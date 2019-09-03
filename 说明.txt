@@ -1,0 +1,1 @@
+目前档案管理软件上使用的主要前端框架：bootstrap3.7 、 bootstrap-table、和 pop模态窗体（modal-win），这些框架代码已上传到github，可根据宋经理的界面设计风格，对这些框架稍作修改。修改完，再传回到github。
