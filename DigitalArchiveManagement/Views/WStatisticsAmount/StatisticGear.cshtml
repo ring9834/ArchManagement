@@ -1,0 +1,472 @@
+﻿
+@{
+    ViewData["Title"] = "用户角色";
+}
+
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-table/css/jquery.treegrid.css" rel="stylesheet" />
+
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="row">
+            <div class="alert alert-warning" style="margin-top:8px;font-size:13px;">
+                <i class="fa fa-volume-up"></i><strong> 提醒!</strong> 1、第一步到第三部，请按顺序操作；2、第三步中，统计方式若选择“字段求和”，若部分档案库未选择统计所用字段，则计算数量时，未选择字段的库，将不被统计；3、第三步中，统计方式若选择“目录条数”或“有电子原文”，统计所用字段不用选择。
+            </div>
+            <div class="col-md-3">
+                <div>
+                    <span style="font-size:24px;color:#105bae;">第一步</span>
+                    <span style="font-size:14px;color:#105bae;">选择数量统计的类型</span>
+                </div>
+                <table id="staGearGrid"></table>
+            </div>
+            <div class="col-md-5">
+                <div>
+                    <span style="font-size:24px;color:#105bae;">第二步</span>
+                    <span style="font-size:14px;color:#105bae;">选择需要进行数量统计的档案库</span>
+                </div>
+                <table id="archtypetable"></table>
+            </div>
+            <div class="col-md-4">
+                <div>
+                    <span style="font-size:24px;color:#105bae;">第三步</span>
+                    <span style="font-size:14px;color:#105bae;">配置各档案库统计所用字段</span>
+                </div>
+                <table id="tableFieldsTable"></table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var selectedStatisticsType = '';//记录已选定的数量统计类型
+
+        $(function () {
+            loadTableData();
+            loadTreeGrid();
+            getCountTypes();
+        });
+
+        var loadTableData = function () {
+            var table1 = $('#staGearGrid');
+            table1.bootstrapTable('destroy');
+            $table = table1.bootstrapTable({
+                url: '/WStatisticsAmount/GetAmountStTypes',                      //请求后台的URL（*）
+                method: 'POST',                      //请求方式（*）
+                contentType: "application/x-www-form-urlencoded",
+                silent: true, //静态刷新
+                //toolbar: '#userToolbar',              //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                search: false,                      //是否显示表格搜索
+                //strictSearch: true,
+                //showColumns: true,                  //是否显示所有的列（选择显示的列）
+                //showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                clickToSelect: true,                //是否启用点击选中行
+                //height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                uniqueId: "unique_code",                     //每一行的唯一标识，一般为主键列
+                //showToggle: true,                   //是否显示详细视图和列表视图的切换按钮
+                //showExport: true,
+                cardView: false,                    //是否显示详细视图
+                detailView: false,                  //是否显示父子表
+                showLoading: false,
+                singleSelect: true,                //true只能单选，false为多选
+                //exportDataType: "selected",        //导出checkbox选中的行数
+                //showFullscreen: true,
+                columns: [
+                    {
+                        field: 'check', checkbox: true, formatter: function (value, row, index) {
+                            if (row.check == true) {
+                                //设置选中
+                                return { checked: true };
+                            }
+                        }
+                    },
+                    { field: 'code_name', title: '数量统计的种类' }
+                ],
+                formatLoadingMessage: function () {
+                    return "请稍等，正在加载中···";
+                },
+                onLoadSuccess: function (data) {
+                    //alert(JSON.stringify(data));
+                    $("#h_loading_mask").css("display", "none");//关闭页面加载指示器
+                    $("#h_loading").css("display", "none");
+                },
+                onPostBody: function () {
+                    //改变复选框样式
+                    table1.find("input:checkbox").each(function (i) {
+                        var $check = $(this);
+                        if ($check.attr("id") && $check.next("label")) {
+                            return;
+                        }
+                        var name = $check.attr("name");
+                        var id = name + "a-" + i;
+                        var $label = $('<label for="' + id + '" onclick = stopBubbleEvent();></label>');
+                        $check.attr("id", id)
+                            .parent()
+                            .addClass("bella-checkbox")
+                            .children("span").remove();
+                        $check.parent().append($label);
+                    });
+                },
+                //onClickRow: function (row, $element) {//行单击事件
+                //    typeRowSelect(row);
+                //},
+                onCheck: function (row) {//checkbox选择时触发
+                    typeRowSelect2(row);
+                },
+                onUncheck: function (row) {
+                    typeRowSelect2(row);
+                },
+            });
+        }
+
+        var loadTreeGrid = function () {
+            $table = $('#archtypetable');
+            $table.bootstrapTable({
+                url: '/WArchTree/GetArchTypes',
+                idField: 'unique_code',
+                parentIdField: 'super_id', //指定父id列
+                treeShowField: 'name',//在哪一列展开树形
+                //dataType: 'json',
+                pagination: false,
+                columns: [
+                    { field: 'name', title: '档案库名' },
+                    { field: 'code', title: '库对应表名' },
+                    { field: 'has_content', title: '有否原文', formatter: 'isOrNotFormatter' },
+                    { field: 'operate', title: '操作', align: 'center', events: operateEvents, formatter: 'operateFormatter' },
+                ],
+                //加载后台数据库时用onLoadSuccess；加载JSON数据文件时，用onResetView
+                onLoadSuccess: function (data) {
+                    $table.treegrid({
+                        //initialState: 'collapsed',
+                        treeColumn: 0,
+                        expandAll: true,  //是否全部展开
+                        expanderExpandedClass: 'glyphicon glyphicon-minus',
+                        expanderCollapsedClass: 'glyphicon glyphicon-plus',
+                        onChange: function () {
+                            $table.bootstrapTable('resetWidth');
+                        }
+                    });
+                    $("#h_loading_mask").css("display", "none");
+                    $("#h_loading").css("display", "none");
+                },
+                onResetView: function (data) {
+                    $table.treegrid({
+                        treeColumn: 0,
+                    });
+                }
+            });
+        }
+
+        var loadTableFieldsData = function (typeId) {
+            var table = $('#tableFieldsTable');
+            table.bootstrapTable('destroy');
+            $table = table.bootstrapTable({
+                url: '/WStatisticsAmount/GetTableFields',                      //请求后台的URL（*）
+                method: 'POST',                      //请求方式（*）
+                contentType: "application/x-www-form-urlencoded",
+                silent: true, //静态刷新
+                //toolbar: '#userToolbar',              //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                search: false,                      //是否显示表格搜索
+                //strictSearch: true,
+                //showColumns: true,                  //是否显示所有的列（选择显示的列）
+                //showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                //clickToSelect: true,                //是否启用点击选中行
+                //height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                uniqueId: "id",                     //每一行的唯一标识，一般为主键列
+                //showToggle: true,                   //是否显示详细视图和列表视图的切换按钮
+                //showExport: true,
+                cardView: false,                    //是否显示详细视图
+                detailView: false,                  //是否显示父子表
+                showLoading: false,
+                //singleSelect: true,                //true只能单选，false为多选
+                //exportDataType: "selected",        //导出checkbox选中的行数
+                //showFullscreen: true,
+                queryParams: { statisticsTypeId: typeId },
+                columns: [
+                    { field: 'table', title: '档案库名' },
+                    { field: 'field', title: '用于统计的字段', events: operateEvents, formatter: 'fieldsFormatter' },
+                    { field: 'countType', title: '统计方式', formatter: 'countTypeFormatter' },
+                    { field: 'operate', title: '操作', align: 'center', events: operateEvents, formatter: 'operateFormatter2' },
+                ],
+                formatLoadingMessage: function () {
+                    return "请稍等，正在加载中···";
+                },
+                onLoadSuccess: function (data) {
+                    initiateSelectVal();//让select控件的selectedValue对应数据库中的数据
+                    initiateCountTypeVal();//让select控件的selectedValue对应数据库中的数据
+
+                    $("#h_loading_mask").css("display", "none");//关闭页面加载指示器
+                    $("#h_loading").css("display", "none");
+                }
+            });
+        }
+
+        var stopBubbleEvent = function () {
+            if (window.event) {//IE下阻止冒泡
+                event.cancelBubble = true;
+            } else {
+                event.stopPropagation();
+            }
+        }
+
+        //初始化操作按钮的方法
+        window.operateEvents = {
+            'click .RoleOfadd': function (e, value, row, index) {
+                selectThis(row, index);
+            },
+            'click .RoleOfdelete': function (e, value, row, index) {
+                del(row);
+            },
+            'click .RoleOfedit': function (e, value, row, index) {
+                saveField(row, index);
+            },
+            'change .RoleofFieldsChange': function (e, value, row, index) {
+                //andOrConditionChange(row, index);
+            },
+            'change .RoleofCountTypeChange': function (e, value, row, index) {
+
+            }
+        };
+
+        function operateFormatter(value, row, index) {
+            var result = '';
+            if (row.node_type == '1') {
+                result = '<button type="button" class="RoleOfadd btn btn-sm  btn-info" style="margin-right:15px;"><i class="fa fa-arrow-right" ></i>&nbsp;选择此库</button>';
+            }
+            return [
+                result
+            ].join('');
+        }
+
+        function operateFormatter2(value, row, index) {
+            return [
+                '<button type="button" class="RoleOfedit btn btn-sm btn-success" style="margin-right:15px;"><i class="fa fa-save" ></i>&nbsp;保存</button>',
+                '<button type="button" class="RoleOfdelete btn btn-sm btn-danger" style="margin-right:15px;"><i class="fa fa-trash-o" ></i>&nbsp;删除</button>'
+            ].join('');
+        }
+
+        function isOrNotFormatter(value, row, index) {
+            if (value === true) {
+                return '<span class="label label-success">是</span>';
+            } else {
+                return '<span class="label label-default">否</span>';
+            }
+        }
+
+        function fieldsFormatter(value, row, index) {
+            var strHtml = "<select class='RoleofFieldsChange form-control' id='field_" + index + "'>";
+            strHtml += "<option value='-1'>--请选择--</option>";
+            $.ajax({
+                type: 'post',
+                url: '/WStatisticsAmount/GetFieldsByTableName',
+                dataType: "json",
+                data: { id: row.table },
+                async: false,//使用同步的方式,true为异步方式;这里使用同步方式，是让程序在success处等待后台的返回，在后台返回之前，不执行success之后的代码
+                success: function (data) {
+
+                    for (var i = 0; i < data.length; i++) {
+                        console.log('hhy');
+                        strHtml += "<option value='" + data[i].col_name + "'>" + data[i].show_name + "</option>";
+                    }
+                }
+            });
+            strHtml += "</select>";
+            return strHtml;
+        }
+
+        function countTypeFormatter(value, row, index) {
+            var strHtml = "<select class='RoleofCountTypeChange form-control' id='ct_" + index + "'>";
+            strHtml += "<option value='-1'>-请选择-</option>";
+            for (var i = 0; i < countTypeData.length; i++) {
+                strHtml += "<option value='" + countTypeData[i].code_value + "'>" + countTypeData[i].code_name + "</option>";//unique_code的u为什么大写的不行？有的页面上小写的不行？
+            }
+            strHtml += "</select>";
+            return strHtml;
+        }
+
+        var countTypeData;
+        function getCountTypes() {
+            $.ajax({
+                type: 'POST',
+                url: "/WStatisticsAmount/GetCountTypes",
+                dataType: "JSON",
+                success: function (data) {
+                    countTypeData = data;
+                }
+            });
+        }
+
+        //function typeRowSelect(row) {
+        //    var typeId = row.unique_code;
+        //    if (row.check == true) {//某行被选定
+        //        selectedStatisticsType = '';
+        //        $('#tableFieldsTable').bootstrapTable("removeAll");//清空第三个表格
+        //    } else {//某行被取消选定
+        //        selectedStatisticsType = typeId;
+        //        loadTableFieldsData(typeId);
+        //    }
+        //}
+
+        function typeRowSelect2(row) {
+            var typeId = row.unique_code;
+            if (row.check == false) {//某行被选定
+                selectedStatisticsType = '';
+                $('#tableFieldsTable').bootstrapTable("removeAll");//清空第三个表格
+            } else {//某行被取消选定
+                selectedStatisticsType = typeId;
+                loadTableFieldsData(typeId);
+            }
+        }
+
+        function selectThis(row, index) {
+            if (this.selectedStatisticsType == '') {
+                HM.alertWin('请在第一个表格中选择一种数量统计类型后继续！');
+                return;
+            }
+
+            var flag = false;
+            var selectedCode = row.code;
+            var allTableData = $('#tableFieldsTable').bootstrapTable('getData');
+            $.each(allTableData, function (i, e) {
+                if (selectedCode == e.table) {
+                    HM.alertWin('此档案库在右表中已存在，添加失败！如果改变此库用于统计的字段，请使用右表中的“保存”按钮！');
+                    flag = true;
+                    return false;//跳出each循环;return true表示continue
+                }
+            })
+            if (flag == true) {//阻止代码往下执行
+                return;
+            }
+
+            var theId = new Date().Format("yyyyMMddHHmmss"); //使用不重复的时间字符串作为id
+            $.ajax({
+                type: 'POST',
+                url: "/WStatisticsAmount/AddStcTemplData",
+                data: { statisticTypeId: selectedStatisticsType, id: theId, tableName: row.code },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        refreshTableData();
+                        HM.hintWin(data.info);
+                    }
+                }
+            });
+        }
+
+        // 对Date的扩展，将 Date 转化为指定格式的String
+        // 月(M)、日(d)、小时(h)、分(m)、秒(s)、季度(q) 可以用 1-2 个占位符，
+        // 年(y)可以用 1-4 个占位符，毫秒(S)只能用 1 个占位符(是 1-3 位的数字)
+        Date.prototype.Format = function (fmt) { //author: meizz
+            var o = {
+                "M+": this.getMonth() + 1, //月份
+                "d+": this.getDate(), //日
+                "H+": this.getHours(), //小时
+                "m+": this.getMinutes(), //分
+                "s+": this.getSeconds(), //秒
+                "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+                "S": this.getMilliseconds() //毫秒
+            };
+            if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            for (var k in o)
+                if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+            return fmt;
+        }
+
+        function del(row) {
+            //alert(JSON.stringify(row)); return;
+            HM.confirmDelWintwo(this.selectedStatisticsType, row.id, "所选记录将被删除！确定吗？", '确认删除', 'recdel', delSelectedRec);
+        }
+
+        function delSelectedRec(tid, id) {
+            $.ajax({
+                type: 'POST',
+                url: "/WStatisticsAmount/DeleteInfo",
+                data: { typeId: tid, sid: id },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin("所选记录删除成功！");
+                        pop.close('confirm-win_recdel');
+                        refreshTableData();
+                    }
+                }
+            });
+        }
+
+        var refreshTableData = function () {
+            $('#tableFieldsTable').bootstrapTable('refresh');
+        }
+
+        function saveField(row, index) {
+            var v = $('#field_' + index).val();
+            var ct = $('#ct_' + index).val();
+            if (v == '-1' && (ct != '-1' && ct != 'ELCCONT-COUNT' && ct != 'CATL-COUNT')) {//电子原文统计例外
+                HM.alertWin('请先选择一个用于统计的字段，再选择统计方式，然后保存！');
+                return;
+            }
+            if (v != '-1' && ct == '-1') {
+                HM.alertWin('请选择统计方式，然后再保存！');
+                return;
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: "/WStatisticsAmount/UpdateInfo",
+                data: { typeId: this.selectedStatisticsType, sid: row.id, fieldName: v, countType: ct },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin("保存成功！");
+                    }
+                }
+            });
+        }
+
+        function initiateSelectVal() {
+            var rows = $('#tableFieldsTable').bootstrapTable('getData');//行的数据
+            for (var i = 0; i < rows.length; i++) {
+                var fieldv = rows[i].field;
+                if (fieldv != '' && fieldv != undefined) {
+                    $('#field_' + i).val(fieldv);
+                } else {
+                    $('#field_' + i).val('-1');
+                }
+            }
+        }
+
+        function initiateCountTypeVal() {
+            var rows = $('#tableFieldsTable').bootstrapTable('getData');//行的数据
+            //alert(JSON.stringify(rows)); return;
+            for (var i = 0; i < rows.length; i++) {
+                var typev = rows[i].countType;
+                if (typev != '' && typev != undefined) {
+                    $('#ct_' + i).val(typev);
+                } else {
+                    $('#ct_' + i).val('-1');
+                }
+            }
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-treegrid.js"></script>
+    <script src="~/lib/bootstrap-table/js/jquery.treegrid.js"></script>
+    <script src="~/lib/bootstrap-table/js/jquery.treegrid.bootstrap3.js"></script>
+}
+
+
+

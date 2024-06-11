@@ -1,0 +1,108 @@
+﻿
+@{
+    ViewData["Title"] = "增添辅助代码子类信息";
+}
+@section head {
+
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="row" style="padding: 5px">
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <div class="input-group">
+                    <span class="input-group-addon">密集架（档案柜）名</span>
+                    <input class="form-control" type="text" id="subName">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-lg-6">
+                <div class="input-group">
+                    <span class="input-group-addon">密集架（档案柜）代码（字母或与数字的组合）</span>
+                    <input class="form-control" type="text" id="subCode">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-lg-6">
+                <div class="input-group">
+                    <span class="input-group-addon">排序</span>
+                    <input class="form-control" type="text" id="subOrder">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6" style="margin-bottom:2px;text-align:center;">
+                <input type="button" class="btn btn-success" id="okbutton" onclick="addSubCodeInfo();" value="确定" />
+                <input type="button" class="btn btn-danger" onclick="resetInfo();" value="重置" />
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var param;//通过iframe父窗体的$("#mainfrm")[0].contentWindow.param = 传参到子页面来
+
+        $(function () {
+            $("#h_loading_mask").css("display", "none");
+            $("#h_loading").css("display", "none");
+        });
+
+        var validateBeforeSummit = function () {
+            if ($.trim($("#subName").val()) == '') {
+                HM.alertWin("密集架（档案柜）名称不能为空！");
+                return 0;
+            }
+            if ($.trim($("#subCode").val()) == '') {
+                HM.alertWin("密集架（档案柜）代码不能为空！");
+                return 0;
+            }
+            var order = $("#subOrder").val();
+            if (!(/(^[0-9]\d*$)/.test(order))) {
+                HM.alertWin("排序必须是大于0的整数！");
+                return 0;
+            }
+        }
+
+        var addSubCodeInfo = function () { 
+            var r = validateBeforeSummit();
+            if (r == 0) {//验证有误则返回
+                return;
+            }
+            var subName = $("#subName").val();
+            var subCode = $("#subCode").val();
+            var subOrder = $("#subOrder").val();
+
+            $.ajax({
+                type: 'POST',
+                url: "/WVirStock/AddDenseFrm",
+                data: { subName: subName, subCode: subCode, subOrder: subOrder, parentId: '@ViewData["BaseId"]'},
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst == '1') {
+                        parent.refreshTable();
+                        parent.hintWin("密集架（档案柜）信息添加成功！");
+                        parent.closeDealWin('adddenseFrm');
+                    }
+                    else if (data.rst == '-2') {
+                        parent.closeDealWin('adddenseFrm');
+                        parent.popAlertWin('同一库房内密集架名或密集架值不允许重复，添加失败！');
+                    }
+                }
+            });
+        }
+
+        var resetInfo = function () {
+            $("#subName").val('');
+            $("#subCode").val(''); 
+            $("#subOrder").val('');
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

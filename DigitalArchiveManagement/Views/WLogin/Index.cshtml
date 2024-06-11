@@ -1,0 +1,163 @@
+﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@{
+    ViewData["Title"] = "用户登录";
+}
+
+
+@section head {
+    <link href="~/lib/bootstrap-icheck/skins/square/grey.css" rel="stylesheet" />
+    <link href="~/css/login-button.css" rel="stylesheet" />
+    <link href="~/lib/jquery-toast/jquery.toast.min.css" rel="stylesheet" />
+}
+
+@section body {
+    <style>
+    </style>
+    <div style="position:absolute;top:10px;left:10px;"><img src='@Url.Content("~/images/LoginImg/companylogo.png")' style="width:500px;" /></div>
+    <div style="position: absolute;top: 50%;height: 666px;width: 100%;margin: -333px 0; background:url('@Url.Content("~/images/LoginImg/bgimg.jpg")') no-repeat left #0a5fb9; text-align:center;">
+        <div style="width:400px; height:480px; margin-top: 90px;margin-right:100px; float:right; position:relative;border-radius:20px;background:#fff;padding:35px;box-shadow:0px 6px 20px #023468;">
+            <span style="color:#3b91ed;letter-spacing:3px;font-size:28px;">高第综合档案管理系统</span>
+            <div style="height:35px;"></div>
+            <div>
+                <div class="input-group" style="margin-bottom:15px;">
+                    <span class="input-group-addon" id="sizing-addon1"><i class="glyphicon glyphicon-user" aria-hidden="true"></i></span>
+                    <input type="text" class="form-control" id="userid" name="userid" placeholder="请输入用户ID" style="height:45px;" autocomplete="off" />
+                </div>
+                <div class="input-group" style="margin-bottom:15px;">
+                    <span class="input-group-addon" id="sizing-addon1"><i class="glyphicon glyphicon-lock"></i></span>
+                    <input type="text" class="form-control" id="password" name="password" placeholder="请输入密码" style="height:45px;" autocomplete="off" />
+                </div>
+                <div>
+                    <div class="verify-wrap" id="verify-wrap2" style="border-radius:20px;"></div>
+                </div>
+                <div style="padding:20px 0 20px 0; text-align:left;">
+                    <input type="checkbox" id="remcheck">&nbsp;&nbsp;&nbsp;&nbsp;
+                    <label for="remcheck" style="color:#7b7b7b; font-weight:normal;">记住密码</label>
+                </div>
+                <div style="padding:20px 0 20px 0;">
+                    <button class="btn btn-login btn-block" style="height:45px;font-size:19px;" onclick="okLogin();">登&nbsp;&nbsp;录</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div style="position:absolute;bottom:10px;width:100%;text-align:center;"><img src='@Url.Content("~/images/LoginImg/gdlogo.png")' style="width:300px;" /></div>
+
+    <script>
+        var slideVerify2;
+        var inputChgFlag = 0;
+        $(function () {
+            //if (window.top != window.self) {
+            //    window.top.location.href = '/WLogin/Index';
+            //    return;
+            //}
+
+            if (parent != null && parent.length > 0) {
+                //console.log(parent.length);
+                window.top.location.href = '/WLogin/Index';
+                return;
+            }
+
+            $("#h_loading_mask").css("display", "none");//关闭页面加载指示器
+            $("#h_loading").css("display", "none");
+
+            var SlideVerifyPlug = window.slideVerifyPlug;
+            slideVerify2 = new SlideVerifyPlug('#verify-wrap2', {
+                wrapWidth: '330',
+                initText: '请滑动验证码',
+                sucessText: '验证通过',
+
+            });
+
+            $('#remcheck').iCheck({
+                checkboxClass: 'icheckbox_square-grey',
+                increaseArea: '20%', // optional
+                labelHover: true,
+            });
+
+            var pwinput = $('#password');//modified on 202010130
+            pwinput.focus(function () {
+                pwinput.attr('type','password');
+            });
+
+            var uName = '@Html.Raw(HttpContextAccessor.HttpContext.Request.Cookies["LoginUser"])';
+            var uPwd = '@Html.Raw(HttpContextAccessor.HttpContext.Request.Cookies["LoginPwd"])';
+            if (uName != null || uName != '') {
+                $('#userid').val(uName);
+            }
+            if (uPwd != null || uPwd != '') {
+                pwinput.attr('type','password');
+                pwinput.val(uPwd);
+            }
+
+            $("#userid").bind("input propertychange",function(event){
+                inputChgFlag = 1;
+            });
+
+            $("#password").bind("input propertychange",function(event){
+                inputChgFlag = 1;
+            });
+        });
+
+        var okLogin = function () {
+            var userName = $('#userid').val();
+            if ($.trim(userName) == '') {
+                TS.alertWin('敬告', '请输入用户ID！', 'mid-center');
+                return;
+            }
+
+            var pwinput = $('#password');//modified on 202010130
+            var password = pwinput.val();
+            if ($.trim(password) == '') {
+                TS.alertWin('敬告', '请输入密码！', 'mid-center');
+                return;
+            }
+            var state = slideVerify2.slideFinishState;
+            if (!state) {
+                TS.alertWin('敬告', '请拖动验证滑块到最右边！', 'mid-center');
+                return;
+            }
+            var cookie = false;
+            if ($('#remcheck').is(':checked')) {
+                cookie = true;
+            }
+
+            pwinput.attr('type', 'text');//modified on 202010130
+            pwinput.val('');
+
+            // modified on 20201209
+            var urlstr = '/WLogin/VerifyUsert';
+            if (inputChgFlag == 1) {
+                urlstr = '/WLogin/VerifyUser';
+            }
+            $.ajax({
+                type: 'post',
+                url: urlstr,
+                dataType: "json",
+                data: { name: userName, pwd: password, cookie:cookie },
+                success: function (data) {
+                    if (data.rst == 0) {
+                        TS.alertWin('敬告', '用户ID或密码有误，登录失败！', 'mid-center');
+                        return;
+                    }
+                    else {
+                        //alert(data.nickName + '  ' + userName);
+                        window.location.href = '/WFirstPage/Index/' + data.nickName + '/' + userName;
+                    }
+                }
+            });
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/jquery-slideverify/jq-slideVerify.js"></script>
+    <script src="~/lib/bootstrap-icheck/icheck.min.js"></script>
+    <script src="~/lib/jquery-toast/jquery.toast.min.js"></script>
+    <script src="~/js/toastwindow.js"></script>
+}
+
+
+

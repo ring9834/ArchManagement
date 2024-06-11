@@ -1,0 +1,235 @@
+﻿
+@{
+    ViewData["Title"] = "用户管理";
+}
+
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+    <link href="~/css/arch-button.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div id="userToolbar">
+            <button class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="addOneUser();"><i class="fa fa-user-plus"></i> 增加人员</button>
+        </div>
+        <table id="userGrid"></table>
+    </div>
+
+    <script>
+        $(function () {
+            getRoles();//先加载roles
+
+        });
+
+        var loadTableData = function () {
+            $('#userGrid').bootstrapTable('destroy');
+            $table = $('#userGrid').bootstrapTable({
+                url: '/WUser/GetUsers',                      //请求后台的URL（*）
+                method: 'POST',                      //请求方式（*）
+                contentType: "application/x-www-form-urlencoded",
+                silent: true, //静态刷新
+                toolbar: '#userToolbar',              //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                search: false,                      //是否显示表格搜索
+                //strictSearch: true,
+                showColumns: true,                  //是否显示所有的列（选择显示的列）
+                showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                //clickToSelect: true,                //是否启用点击选中行
+                //height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                uniqueId: "unique_code",                     //每一行的唯一标识，一般为主键列
+                //showToggle: true,                   //是否显示详细视图和列表视图的切换按钮
+                showExport: true,
+                cardView: false,                    //是否显示详细视图
+                detailView: false,                  //是否显示父子表
+                showLoading: false,
+                //singleSelect: true,                //true只能单选，false为多选
+                exportDataType: "selected",        //导出checkbox选中的行数
+                showFullscreen: true,
+                columns: [
+                    { field: 'user_name', title: '用户名' },
+                    { field: 'nick_name', title: '昵称' },
+                    { field: 'work_place', title: '工作单位' },
+                    { field: 'tel', title: '电话', },
+                    { field: 'role_id', title: '角色', formatter: 'roleFormatter' },
+                    { field: 'user_depart', title: '所属机构', formatter: 'departFormatter' },
+                    //{ field: 'password', title: '密码' },
+                    { field: 'operate', title: '操作', align: 'center', width: '250px', events: operateEvents, formatter: 'operateFormatter' },
+                ],
+                formatLoadingMessage: function () {
+                    return "请稍等，正在加载中···";
+                },
+                onLoadSuccess: function (data) {
+                    //alert(JSON.stringify(data));
+                    $("#h_loading_mask").css("display", "none");//关闭页面加载指示器
+                    $("#h_loading").css("display", "none");
+                },
+                onPreBody: function () {
+
+                }
+            });
+        }
+
+        var rolesData;
+        var getRoles = function () {
+            $.ajax({
+                type: 'POST',
+                url: "/WUser/GetRoles",
+                dataType: "JSON",
+                success: function (data) {
+                    rolesData = data;
+                    getDeparts();//再加载机构信息
+                    
+                }
+            });
+        }
+
+        var departsData;
+        var getDeparts = function () {
+            $.ajax({
+                type: 'POST',
+                url: "/WDepartMent/GetDepartments",
+                dataType: "JSON",
+                success: function (data) {
+                    departsData = data;
+                    loadTableData();//先决条件加载完再加载表格数据
+                }
+            });
+        }
+
+        function roleFormatter(value, row, index) {//roleFormatter有可能比getRoles加载的早或快
+            for (var i = 0; i < rolesData.length; i++) {
+                var id = rolesData[i].unique_code;
+                var name = rolesData[i].role_name;
+                if (value == id) {
+                    return '<span class="label label-warning">' + name + '</span>';
+                }
+            }
+        }
+
+        function departFormatter(value, row, index) {
+            nm = '';
+            c = 0;
+            selectParentChecked(departsData, row.user_depart);
+            return '<span class="label label-success">' + nm + '</span>';
+        }
+
+        var nm = '';
+        var c = 0;
+        function selectParentChecked(datas, departid) {
+            //console.log(JSON.stringify(datas));
+            for (var i = 0; i < datas.length; i++) {
+                if (datas[i].unique_code == departid) {
+                    if (datas[i].parent_id != 0) {
+                        if (c == 0) {
+                            nm = datas[i].name;
+                        }
+                        else {
+                            nm = datas[i].name + ' - ' + nm;
+                        }
+                        c++;
+                        selectParentChecked(datas, datas[i].parent_id);
+                    }
+                };
+            }
+        }
+
+        // 格式化按钮
+        function operateFormatter(value, row, index) {
+            return [
+                '<button type="button" class="RoleOfedit btn btn-sm   btn-info" style="margin-right:15px;"><i class="fa fa-pencil-square-o" ></i>&nbsp;修改</button>',
+                '<button type="button" class="RoleOfdelete btn btn-sm   btn-info" style="margin-right:15px;"><i class="fa fa-trash-o" ></i>&nbsp;删除</button>'
+            ].join('');
+
+        }
+
+        //初始化操作按钮的方法
+        window.operateEvents = {
+            'click .RoleOfdelete': function (e, value, row, index) {
+                del(row);
+            },
+            'click .RoleOfedit': function (e, value, row, index) {
+                update(row, index);
+            }
+        };
+
+        function addOneUser(row) {
+            var content = "<iframe id='adduserframe' src='/WUser/AddUserView' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 880, 530, '人员信息添加窗口','adduserFrm');
+        }
+
+        function update(row, index) {
+            nm = '';
+            c = 0;
+            selectParentChecked(departsData, row.user_depart);
+            var content = "<iframe id='updateUserFrame' src='/WUser/getUserInfo2/" + row.unique_code + "/-1/" + nm + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 880, 510, '人员信息修改窗口','updateuserFrm');
+        }
+
+        function del(row) {
+            HM.confirmWin(row.unique_code, "所选用户信息将被删除！确定吗？", '确认删除', 'userdel', delSelectedRec);
+        }
+
+        function delSelectedRec(id, t) {
+            $.ajax({
+                type: 'POST',
+                url: "/WUser/DeleteUserInfo",
+                data: { userId: id },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin("所选用户信息删除成功！");
+                        pop.close('confirm-win_userdel');
+                        refreshTableData();
+                    }
+                }
+            });
+        }
+
+        var closeDealWin = function (winid) {
+            pop.close('deal-win-' + winid);
+        }
+
+        var refreshTableData = function () {
+            $('#userGrid').bootstrapTable('refresh');
+        }
+
+        var hintAddSucess = function () {
+            HM.hintWin('用户信息添加成功！');//
+        }
+
+        var hintAlready = function () {
+            HM.alertWin('相同用户名的信息已存在，添加失败！');
+        }
+
+        var hintAlreadyWhenModi = function () {
+            HM.alertWin('相同用户名的信息已存在，修改失败！');
+        }
+
+        var hintAddFailer = function () {
+            HM.alertWin('用户信息添加失败！');
+        }
+
+        var hintUpdateSucess = function () {
+            HM.hintWin('用户信息修改成功！');
+        }
+
+        var hintUpdateFailer = function () {
+            HM.alertWin('用户信息修改失败！');
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

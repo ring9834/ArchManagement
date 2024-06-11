@@ -1,0 +1,101 @@
+﻿
+@{
+    ViewData["Title"] = "密集架（档案柜）层格设置";
+}
+@section head {
+
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="row" style="padding: 5px">
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <div class="input-group">
+                    <span class="input-group-addon">密集架（档案柜）层数</span>
+                    <input class="form-control" type="text" id="tireCount">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-lg-6">
+                <div class="input-group">
+                    <span class="input-group-addon">每层的格子数</span>
+                    <input class="form-control" type="text" id="squarCount">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6" style="margin-bottom:2px;text-align:center;">
+                <input type="button" class="btn btn-success" id="okbutton" onclick="dealTireInfo();" value="确定" />
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var denseFrmID;//通过iframe父窗体的$("#mainfrm")[0].contentWindow.param = 传参到子页面来 
+
+        $(function () {
+            $("#tireCount").val('@ViewData["TireCount"]'); //added on 20201116
+            $("#squarCount").val('@ViewData["SquareCount"]');
+            $("#h_loading_mask").css("display", "none");
+            $("#h_loading").css("display", "none");
+        });
+
+        var validateBeforeSummit = function () {
+            if ($.trim($("#tireCount").val()) == '') {
+                HM.alertWin("密集架（档案柜）层数不能为空！");
+                return 0;
+            }
+            if ($.trim($("#squarCount").val()) == '') {
+                HM.alertWin("每层的格子数不能为空！");
+                return 0;
+            }
+            var tire = $("#tireCount").val();
+            if (!(/(^[0-9]\d*$)/.test(tire))) {
+                HM.alertWin("密集架（档案柜）层数必须是大于0的整数！");
+                return 0;
+            }
+            var sqr = $("#squarCount").val();
+            if (!(/(^[0-9]\d*$)/.test(sqr))) {
+                HM.alertWin("每层的格子数必须是大于0的整数！");
+                return 0;
+            }
+            var tire0 = '@ViewData["TireCount"]';
+            var sqr0 = '@ViewData["SquareCount"]';
+            if (parseInt(tire0) > parseInt(tire) || parseInt(sqr0) > parseInt(sqr)) {
+                HM.alertWin("密集架层数或格子数，不能修改为比原来小的数值！");
+                return 0;
+            }
+        }
+
+        var dealTireInfo = function () {
+            var r = validateBeforeSummit();
+            if (r == 0) {//验证有误则返回
+                return;
+            }
+            var tire = $("#tireCount").val();
+            var squar = $("#squarCount").val();
+
+            $.ajax({
+                type: 'POST',
+                url: "/WVirStock/DealTireInfo",
+                data: { t: tire, s: squar, id: '@ViewData["ID"]' },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        parent.refreshSubTable();
+                        parent.hintWin("层格数信息添加成功！");
+                        parent.closeDealWin('dealtireFrm');
+                    }
+                }
+            });
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

@@ -1,0 +1,122 @@
+﻿
+@{
+    ViewData["Title"] = "馆藏数量统计效果预览";
+}
+
+@section head {
+    <link href="~/css/arch-button.css" rel="stylesheet" />
+}
+
+@section body {
+    <style>
+        .stadiv {
+            height: 150px;
+            float: left;
+            background-color: white;
+            margin: 8px;
+            padding: 8px 0 8px 0;
+            box-shadow: 0 0 5px lightgray;
+            -moz-box-shadow: 0 0 5px lightgray;
+            -webkit-box-shadow: 0 0 5px lightgray;
+        }
+
+        .stasubdiv {
+            position: relative;
+            top: 50%; /*偏移*/
+            height: 30px;
+            margin-top: -15px;
+            font-size: 25px;
+            color:white;
+            font-weight:bold;
+        }
+    </style>
+    <div style="height:100%;width:100%;">
+        <div style="padding:5px;">
+            <button class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="prvExsting();"><i class="fa fa-refresh"></i> 预览现有数据</button>
+            <button class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="prvAfterUpdate();"><i class="fa fa-refresh"></i> 更新数据后预览</button>
+        </div>
+        <div style="padding:5px 5px 0 5px;">
+            <div class="panel panel-info" style="margin-bottom:0;">
+                <div class="panel-heading">
+                    <h3 class="panel-title">预览结果</h3>
+                </div>
+                <div id="scontainer" class="panel-body">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        $(function () {
+            $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+            $("#h_loading").css("display", "none");
+        });
+
+        var colorArray = ['#d9544f', '#efad4e', '#5bc0de', '#9f851d', '#839204', '#a26f01', '#9850f1', '#9f851d', '#ee0393', '#5bb85d', '#418bca']; 
+
+        function prvExsting() {
+            HM.pageLoading();
+            $.ajax({
+                type: 'post',
+                url: '/WStatisticsAmount/GetAmountStatiscInfo',
+                dataType: "json",
+                success: function (data) {
+                    $('#scontainer').empty();
+                    for (var i = 0; i < data.length; i++) {
+                        var index = i;
+                        if (i > 9) index = i % 9;
+                        var html = '';
+                        html += '<div class="stadiv" style="background-color:' + colorArray[index] +'">';
+                        html += '   <div style="font-size:15px;padding-left:12px;">' + data[i].name + '</div>';
+                        html += '       <div style="height:110px;text-align:center;">';
+                        html += '           <div class="stasubdiv">' + data[i].amount + '</div>';
+                        html += '       </div>';
+                        html += '</div>';
+                        $('#scontainer').append(html);
+                    }
+                    var w = 100 / data.length;//每个div的宽度，自适应
+                    $('.stadiv').css('width', 'calc(' + w + '% - 16px)');
+                    HM.closePageLoading();
+                }
+            });
+        }
+
+        function prvAfterUpdate() {
+            HM.pageLoading();
+            $.ajax({
+                type: 'post',
+                url: '/WStatisticsAmount/GetAmountStatiscInfo2',
+                dataType: "json",
+                success: function (data) {
+                    $('#scontainer').empty();
+                    for (var i = 0; i < data.length; i++) {
+                        var index = i;
+                        if (i > 9) index = i % 9;
+                        var html = '';
+                        html += '<div class="stadiv" style="background-color:' + colorArray[index] +'">';
+                        html += '   <div style="font-size:15px;padding-left:12px;">' + data[i].name + '</div>';
+                        html += '       <div style="height:110px;text-align:center;">';
+                        html += '           <div class="stasubdiv">' + data[i].amount + '</div>';
+                        html += '       </div>';
+                        html += '</div>';
+                        $('#scontainer').append(html);
+                    }
+                    var w = 100 / data.length;//每个div的宽度，自适应
+                    $('.stadiv').css('width', 'calc(' + w + '% - 16px)');
+                    HM.closePageLoading();
+                }
+            });
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

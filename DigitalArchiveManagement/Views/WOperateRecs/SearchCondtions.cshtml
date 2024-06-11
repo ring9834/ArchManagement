@@ -1,0 +1,205 @@
+﻿
+@{
+    ViewData["Title"] = "增加人员信息";
+}
+@section head {
+    <link href="~/lib/bootstrap-datetimepicker/bootstrap-datepicker.min.css" rel="stylesheet" />
+}
+
+@section body {
+    <style>
+        .searchTable {
+            width: 100%;
+            margin: 5px;
+        }
+
+            .searchTable td {
+                padding: 6px;
+            }
+    </style>
+
+    <div class="container-fluid">
+        <table class="searchTable">
+            <tr>
+                <td class="col-md-1">
+                    <label for="operator" class="control-label">操作人</label>
+                </td>
+                <td class="col-md-3">
+                    <input type="text" id="operator" class="form-control" placeholder="点击输入关键字" />
+                </td>
+                <td class="col-md-1">
+                    <label for="userrole" class="control-label">所属部门<br />(或角色)</label>
+                </td>
+                <td class="col-md-3">
+                    @*<input type="text" id="depart" class="form-control" placeholder="点击输入关键字" />*@
+                    <select class="form-control" id="userrole"></select>
+                </td>
+                <td class="col-md-1">
+                    <label for="archtype" class="control-label">档案类型</label>
+                </td>
+                <td class="col-md-3">
+                    <input type="text" id="archtype" class="form-control" title="" onclick="pickTable();" readonly="readonly" placeholder="点击选择档案类型库" />
+                    @*<select class="form-control" id="archtype"></select>*@
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-1">
+                    <label for="funcmodal" class="control-label">系统模块</label>
+                </td>
+                <td class="col-md-3">
+                    <input type="text" id="funcmodal" class="form-control" placeholder="点击输入关键字" />
+                </td>
+                <td class="col-md-1">
+                    <label for="funcname" class="control-label">操作功能</label>
+                </td>
+                <td class="col-md-3">
+                    <input type="text" id="funcname" class="form-control" placeholder="点击输入关键字" />
+                </td>
+                <td class="col-md-1">
+                    <label for="opertag" class="control-label">操作说明</label>
+                </td>
+                <td class="col-md-3">
+                    <input type="text" id="opertag" class="form-control" placeholder="点击输入关键字" />
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-1">
+                    <label for="operip" class="control-label">操作IP</label>
+                </td>
+                <td class="col-md-3">
+                    <input type="text" id="operip" class="form-control" placeholder="点击输入关键字" />
+                </td>
+                <td class="col-md-1">
+                    <label for="opertime" class="control-label">操作时间</label>
+                </td>
+                <td class="col-md-3">
+                    <input type="text" id="opertime" placeholder="点击选择时间" data-date-format="yyyy-mm-dd" class="form-control dateinput" autocomplete="off" />
+                </td>
+                <td class="col-md-1">
+                </td>
+                <td class="col-md-3">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="6" style="text-align:center;">
+                    <button class="btn btn-info" onclick="performSearch();"><i class="fa fa-search"></i> 搜索</button>
+                    <button class="btn btn-warning" onclick="clearInfo();"><i class="fa fa-undo"></i> 重置</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        $(function () {
+            getRoles();
+            //getArchTypes();
+            $('.dateinput').each(function () {
+                $(this).datepicker({
+                    language: 'zh-CN', //语言
+                    autoclose: true, //选择后自动关闭
+                    clearBtn: true,//清除按钮
+                    format: "yyyy-mm-dd"//日期格式
+                });
+            });
+        });
+
+        var getRoles = function () {
+            $.ajax({
+                type: 'post',
+                url: '/WUser/GetRoles',
+                dataType: "json",
+                success: function (data) {
+                    var select = $('#userrole');
+                    select.append("<option value='-1'>--请选择--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                        select.append("<option value='" + data[i].unique_code + "'>" + data[i].role_name + "</option>");
+                    }
+
+                    $("#h_loading_mask").css("display", "none");//关闭页面加载指示器
+                    $("#h_loading").css("display", "none");
+                }
+            });
+        }
+
+        var getArchTypes = function () {
+            $.ajax({
+                type: 'post',
+                url: '/WOperateRecs/GetArchTypesWithYw',
+                dataType: "json",
+                success: function (data) {
+                    var select = $('#archtype');
+                    select.append("<option value='-1'>--请选择--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                        select.append("<option value='" + data[i].code + "'>" + data[i].name + "</option>");
+                    }
+
+                    $("#h_loading_mask").css("display", "none");//关闭页面加载指示器
+                    $("#h_loading").css("display", "none");
+                }
+            });
+        }
+
+        var performSearch = function () {
+            var userName = $('#operator').val();
+            var depSelected = $("#userrole").val();
+            var deparMment = '';
+            if (depSelected != '-1') {
+                deparMment = $("#userrole").find("option:selected").text()
+            }
+            var tableName = $('#archtype').attr('title');
+            var funcName = $('#funcname').val();
+            var funcModal = $('#funcmodal').val();
+            var operTime = $('#opertime').val();
+            var operTag = $('#opertag').val();
+            var sourceIp = $('#operip').val();
+
+            var opInfo = {
+                username: userName,
+                department:deparMment,
+                tablename: tableName,
+                funcname: funcName,
+                funcmodal: funcModal,
+                opertime: operTime,
+                opertag: operTag,
+                sourceip: sourceIp,
+            }
+
+            parent.operateInfo = opInfo;//向父窗口传参：对象
+            parent.loadTableData();//在父窗口中加载表格
+            parent.closeSchCditionWin();
+        }
+
+        var clearInfo = function () {
+
+            $('#operator').val('');
+            $('#archtype').val('');
+            $('#funcname').val('');
+            $('#funcmodal').val('');
+            $('#opertime').val('');
+            $('#userrole').val('-1');
+            $('#opertag').val('');
+            $('#operip').val('');
+        }
+
+        var pickDepart = function () {
+            var content = "<iframe id='picDepFrame' src='/WUser/PickDepartv" + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwin(content, 600, 280, '人员所属机构选择窗口');
+        }
+
+        var closeDealWin = function () {
+            pop.close('deal-win');
+        }
+
+        var pickTable = function () {
+            parent.pickTable();
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+    <script src="~/lib/bootstrap-datetimepicker/bootstrap-datepicker.min.js"></script>
+    <script src="~/lib/bootstrap-datetimepicker/bootstrap-datepicker.zh-CN.min.js"></script>
+}

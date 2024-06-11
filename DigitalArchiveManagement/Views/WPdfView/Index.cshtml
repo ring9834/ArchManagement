@@ -1,0 +1,35 @@
+﻿
+@{
+    ViewData["Title"] = "PDF浏览";
+}
+
+@section head {
+
+}
+
+@section body {
+<div class="container-fluid">
+    <a class="media" id="pdfviewer1" href=""></a>
+</div>
+
+    <script type="text/javascript">
+        $(function () {
+
+            $('#pdfviewer1').media({ width: '100%', height: '100%' }); 
+
+            $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+            $("#h_loading").css("display", "none");
+        });
+
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/jquery-media/jquery.media.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

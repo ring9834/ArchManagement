@@ -1,0 +1,157 @@
+﻿
+@{
+    ViewData["Title"] = "查看借阅单申请";
+}
+
+
+@section head {
+    <link href="~/lib/bootstrap-datetimepicker/bootstrap-datepicker.min.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="alert alert-warning" style="margin-top:8px;font-size:13px;">
+            <i class="fa fa-volume-up"></i><strong> 提醒!</strong> 1、查看别人登记的借阅信息，需经过审批程序；2、通过审批后，有一定的查看期限，申请人可以在提交审请时填写查看期限；若不填写，默认期限为5天。
+        </div>
+        <div class="row" style="padding: 5px">
+        </div>
+        <div class="row">
+            <div class="form-group col-md-12">
+                <div class="input-group">
+                    <span class="input-group-addon">审批事由</span>
+                    <input class="form-control" type="text" id="appbrief">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-12">
+                <div class="input-group">
+                    <span class="input-group-addon">选审核人</span>
+                    <select class="form-control" id="appreplier"></select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-12">
+                <div class="input-group">
+                    <span class="input-group-addon">查看期限</span>
+                    <input id="expireDateInput" name="expireDateInput" type="text" placeholder="点击选择时间" data-date-format="yyyy-mm-dd" class="form-control dateinput" autocomplete="off" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-12">
+                <div class="input-group">
+                    <span class="input-group-addon">说明</span>
+                    <textarea class="form-control" rows="3" id="appcomment"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-12" style="margin-bottom:2px;">
+                <input type="button" class="btn btn-success" id="okbutton" onclick="summitApplct();" value="确定" />
+                <input type="button" class="btn btn-danger" onclick="resetInfo();" value="重置" />
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            GetAllUsers();
+            $("#h_loading_mask").css("display", "none");
+            $("#h_loading").css("display", "none");
+
+             $('.dateinput').each(function () {
+                $(this).datepicker({
+                    language: 'zh-CN', //语言
+                    autoclose: true, //选择后自动关闭
+                    clearBtn: true,//清除按钮
+                    format: "yyyy-mm-dd"//日期格式
+                });
+             });
+
+            var dt = new Date();
+            var fifthDay = dt.getFullYear() + '-' + (dt.getMonth() + 1) + '-' + (dt.getDate() + 5);//取得当前日期后的第5日
+            $('#expireDateInput').val(fifthDay);
+        });
+
+        function GetAllUsers() {
+            $.ajax({
+                type: 'post',
+                url: '/WAuditingAccess/GetSelectedUsers',
+                dataType: "json",
+                success: function (data) {
+                    //console.log(data.length);
+                    var strHtml = '';
+                    strHtml += "<option value='-1'>--请选择--</option>";
+                    for (var i = 0; i < data.length; i++) {
+                        strHtml += "<option value='" + data[i].user_name + "'>" + data[i].nick_name + "</option>";
+                    }
+                    $('#appreplier').append(strHtml);
+                }
+            });
+
+        }
+
+        var summitApplct = function () {
+            var v = $('#appbrief').val();
+            if (v.trim() == '') {
+                HM.alertWin('请填写申请事由后再继续！');
+                return;
+            }
+
+            var p = $('#appreplier').val();
+            if (p == '-1') {
+                HM.alertWin('请选择审核人后再继续！');
+                return;
+            }
+
+            var d = $('#expireDateInput').val();
+            if (d.trim() == '') {
+                HM.alertWin('请选择查看期限后再继续！');
+                return;
+            }
+
+            var dt = new Date();
+            var now = dt.getFullYear() + '-' + (dt.getMonth() + 1) + '-' + dt.getDate();//取得当前日期
+            var nowDate = new Date(now.replace("-", "/").replace("-", "/"));
+            var expDate = new Date(d.replace("-", "/").replace("-", "/"));
+            //console.log(nowDate);
+            //console.log(expDate);
+            //console.log(expDate < nowDate);
+            if (expDate < nowDate) {
+                HM.alertWin('所选择的查看期限不能早于当前日期！');
+                return;
+            }
+
+            $.ajax({
+                type: 'post',
+                url: '/WUseRcdAuditing/RecordAuditInfo',
+                dataType: "json",
+                data: { requestId: '@ViewData["requestId"]', applytitle: v, applier: '@ViewData["userid"]', checker: p, comment:$('#appcomment').val(),expireDate:d},
+                success: function (data) {
+                    if (data.rst > 0) {
+                        //HM.hintWin("申请审核成功！可在系统首页查看审核结果！或在“入资源总库”下拉按钮中查看审核进度。");
+                        parent.closeAuditWin();//关闭申请审批窗
+                    }
+                }
+            });
+        }
+
+        function resetInfo() {
+            $('#appbrief').val('');
+            $('#appreplier').val('-1');
+            $('#appcomment').val('');
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+    <script src="~/lib/bootstrap-datetimepicker/bootstrap-datepicker.min.js"></script>
+    <script src="~/lib/bootstrap-datetimepicker/bootstrap-datepicker.zh-CN.min.js"></script>
+}
+
+
+

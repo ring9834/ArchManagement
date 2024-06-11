@@ -1,0 +1,368 @@
+﻿@{
+
+    ViewData["Title"] = "档案利用单打印";
+}
+@section head {
+    <link href="~/css/archRequestPrint.css" rel="stylesheet" />
+}
+@section body {
+    <style media="print">
+        @@page {
+            size: A4 portrait; /*A4纸，纵向打印*/
+            margin: 32px; /*去掉页边距*/
+        }
+    </style>
+    <div class="container-fluid">
+        <div style="margin:5px 1px 5px 1px;padding:5px;background-color:#e1eefc;" class="form-inline">
+            <div class="input-group">
+                <span class="input-group-addon">使用天数</span>
+                <input id="daysForUse" type="text" class="form-control" style="width:50px;" value="5" />
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon">合计件数</span>
+                <input id="totalPieces" type="text" class="form-control" style="width:50px;" value="" />
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon">合计份数</span>
+                <input id="totalShares" type="text" class="form-control" style="width:50px;" value="1" />
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon">备注</span>
+                <input id="commentInput" type="text" class="form-control" style="width:400px;" />
+            </div>
+            <button class="btn btn-info" id="printBtn"><i class="fa fa-print"></i>打印</button>
+        </div>
+        <div id="printTable">
+            <table class="tabletd">
+                <thead>
+                    <tr>
+                        <th colspan="6">借  档  登 记 表</th>
+                    </tr>
+                </thead>
+                <tr>
+                    <td colspan="6" style="height:20px;font-size:15px;text-align:right;border:none;padding:2px;">
+                        利用编号：<span id="vitalizeCode"></span>&nbsp;&nbsp;日期：<span id="vitalizeDate"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>借档人<br />姓名</td>
+                    <td>
+                        <span id="vitalizer"></span>
+                    </td>
+                    <td style="text-align:center;">供职（就学）单位</td>
+                    <td colspan="3">
+                        <span id="workplace"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:80px;">联系电话</td>
+                    <td>
+                        <span id="telephone"></span>
+                    </td>
+                    <td style="width:80px;">证件类型</td>
+                    <td>
+                        <span id="certitype"></span>
+                    </td>
+                    <td style="width:80px;">证件号码</td>
+                    <td>
+                        <span id="certino"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>利用目的</td>
+                    <td colspan="5">
+                        <span id="vitalizeAim"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>利用内容</td>
+                    <td colspan="5">
+                        <span id="vitalizeContent"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align:center;">
+                        用  档  情  况
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="padding:2px;">
+                        <table id="dhUsedTable" class="dhTable">
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td>使用天数</td>
+                    <td>
+                        <span id="resultUseDays"></span>天
+                    </td>
+                    <td>合计件数</td>
+                    <td>
+                        <span id="resultUsePieces"></span>件
+                    </td>
+                    <td>合计份数</td>
+                    <td>
+                        <span id="resultsUseShare"></span>份
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6">
+                        备注：<span id="comment"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align:center;">
+                        借 档 人 承 诺 条 款<br />
+                        <span style="font-size:14px;">（请查档人仔细阅读下述条款，如无疑问，请签字认可。）</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6">
+                        &nbsp;&nbsp;严格按照《中华人民共和国保守国家秘密法》、《中华人民共和国档案法》、《中华人民共和国保守国家秘密法实施办法》等国家法律法规，对所借用档案文件原件资料做好安全保障和保密工作。<br/>
+                        &nbsp;&nbsp;对借出档案保证不擅自复制、转借、摘抄，不在档案资料上有填注、划道、涂改、拆散或抽取行为。如发生损毁、丢失档案，擅自提供、抄录、公布、销毁、涂改、伪造档案，擅自出卖或转让、倒卖档案牟利或
+                        将档案卖给、赠送外国人等违法行为，将承担一切法律责任。<br />
+                        &nbsp;&nbsp;借档期限不得超过30天，确需延期借档，请自觉办理续借手续。
+                    </td>
+                </tr>
+                <tr>
+                    <td>经办人</td>
+                    <td colspan="2">
+                        <span id="fileClerk"></span>
+                    </td>
+                    <td colspan="3">
+                        经办人签字：
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            initiatePage();//初始化打印按钮功能等
+            getRequestInfo();//获得查档数据，填充打印单
+            //$("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+            //$("#h_loading").css("display", "none");
+        });
+
+        var initiatePage = function () {
+            $('#daysForUse').keyup(function(){//只能输入正整数
+	            $(this)[0].value=$(this)[0].value.replace(/^(0+)|[^\d]+/g,'')
+            })
+
+            $('#totalPieces').keyup(function(){//只能输入正整数
+	            $(this)[0].value=$(this)[0].value.replace(/^(0+)|[^\d]+/g,'')
+            })
+
+            $('#totalShares').keyup(function () {//只能输入正整数
+                $(this)[0].value = $(this)[0].value.replace(/^(0+)|[^\d]+/g, '')
+            })
+
+            var beover = '@ViewData["beOver"]';
+            if (beover == '5' || beover == '6' || beover == '7') {
+                $('#daysForUse').attr('disabled', 'disabled');
+                $('#totalPieces').attr('disabled', 'disabled');
+                $('#totalShares').attr('disabled', 'disabled');
+                $('#commentInput').attr('disabled', 'disabled');
+            }
+
+            $("#printBtn").on('click', function () {
+                HM.pageLoading();
+                $.ajax({//判断是否已经查档结束
+                    type: 'POST',
+                    url: "/WLookUpSvc/VerifyBeOver",
+                    data: { requestId: '@ViewData["requestId"]'},
+                    dataType: "JSON",
+                    success: function (data) {
+                        //console.log(data.rst);
+                        if (data.rst == '3') {//只有借档审批通过的，才能修改使用天数、合计件数、合计份数等内容
+                            var flag = updateFileResult();//更新查档结果，如复印摘抄份数页数等
+                            if (flag == 0) {
+                                HM.closePageLoading();
+                                return;
+                            }
+                        }
+                        if (data.rst == '5' || data.rst == '6' || data.rst == '7') {//档案借出中\借出已归还\借出部分延期等情况，可以直接打开打印界面 added on 20201124
+                            $("#printTable").print({
+                                globalStyles: true,//是否包含父文档的样式，默认为true
+                                mediaPrint: false,//是否包含media='print'的链接标签。会被globalStyles选项覆盖，默认为false
+                                stylesheet: null,//外部样式表的URL地址，默认为null
+                                noPrintSelector: ".no-print",//不想打印的元素的jQuery选择器，默认为".no-print"
+                                iframe: true,//是否使用一个iframe来替代打印表单的弹出窗口，true为在本页面进行打印，false就是说新开一个页面打印，默认为true
+                                append: null,//将内容添加到打印内容的后面
+                                prepend: null,//将内容添加到打印内容的前面，可以用来作为要打印内容
+                                deferred: $.Deferred()//回调函数
+                            })
+                        }
+                        HM.closePageLoading();
+                    }
+                });
+            })
+        }
+
+        var getRequestInfo = function () {
+            $.ajax({
+                type: 'POST',
+                url: "/WLookUpSvc/fetchBrrwDhsById",
+                data: { requestId: '@ViewData["requestId"]'},
+                dataType: "JSON",
+                success: function (data) {
+                    var dhs = data.dhs;
+                    listDhs(dhs);//显示所查档号列表
+                    if (data.rqstInfo.length > 0) {
+                        var info = data.rqstInfo[0];
+                        showRequesterInfo(info);//显示所查档其他信息，如查档者信息、查档目的等
+                    }
+                    
+                    if (data.rsltInfo.length > 0) {
+                        var info = data.rsltInfo[0]; console.log(info);
+                        showResultInfo(info);
+                    }
+                    $('#totalPieces').val(dhs.length);
+
+                    $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                    $("#h_loading").css("display", "none");
+                }
+            });
+        }
+
+        var updateFileResult = function(){
+            var pieces = $('#totalPieces').val();
+            var shares = $('#totalShares').val();
+            var days = $('#daysForUse').val();
+            var comment = $('#commentInput').val();
+
+            if (days.trim() == '') {
+                HM.alertWin('使用天数不能为空！');
+                return 0;
+            }                
+            if (pieces.trim() == '') {
+                HM.alertWin('合计件数不能为空！');
+                return 0;
+            }               
+            if (shares.trim() == '') {
+                HM.alertWin('合计份数不能为空！');
+                return 0;
+            }
+
+            $('#resultUsePieces').html(pieces);
+            $('#resultsUseShare').html(shares);
+            $('#resultUseDays').html(days);
+            $('#comment').html(comment);
+            $.ajax({//更新借档结果（如借档件数，份数，天数等）信息
+                type: 'POST',
+                url: "/WLookUpSvc/UpdateFileOutBResult",
+                data: { requestId: '@ViewData["requestId"]', pieces: pieces, shares: shares, days: days, comment: comment},
+                dataType: "JSON",
+                success: function (data) {
+                    parent.closePrintWin();//关闭本窗口，刷新父页面表格
+
+                    $("#printTable").print({
+                        globalStyles: true,//是否包含父文档的样式，默认为true
+                        mediaPrint: false,//是否包含media='print'的链接标签。会被globalStyles选项覆盖，默认为false
+                        stylesheet: null,//外部样式表的URL地址，默认为null
+                        noPrintSelector: ".no-print",//不想打印的元素的jQuery选择器，默认为".no-print"
+                        iframe: true,//是否使用一个iframe来替代打印表单的弹出窗口，true为在本页面进行打印，false就是说新开一个页面打印，默认为true
+                        append: null,//将内容添加到打印内容的后面
+                        prepend: null,//将内容添加到打印内容的前面，可以用来作为要打印内容
+                        deferred: $.Deferred()//回调函数
+                    })
+                }
+            });
+        }
+
+        var listDhs = function (dhs) {
+            var tb = $('#dhUsedTable');
+            if (dhs.length <= 3) {
+                var tr = '<tr>';
+                for (var i = 0; i < dhs.length; i++) {
+                    tr += '<td class="archiveItems">档号</td><td>' + dhs[i].dh + '</td>';
+                }
+                tr += '</tr>';
+                tb.append(tr);
+            }
+            else {
+                var md = dhs.length % 3; console.log(md);
+                var avg =  Math.floor(dhs.length / 3);console.log(avg);
+                if (md == 0) {//正好是3的倍数
+                    var counter = 0;
+                    for (var i = 0; i < avg; i++) {
+                        var tr = '<tr><td class="archiveItems">档号</td><td>' + dhs[i + counter].dh + '</td><td>档号</td><td>' + dhs[i + 1 + counter].dh + '</td><td>档号</td><td>' + dhs[i + 2 + counter].dh + '</td></tr>';
+                        counter += 2;
+                        tb.append(tr);
+                    }
+                }
+                else {
+                    var counter = 0;
+                    var ordial = 0;
+                    for (var i = 0; i < avg; i++) {
+                        var tr = '<tr><td class="archiveItems">档号</td><td>' + dhs[i + counter].dh + '</td><td>档号</td><td>' + dhs[i + 1 + counter].dh + '</td><td>档号</td><td>' + dhs[i + 2 + counter].dh + '</td></tr>';
+                        counter += 2;
+                        tb.append(tr);
+                        ordial += 3;
+                    }
+
+
+                    var tr2 = '<tr>';
+                    for (var i = 0; i < md; i++) {//加上mod个数的data的数据
+                        var index = ordial + i;
+                        tr2 += '<td class="archiveItems">档号</td><td>' + dhs[index].dh + '</td>';
+                    }
+                    for (var i = 0; i < 3 - md; i++) {//加上3-mod个数的data的数据
+                        tr2 += '<td>档号</td><td></td>';
+                    }
+                    tr2 += '</tr>';
+                    tb.append(tr2);
+                }
+            }
+
+            var c = 1;
+            var md2 = dhs.length % 3;
+            if (md2 == 0) {
+                c = dhs.length / 3;
+            }
+            else {
+                c = Math.floor(dhs.length / 3) + 1;
+            }
+            var average =  Math.ceil(300 / c);//向上取整
+            
+            if (c <= 5 || c > 10) {
+                $('.archiveItems').attr('style', 'height:' + average + 'px;');
+                //console.log('1a');
+            }
+            else {
+                $('.archiveItems').attr('style', 'padding:2px;height:' + average + 'px;font-size:12px;');
+                //console.log('2a');
+            }
+            //console.log($('.archiveItems').length);
+        }
+
+        var showRequesterInfo = function (info) {
+            $('#vitalizeCode').html(info.vitalization_code);
+            $('#vitalizeDate').html(info.checkin_time);
+            $('#vitalizer').html(info.vitalizer);
+            $('#workplace').html(info.workplace);
+            $('#telephone').html(info.telephone);
+            $('#certitype').html(info.certitype);
+            $('#certino').html(info.certino);
+            $('#vitalizeAim').html(info.aiming);
+            $('#vitalizeContent').html(info.file_content);
+            $('#fileClerk').html(info.nick_name);
+
+        }
+
+        var showResultInfo = function (info) {
+            JSON.stringify(info);
+            $('#resultUsePieces').html(info.pieces);
+            $('#resultsUseShare').html(info.shares);
+            $('#resultUseDays').html(info.days);
+            $('#comment').html(info.comment);
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/jquery-print/jQuery.print.min.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

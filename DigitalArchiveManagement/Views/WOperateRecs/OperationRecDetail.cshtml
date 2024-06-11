@@ -1,0 +1,99 @@
+﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@{
+    ViewData["Title"] = "系统操作记录";
+}
+
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+    <link href="~/css/arch-button.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="specified-table" style="margin-top:8px;">
+            <table id="operateGrid"></table>
+        </div>
+    </div>
+
+    <script>
+        var loadTableData = function () {
+            $('#operateGrid').bootstrapTable('destroy');
+            $table = $('#operateGrid').bootstrapTable({
+                url: '/WOperateRecs/oprtionRecDetail',
+                method: 'POST',                      //请求方式（*）
+                contentType: "application/x-www-form-urlencoded",
+                silent: true, //静态刷新
+                //toolbar: '#toolbarSearch',              //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                pagination: true,                   //是否显示分页（*）
+                sortable: true,                     //是否启用排序
+                sortOrder: "asc",                   //排序方式
+                sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+                pageNumber: 1,                      //初始化加载第一页，默认第一页,并记录
+                pageSize: 15,                     //每页的记录行数（*）
+                pageList: [15, 30, 50, 100],        //可供选择的每页的行数（*）
+                search: false,                      //是否显示表格搜索
+                strictSearch: true,
+                //showColumns: true,                  //是否显示所有的列（选择显示的列）
+                //showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                clickToSelect: true,                //是否启用点击选中行
+                //height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                uniqueId: "Unique_code",                     //每一行的唯一标识，一般为主键列
+                //showToggle: true,                   //是否显示详细视图和列表视图的切换按钮
+
+                cardView: false,                    //是否显示详细视图
+                detailView: false,                  //是否显示父子表
+                paginationLoop: false,
+                showLoading: false,
+                singleSelect: false,                //true只能单选，false为多选
+                //showExport: true,
+                //exportDataType: "all",        //导出checkbox选中的行数
+                //exportTypes: ['excel'],
+                //showFullscreen: true,
+                useRowAttrFunc: true,
+                reorderableRows: true,
+                //得到查询的参数
+                queryParams: function (params) {
+                    //这里的键的名字和控制器的变量名必须一致，这边改动，控制器也需要改成一样的
+                    var temp = {
+                        pageSize: params.limit,                         //页面大小
+                        pageIndex: params.offset / params.limit,   //页码
+                        uniquecode:'@ViewData["id"]'
+                    };
+                    return temp;
+                },
+                columns: [
+                    { field: 'tb', title: '影响的数据表' }
+                    , { field: 'id', title: '影响的记录ID' }
+                ],
+                onLoadSuccess: function () {
+                    $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                    $("#h_loading").css("display", "none");
+                },
+                formatLoadingMessage: function () {
+                    return "请稍等，正在加载中···";
+                }
+            });
+        }
+
+        $(function () {
+            loadTableData();
+        });
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

@@ -1,0 +1,83 @@
+﻿@{
+
+    ViewData["Title"] = "解密授权";
+}
+@section head {
+
+}
+
+@section body {
+    <style>
+        .pwdTable {
+            width: 100%;
+        }
+
+            .pwdTable td {
+                padding: 5px 0 12px 0;
+            }
+
+            .pwdTable select,
+            .pwdTable input {
+                width: 420px;
+                margin-right: 5px;
+            }
+    </style>
+
+    <div class="container-fluid">
+        <div class="alert alert-warning" style="margin-top:8px;font-size:13px;">
+            <i class="fa fa-volume-up"></i><strong> 提醒!</strong> 解密前，请输入原文操作密码（授权码）。欲取得授权码，请联系系统管理员
+        </div>
+        <table class="pwdTable">
+            <tr>
+                <td>
+                    <label for="ppwd" class="control-label">授权码</label>
+                </td>
+                <td>
+                    <input type="password" id="ppwd" class="form-control" placeholder="请输入原文操作密码" />
+                </td>
+                <td>
+                    <button class="btn btn-warning" onclick="yelp();"><i class="fa fa-yelp"></i> 确定</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        $(function () {
+            $("#h_loading_mask").css("display", "none");//关闭页面加载指示器
+            $("#h_loading").css("display", "none");
+        });
+
+        var yelp = function () {
+            if ($.trim($('#ppwd').val()) == '') {
+                HM.alertWin('请输入授权码！');
+                return;
+            }
+
+            var ppwd = $('#ppwd').val();
+            $.ajax({
+                type: 'post',
+                url: '/WEncrypt/IfAccessed',
+                dataType: "json",
+                data: { ppwd: ppwd },
+                success: function (data) {
+                    console.log(JSON.stringify(data));
+                    if (data.rst > 0) {
+                        parent.closeDealWin();
+                        parent.decryptSContent();//调用父窗口的加密函数
+                        return;
+                    } else {
+                        HM.alertWin('输入的密码不正确！');                        
+                        return;
+                    }
+                }
+            });
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

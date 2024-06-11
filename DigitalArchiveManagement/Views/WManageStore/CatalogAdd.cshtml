@@ -1,0 +1,335 @@
+﻿
+@{
+    ViewData["Title"] = "目录著录";
+}
+@model List<ColDictionary>
+
+@section head {
+    <link href="~/lib/bootstrap-datetimepicker/bootstrap-datepicker.min.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="alert alert-warning" style="margin-top:8px;font-size:13px;">
+            <i class="fa fa-volume-up"></i><strong> 提醒!</strong> 1、页面中如果您只看到两个按钮，说明您需要请系统管理员进行“目录著录界面配置”，方法：“配置管理”-->“目录著录界面配置”；2、文本框中出现提示“可为空”或“不可为空”字眼，是业务数据字典中的字段配置的原因，如果需更改是否可为空的配置，请联系系统管理员。
+        </div>
+        <form class="form-horizontal" role="form" style="margin-top:8px;">
+            @{
+                var r = 0;
+                var c = 0;
+                var m = Model.Count % 2;
+                if (m == 0)
+                {
+                    r = Model.Count / 2;
+                    for (int j = 0; j < r; j++)
+                    {
+                        ColDictionary row = Model[c];
+                        c++;
+                        string showName = row.ShowName;
+                        string colName = row.ColName;
+                        bool colNull = row.ColNull;
+                        string colMaxLen = row.MaxLength;
+                        string baseCode = row.BaseCode;
+                        string colShowValue = row.ColShowValue;
+                        string colShowType = row.ColShowType;
+                        string dataType = row.DataType;//added on 20201111
+                        string placeholder = colNull ? "可为空" : "不可为空";
+                        <div class="form-group">
+                            <label for="@("txt_" + colName)" id="@("lb_" + colName)" class="col-md-2 control-label">@(showName)</label>
+                            <div class="col-md-4">
+                                @if (colShowValue.ToLower().Equals("wbk"))
+                                {
+                                    <input type="hidden" id="@("hd_null_" + colName)" value="@(colNull.ToString())">
+                                    <input type="hidden" id="@("hd_max_" + colName)" value="@(colMaxLen)">
+                                    <input type="text" class="form-control" id="@("txt_"+ colName)" placeholder="@(placeholder)">
+                                }
+                                else if (colShowValue.ToLower().Equals("xlk"))
+                                {
+                                    <input type="hidden" id="@("hd_" + colName)" value="@(baseCode)">
+                                    <select class="form-control" id="@("txt_" + colName)"></select>
+                                }
+                                else if (colShowValue.ToLower().Equals("rqk"))
+                                {
+                                    @*<select class="form-control" id="@("txt_" + colName)"></select>*@
+                                    <input id="@("txt_" + colName)" name="fromDate" type="text" placeholder="点击选择时间" data-date-format="yyyy-mm-dd" class="form-control dateinput" autocomplete="off" />
+                                }
+                                <input type="hidden" id="@("hd_dtype_" + colName)" value="@(dataType)">
+                            </div>
+                            @{row = Model[c];
+                                c++;
+                                showName = row.ShowName;
+                                colName = row.ColName;
+                                colNull = row.ColNull;
+                                colMaxLen = row.MaxLength;
+                                baseCode = row.BaseCode;
+                                colShowValue = row.ColShowValue;
+                                colShowType = row.ColShowType;
+                                dataType = row.DataType;//added on 20201111
+                                placeholder = colNull ? "可为空" : "不可为空";
+                            }
+                            <label for="@("txt_" + colName)" id="@("lb_" + colName)" class="col-md-2 control-label">@(showName)</label>
+                            <div class="col-md-4">
+                                @if (colShowValue.ToLower().Equals("wbk"))
+                                {
+                                    <input type="hidden" id="@("hd_null_" + colName)" value="@(colNull.ToString())">
+                                    <input type="hidden" id="@("hd_max_" + colName)" value="@(colMaxLen)">
+                                    <input type="text" class="form-control" id="@("txt_" + colName)" placeholder="@(placeholder)">
+                                }
+                                else if (colShowValue.ToLower().Equals("xlk"))
+                                {
+                                    <input type="hidden" id="@("hd_" + colName)" value="@(baseCode)">
+                                    <select class="form-control" id="@("txt_" + colName)"></select>
+                                }
+                                else if (colShowValue.ToLower().Equals("rqk"))
+                                {
+                                    @*<select class="form-control" id="@("txt_" + colName)"></select>*@
+                                    <input id="@("txt_" + colName)" name="fromDate" type="text" placeholder="点击选择时间" data-date-format="yyyy-mm-dd" class="form-control dateinput" autocomplete="off" />
+                                }
+                                <input type="hidden" id="@("hd_dtype_" + colName)" value="@(dataType)">
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    r = Model.Count / 2 + 1;
+                    for (int j = 0; j < r - 1; j++)
+                    {
+                        ColDictionary row = Model[c];
+                        c++;
+                        string showName = row.ShowName;
+                        string colName = row.ColName;
+                        bool colNull = row.ColNull;
+                        string colMaxLen = row.MaxLength;
+                        string baseCode = row.BaseCode;
+                        string colShowValue = row.ColShowValue;
+                        string colShowType = row.ColShowType;
+                        string dataType = row.DataType;//added on 20201111
+                        string placeholder = colNull ? "可为空" : "不可为空";
+                        <div class="form-group">
+                            <label for="@("txt_" + colName)" id="@("lb_" + colName)" class="col-md-2 control-label">@(showName)</label>
+                            <div class="col-md-4">
+                                @if (colShowValue.ToLower().Equals("wbk"))
+                                {
+                                    <input type="hidden" id="@("hd_null_" + colName)" value="@(colNull.ToString())">
+                                    <input type="hidden" id="@("hd_max_" + colName)" value="@(colMaxLen)">
+                                    <input type="text" class="form-control" id="@("txt_" + colName)" placeholder="@(placeholder)">
+                                }
+                                else if (colShowValue.ToLower().Equals("xlk"))
+                                {
+                                    <input type="hidden" id="@("hd_" + colName)" value="@(baseCode)">
+                                    <select class="form-control" id="@("txt_" + colName)"></select>
+                                }
+                                else if (colShowValue.ToLower().Equals("rqk"))
+                                {
+                                    @*<select class="form-control" id="@("txt_" + colName)"></select>*@
+                                    <input id="@("txt_" + colName)" name="fromDate" type="text" placeholder="点击选择时间" data-date-format="yyyy-mm-dd" class="form-control dateinput" autocomplete="off" />
+                                }
+                                <input type="hidden" id="@("hd_dtype_" + colName)" value="@(dataType)">
+                            </div>
+                            @{row = Model[c];
+                                c++;
+                                showName = row.ShowName;
+                                colName = row.ColName;
+                                colNull = row.ColNull;
+                                colMaxLen = row.MaxLength;
+                                baseCode = row.BaseCode;
+                                colShowValue = row.ColShowValue;
+                                colShowType = row.ColShowType;
+                                dataType = row.DataType;//added on 20201111
+                                placeholder = colNull ? "可为空" : "不可为空";
+                            }
+                            <label for="@("txt_" + colName)" id="@("lb_" + colName)" class="col-md-2 control-label">@(showName)</label>
+                            <div class="col-md-4">
+                                @if (colShowValue.ToLower().Equals("wbk"))
+                                {
+                                    <input type="hidden" id="@("hd_null_" + colName)" value="@(colNull.ToString())">
+                                    <input type="hidden" id="@("hd_max_" + colName)" value="@(colMaxLen)">
+                                    <input type="text" class="form-control" id="@("txt_" + colName)" placeholder="@(placeholder)">
+                                }
+                                else if (colShowValue.ToLower().Equals("xlk"))
+                                {
+                                    <input type="hidden" id="@("hd_" + colName)" value="@(baseCode)">
+                                    <select class="form-control" id="@("txt_" + colName)"></select>
+                                }
+                                else if (colShowValue.ToLower().Equals("rqk"))
+                                {
+                                    @*<select class="form-control" id="@("txt_" + colName)"></select>*@
+                                    <input id="@("txt_" + colName)" name="fromDate" type="text" placeholder="点击选择时间" data-date-format="yyyy-mm-dd" class="form-control dateinput" autocomplete="off" />
+                                }
+                                <input type="hidden" id="@("hd_dtype_" + colName)" value="@(dataType)">
+                            </div>
+                        </div>
+                    }
+
+                    <div class="form-group">
+                        @for (int k = 0; k < m; k++)
+                        {
+                            ColDictionary row = Model[c];
+                            c++;
+                            string showName = row.ShowName;
+                            string colName = row.ColName;
+                            bool colNull = row.ColNull;
+                            string colMaxLen = row.MaxLength;
+                            string baseCode = row.BaseCode;
+                            string colShowValue = row.ColShowValue;
+                            string colShowType = row.ColShowType;
+                            string dataType = row.DataType;//added on 20201111
+                            string placeholder = colNull ? "可为空" : "不可为空";
+                            <label for="@("txt_" + colName)" id="@("lb_" + colName)" class="col-md-2 control-label">@(showName)</label>
+                            <div class="col-md-4">
+                                @if (colShowValue.ToLower().Equals("wbk"))
+                                {
+                                    <input type="hidden" id="@("hd_null_" + colName)" value="@(colNull.ToString())">
+                                    <input type="hidden" id="@("hd_max_" + colName)" value="@(colMaxLen)">
+                                    <input type="text" class="form-control" id="@("txt_" + colName)" placeholder="@(placeholder)">
+                                }
+                                else if (colShowValue.ToLower().Equals("xlk"))
+                                {
+                                    <input type="hidden" id="@("hd_" + colName)" value="@(baseCode)">
+                                    <select class="form-control" id="@("txt_" + colName)"></select>
+                                }
+                                else if (colShowValue.ToLower().Equals("rqk"))
+                                {
+                                    @*<select class="form-control" id="@("txt_" + colName)"></select>*@
+                                    <input id="@("txt_" + colName)" name="fromDate" type="text" placeholder="点击选择时间" data-date-format="yyyy-mm-dd" class="form-control dateinput" autocomplete="off" />
+                                }
+                                <input type="hidden" id="@("hd_dtype_" + colName)" value="@(dataType)">
+                            </div>
+                        }
+                        @for (int l = 0; l < 2 - m; l++)
+                        {
+                            <div class="col-md-2"></div>
+                            <div class="col-md-4"></div>
+                        }
+                    </div>
+                }
+
+            }
+        </form>
+        <div style="text-align:center;">
+            <button type="button" class="btn btn-info" id="okaddBtn">确定</button>
+            <button type="button" class="btn btn-warning" id="cancelBtn">重置</button>
+        </div>
+    </div>
+    <script>
+        $(function () {
+            initiateSelects();
+
+             $('.dateinput').each(function () {
+                $(this).datepicker({
+                    language: 'zh-CN', //语言
+                    autoclose: true, //选择后自动关闭
+                    clearBtn: true,//清除按钮
+                    format: "yyyy-mm-dd"//日期格式
+                });
+            });
+
+            $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+            $("#h_loading").css("display", "none");
+
+            $("#okaddBtn").bind("click", addCatalog);
+            $("#cancelBtn").bind("click", resetRec);
+        });
+
+        var initiateSelects = function () {
+            $('select').each(function () {
+                var id = $(this).attr('id');
+                var colName = id.substring(4);
+                var baseCode = $('#hd_' + colName).val();
+                getOptions(baseCode, this);
+            });
+        }
+
+        var getOptions = function (baseCode, t) {
+            $.ajax({
+                type: 'POST',
+                url: "/WManageStore/GetCodesByBaseCode",
+                data: { baseCode: baseCode },
+                dataType: "JSON",
+                success: function (data) {
+                    $(t).append("<option value='-1'>--请选择--</option>");
+                    for (var i = 0; i < data.length; i++) {//拼接下拉框
+                        $(t).append("<option value='" + data[i].code_name + "'>" + data[i].code_name + "</option>");
+                    }
+                }
+            });
+        }
+
+        var addCatalog = function () {
+            var flag = true;
+            var toBackData = [];
+            $('label').each(function () {
+                var id = $(this).attr('id');
+                var colName = id.substring(3);
+                var showName = $(this).text();
+                var v = $('#txt_' + colName).val();
+                var nullv = $('#hd_null_' + colName).val();
+                var maxlen = $('#hd_max_' + colName).val(); 
+                var datatype = $('#hd_dtype_' + colName).val(); 
+                if ($.trim(v) == '' && nullv != 'undefined' && nullv.toLowerCase() != 'true') {
+                    HM.alertWin(showName + '不能为空!');
+                    flag = false;
+                    return false;//跳出each循环
+                }
+                if (maxlen != 'undefined' && v.length > parseInt(maxlen)) {
+                    HM.alertWin(showName + '的内容超过允许的长度！请修改后继续。如果修改允许长度，请到业务数据字典操作！');
+                    flag = false;
+                    return false;
+                }
+                if ($('#hd_' + colName).length > 0 && $('#txt_' + colName).val() == '-1') {//select列表未选择时
+                    HM.alertWin(showName + '需要选择一项!');
+                    flag = false;
+                    return false;//跳出each循环
+                }
+
+                var fieldValuePair = {};
+                fieldValuePair.field = colName; console.log(colName + '-' + datatype);
+                fieldValuePair.value = datatype.toLowerCase()== 'numeric' ? '0' :v;//added on 20201111;modified to '-1' to '0' on 20201130
+                toBackData.push(fieldValuePair);
+            });
+
+            if (flag == false) return;//不执行
+            $.ajax({
+                type: 'POST',
+                url: "/WManageStore/AddSingleCatalog",
+                data: { list: toBackData, table:'@ViewData["table"]',userid:'@ViewData["userid"]'},
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        parent.closeDealWin();//关闭著录窗口
+                        parent.popHintWin();//在主页面弹出提示窗口
+                        parent.loadTable();//刷新表格
+                        return;
+                    }
+                    else {
+                        parent.closeDealWin('catalogAdd');//关闭著录窗口
+                        parent.popAlertWin();
+                    }
+                }
+            });
+        }
+
+        var resetRec = function () {//重置
+            $('label').each(function () {
+                var id = $(this).attr('id');
+                var colName = id.substring(3);
+                if ($('#hd_' + colName).length > 0) {
+                    $('#txt_' + colName).val('-1');
+                } else {
+                    $('#txt_' + colName).val('');
+                }
+            });
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+    <script src="~/lib/bootstrap-datetimepicker/bootstrap-datepicker.min.js"></script>
+    <script src="~/lib/bootstrap-datetimepicker/bootstrap-datepicker.zh-CN.min.js"></script>
+}
+
+
+

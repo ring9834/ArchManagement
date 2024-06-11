@@ -1,0 +1,439 @@
+﻿
+@{
+    ViewData["Title"] = "首页统计页面";
+}
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+    <link href="~/css/arch-button.css" rel="stylesheet" />
+    <link href="~/css/statisticFirstP.css" rel="stylesheet" />
+    <script src="~/lib/echart/echarts.min.js"></script>
+}
+
+@section body {
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+    <div class="panel panel-info" style="margin-bottom:0;height:calc(100vh - 5px);width:calc(100% - 10px);margin:5px 0 0 5px;padding:5px 15px 0 5px;">
+        <div class="row">
+            <div class="col-md-9">
+                <div id="scontainer" class="panel-body"></div>
+                <div id="charBox" style="height:calc(100vh - 200px);margin-top:20px;padding-bottom:20px;">
+                    <div id="mainChart" style="height:100%;"></div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="panel panel-default" style="height:360px;font-size:12px;">
+                    <table style="width:100%;">
+                        <tr>
+                            <td style="text-align:left;">
+                                <div style="font-size:15px;color:black;font-weight:bold;padding:8px;">待办事项</div>
+                            </td>
+                            <td style="text-align:right">
+                                <div style="font-size:13px;color:black;padding:18px;">
+                                    <button type="button" class="btn btn-default btn-xs" onclick="getAuditTodoList()">
+                                        <span style="color:#337ab7;float:left;">待办项</span>&nbsp;
+                                        <div class="circleDot" id="waitaAudit">0</div>
+                                    </button>
+
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-default btn-xs" onclick="getDoneAuditTodoList();"><span style="color:#337ab7;">已办项</span></button>
+                                        <button type="button" class="btn btn-xs dropdown-toggle" data-toggle="dropdown" style="border-color:#99D1FF;" aria-haspopup="true" aria-expanded="false">
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="#" onclick="allDoneAudits();"><i class="fa fa-reorder"></i> 所有已办项</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="panel-body" style="padding-top:2px;" id="todoList">
+
+                    </div>
+                </div>
+
+                <div style="height:20px;"></div>
+                <div style="height:calc(100vh - 400px); width:calc(100vh-10px);padding-bottom:20px;">
+                    <div id="mainPie" style="width:100%;height:100%;"></div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+
+    <script>
+        $(function () {
+            getAuditTodoList();
+            showAmntStatistics();
+            showTypeStatistics();
+            //showStckPrdStatistics();
+        });
+
+        var colorArray = ['#d9544f', '#efad4e', '#5bc0de', '#9f851d', '#839204', '#a26f01', '#9850f1', '#9f851d', '#ee0393', '#5bb85d', '#418bca'];
+
+        function showAmntStatistics() {
+            $.ajax({
+                type: 'post',
+                url: '/WStatisticsAmount/GetAmountStatiscInfo',
+                dataType: "json",
+                success: function (data) {
+                    $('#scontainer').empty();
+                    for (var i = 0; i < data.length; i++) {
+                        var index = i;
+                        if (i > 9) index = i % 9;
+                        var html = '';
+                        html += '<div class="stadiv" style="background-color:' + colorArray[index] + '">';
+                        html += '   <div style="font-size:15px;padding-left:12px;color:white;">' + data[i].name + '</div>';
+                        html += '   <div style="height:150px;text-align:center;">';
+                        html += '       <div class="stasubdiv">' + data[i].amount + '</div>';
+                        html += '   </div>';
+                        html += '</div>';
+                        $('#scontainer').append(html);
+                    }
+                    var w = 100 / data.length;//每个div的宽度，自适应
+                    $('.stadiv').css('width', 'calc(' + w + '% - 20px)');
+
+                    $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                    $("#h_loading").css("display", "none");
+                }
+            });
+        }
+
+        var myChart;
+        function showTypeStatistics() {
+            //$("#mainChart").css('width', 'calc(100vh-10px)');//获取父容器的宽度具体数值直接赋值给图表
+            myChart = echarts.init(document.getElementById('mainChart'));
+            var colorArray = ['#fc9d81', '#acbbf2', '#69cbd8', '#ffc8d3', '#839204', '#a26f01', '#9850f1', '#9f851d', '#ee0393', '#5bb85d', '#418bca'];
+            $.ajax({
+                type: 'post',
+                url: '/WStatisticsType/GetAmountStatiscInfo',
+                dataType: "json",
+                success: function (data) {
+                    var serieStr = '[';
+                    for (var i = 0; i < data.legends.length; i++) {//拼凑成series，字符串形式
+                        if (i == 0) {
+                            serieStr += '{name:"' + data.legends[i] + '",type:"bar",color:"' + colorArray[i] + '",data:[' + data.series[i] + ']}';
+                        }
+                        else {
+                            var idex = i;//若i值超过colorArray的元素量，则取模 added on 2020年3月17日
+                            if (i > 10)
+                                idex = i % 10;
+                            serieStr += ',{name:"' + data.legends[i] + '",type:"bar",color:"' + colorArray[idex] + '",data:[' + data.series[i] + ']}';
+                        }
+                    }
+                    serieStr += ']';
+
+                    var option = {
+                        title: {
+                            text: ''
+                        },
+                        tooltip: {},
+                        legend: {
+                            data: data.legends
+                        },
+                        xAxis: {
+                            data: data.years
+                        },
+                        yAxis: {},
+                        textStyle: {
+                            color: 'red'
+                        },
+                        series: eval('(' + serieStr + ')') // JSON字符串转JSON对象
+                    };
+                    myChart.setOption(option);//画统计图
+
+                    //setTimeout(function () {//让统计图自适应大小
+                    //    window.onresize = function () {
+                    //        myChart.resize();
+                    //    }
+                    //}, 200);
+
+                    showStckPrdStatistics();//柱状图显示后再显示PIE图
+
+                    $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                    $("#h_loading").css("display", "none");
+                }
+            });
+        }
+
+        var myChart2;
+        function showStckPrdStatistics() {
+            myChart2 = echarts.init(document.getElementById('mainPie'));
+            $.ajax({
+                type: 'post',
+                url: '/WStatisticsStockPrd/GetStckPrdStatiscInfo',
+                dataType: "json",
+                success: function (data) {
+                    var dts = '[';
+                    for (var i = 0; i < data.length; i++) {//拼凑成series，字符串形式
+                        if (i == 0) {
+                            dts += '{name:"' + data[i].field + '",value:"' + data[i].value + '"}';
+                        }
+                        else {
+                            dts += ',{name:"' + data[i].field + '",value:"' + data[i].value + '"}';
+                        }
+                    }
+                    dts += ']';
+                    //alert(dts); return;
+                    myChart2.setOption({
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: '{a} <br/>{b} : {c}'
+                        },
+                        series: [
+                            {
+                                name: '保管期限馆藏统计',
+                                type: 'pie',    // 设置图表类型为饼图
+                                radius: '75%',  // 饼图的半径，外半径为可视区尺寸（容器高宽中较小一项）的 55% 长度。
+                                data: eval('(' + dts + ')') // JSON字符串转JSON对象
+                            }
+                        ]
+                    });
+
+                    setTimeout(function () {//让统计图自适应大小
+                        window.onresize = function () {
+                            myChart.resize();
+                            myChart2.resize();
+                        }
+                    }, 200);
+                }
+            });
+        }
+
+        //十六进制颜色随机
+        function color16() {
+            var r = Math.floor(Math.random() * 256);
+            var g = Math.floor(Math.random() * 256);
+            var b = Math.floor(Math.random() * 256);
+            var color = '#' + r.toString(16) + g.toString(16) + b.toString(16);
+            return color;
+        }
+
+        function getAuditings() {
+            //记录页面bootstrap-table全局变量$table，方便应用
+            $('#checkTable').bootstrapTable('destroy');
+            var $table = $('#checkTable').bootstrapTable({
+                url: '/WAuditing/GetAuditingsByChecker', //请求后台的URL（*）
+                method: 'POST',                      //请求方式（*）
+                contentType: "application/x-www-form-urlencoded",
+                silent: true, //静态刷新
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                sortable: true,                     //是否启用排序
+                sortOrder: "asc",                   //排序方式
+                search: false,                      //是否显示表格搜索
+                strictSearch: true,
+                minimumCountColumns: 2,             //最少允许的列数
+                uniqueId: "Unique_code",                     //每一行的唯一标识，一般为主键列
+                cardView: false,                    //是否显示详细视图
+                detailView: false,                  //是否显示父子表
+                showLoading: false,
+                queryParams: function (params) {
+                    var temp = {
+                        //pageSize: params.limit,                         //页面大小
+                        //pageIndex: params.offset / params.limit,   //页码
+                        checkerName: '@ViewData["userid"]',
+                    };
+                    return temp;
+                },
+                columns: [
+                    { field: 'application_info', title: '入库申请' },
+                    { field: 'application_time', title: '申请时间' },
+                    //{ field: 'end_time', title: '结束时间' },
+                    //{ field: 'check_status', title: '审核状态', formatter:'statusFormater'},
+                    //{ field: 'operate', title: '操作', width: 120, align: 'center', valign: 'middle', formatter: actionFormatter },
+                ],
+                formatLoadingMessage: function () {
+                    return "请稍等，正在加载中···";
+                },
+                onLoadSuccess: function (data) {
+                    $('#waitaAudit').text(data.length);
+                    $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                    $("#h_loading").css("display", "none");
+                },
+                onPostBody: function () {
+                },
+            });
+        }
+
+        var auditCounter = 0;
+        var auditingTotal = 0;
+        var getAuditTodoList = function () {
+            auditCounter = 0;
+            auditingTotal = 0;
+            $('#todoList').empty();
+            $.ajax({
+                type: 'POST',
+                url: "/WAuditing/GetAuditingsByChecker",
+                data: { checkerName: '@ViewData["userid"]' },
+                dataType: "JSON",
+                success: function (data) {
+                    var html = '';
+                    for (var i = 0; i < data.length; i++) {
+                        if (auditCounter == 10) break;//最多显示10条待办项
+                        html += '<div class="dotoItem"><a href="#" id="a_'+ i +'" title="' + data[i].application_info + '" onclick="toCheck(this);">[入库审批] ' + data[i].application_info + '</a></div><input id="id_' + i + '" type="hidden" value="' + data[i].unique_code +'">';
+                        auditCounter++;
+                    }
+                    $('#todoList').append(html);
+                    auditingTotal += data.length;
+                    $('#waitaAudit').text(auditingTotal);
+
+                    getBrrwAuditTodoList();//加载完入库审批，再加载借档审批。如果getAuditTodoList和getBrrwAuditTodoList的待审批项总数大于10，则$('#waitaAudit')中仍显示为10。20200330
+                }
+            });
+        }
+
+        var getBrrwAuditTodoList = function () {//借档待审批
+            $.ajax({
+                type: 'POST',
+                url: "/WBorrowAuditing/GetAuditingsByChecker",
+                data: { checkerName: '@ViewData["userid"]' },
+                dataType: "JSON",
+                success: function (data) {
+                    var html = '';
+                    for (var i = 0; i < data.length; i++) {
+                        if (auditCounter == 10) break;//最多显示10条待办项
+                        html += '<div class="dotoItem"><a href="#" id="a_' + (i + auditCounter) + '" title="' + data[i].application_info + '" onclick="toCheckBrrw(this);">[借档审批] ' + data[i].application_info + '</a></div><input id="id_' + (i + auditCounter) + '" type="hidden" value="' + data[i].unique_code +'">';
+                        auditCounter++;
+                    }
+                    $('#todoList').append(html);
+                    auditingTotal += data.length;
+                    $('#waitaAudit').text(auditingTotal);
+
+                    getUseRcdAuditTodoList();//加载完借档审批，再加载查阅借档单审批
+                }
+            });
+        }
+
+        var getUseRcdAuditTodoList = function () {//查看借阅单待审批
+            $.ajax({
+                type: 'POST',
+                url: "/WUseRcdAuditing/GetAuditingsByChecker",
+                data: { checkerName: '@ViewData["userid"]' },
+                dataType: "JSON",
+                success: function (data) {
+                    var html = '';
+                    for (var i = 0; i < data.length; i++) {
+                        if (auditCounter == 10) break;//最多显示10条待办项
+                        html += '<div class="dotoItem"><a href="#" id="a_' + (i + auditCounter) + '" title="' + data[i].application_info + '" onclick="toCheckUseRcd(this);">[借阅单审批] ' + data[i].application_info + '</a></div><input id="id_' + (i + auditCounter) + '" type="hidden" value="' + data[i].unique_code +'">';
+                        auditCounter++;
+                    }
+                    $('#todoList').append(html);
+                    auditingTotal += data.length;
+                    $('#waitaAudit').text(auditingTotal);
+                }
+            });
+        }
+
+        var auditDoneCounter = 0;
+        var getDoneAuditTodoList = function () {
+            auditDoneCounter = 0;
+            $('#todoList').empty();
+            $.ajax({
+                type: 'POST',
+                url: "/WAuditing/GetDoneAuditsByChecker",
+                data: { checkerName: '@ViewData["userid"]' },
+                dataType: "JSON",
+                success: function (data) {
+                    var html = '';
+                    for (var i = 0; i < data.length; i++) {
+                        if (auditDoneCounter == 10) break;//最多显示10条待办项
+                        html += '<div class="dotoItem"><a href="#" title="' + data[i].application_info + '">[入库审批] ' + data[i].application_info + '</a></div>';
+                        auditDoneCounter++;
+                    }
+                    $('#todoList').append(html);
+                    getDoneBrrowAuditTodoList();
+                }
+            });
+        }
+
+        var getDoneBrrowAuditTodoList = function () {
+            $.ajax({
+                type: 'POST',
+                url: "/WBorrowAuditing/GetDoneAuditsByChecker",
+                data: { checkerName: '@ViewData["userid"]' },
+                dataType: "JSON",
+                success: function (data) {
+                    var html = '';
+                    for (var i = 0; i < data.length; i++) {
+                        if (auditDoneCounter == 10) break;//最多显示10条待办项
+                        html += '<div class="dotoItem"><a href="#" title="' + data[i].application_info + '">[借档审批] ' + data[i].application_info + '</a></div>';
+                        auditDoneCounter++;
+                    }
+                    $('#todoList').append(html);
+                    getDoneUseRcdAuditTodoList();
+                }
+            });
+        }
+
+        var getDoneUseRcdAuditTodoList = function () {
+            $.ajax({
+                type: 'POST',
+                url: "/WUseRcdAuditing/GetDoneAuditsByChecker",
+                data: { checkerName: '@ViewData["userid"]' },
+                dataType: "JSON",
+                success: function (data) {
+                    var html = '';
+                    for (var i = 0; i < data.length; i++) {
+                        if (auditDoneCounter == 10) break;//最多显示10条待办项
+                        html += '<div class="dotoItem"><a href="#" title="' + data[i].application_info + '">[借阅单审批] ' + data[i].application_info + '</a></div>';
+                        auditDoneCounter++;
+                    }
+                    $('#todoList').append(html);
+                }
+            });
+        }
+
+        var toCheck = function (self) {
+            var aid = $(self).attr("id");
+            var index = aid.split('_')[1];
+            var uniqueCode = $('#id_' + index).val();
+            var content = "<iframe id='toCheckframe' src='/WAuditing/ShowToCheckWin/" + uniqueCode +"' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwin(content, 880, 510, '入库审批窗口');
+        }
+
+        var toCheckBrrw = function (self) {
+            var aid = $(self).attr("id");
+            var index = aid.split('_')[1];
+            var uniqueCode = $('#id_' + index).val();
+            var content = "<iframe id='toCheckBrrwframe' src='/WBorrowAuditing/ShowToCheckWin/" + uniqueCode + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwin(content, 880, 510, '借档审批窗口');
+        }
+
+        var toCheckUseRcd = function (self) {
+            var aid = $(self).attr("id");
+            var index = aid.split('_')[1];
+            var uniqueCode = $('#id_' + index).val();
+            var content = "<iframe id='toCheckUseRcdframe' src='/WUseRcdAuditing/ShowToCheckWin/" + uniqueCode + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwin(content, 880, 510, '借阅单审批窗口');
+        }
+
+        function closeAuditWin() {
+            pop.close("deal-win");
+            HM.hintWin("审批完毕！");
+        }
+
+        var allDoneAudits = function () {
+            var content = "<iframe id='auditsRecFrame' src='/WBorrowAuditing/GetAuditAllRecs/-1/" + '@ViewData["userid"]' +"/" + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwin(content, 1200, 620,'我的所有审批记录窗口');
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

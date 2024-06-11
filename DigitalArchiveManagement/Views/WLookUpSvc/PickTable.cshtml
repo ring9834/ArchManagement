@@ -1,0 +1,108 @@
+﻿@{
+
+    ViewData["Title"] = "";
+}
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-table/css/jquery.treegrid.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+}
+
+@section body {
+
+    <div class="container-fluid">
+        <table id="archtypetable"></table>
+    </div>
+
+    <script>
+        $(function () {
+            loadTreeGrid();
+        });
+                
+        var loadTreeGrid = function () {
+            $table = $('#archtypetable');
+            $table.bootstrapTable({
+                url: '/WArchTree/GetArchTypes',
+                idField: 'unique_code',
+                parentIdField: 'super_id', //指定父id列
+                treeShowField: 'name',//在哪一列展开树形
+                //dataType: 'json',
+                pagination: false,
+                columns: [
+                    { field: 'name', title: '档案库名' },
+                    { field: 'code', title: '库对应表名' },
+                    { field: 'operate', title: '操作', align: 'center', events: operateEvents, formatter: 'operateFormatter' },
+                ],
+                //加载后台数据库时用onLoadSuccess；加载JSON数据文件时，用onResetView
+                onLoadSuccess: function (data) {
+                    $table.treegrid({
+                        //initialState: 'collapsed',
+                        treeColumn: 0,
+                        expandAll: true,  //是否全部展开
+                        expanderExpandedClass: 'glyphicon glyphicon-minus',
+                        expanderCollapsedClass: 'glyphicon glyphicon-plus',
+                        onChange: function () {
+                            $table.bootstrapTable('resetWidth');
+                        }
+                    });
+                    $("#h_loading_mask").css("display", "none");
+                    $("#h_loading").css("display", "none");
+                },
+                onResetView: function (data) {
+                    $table.treegrid({
+                        treeColumn: 0,
+                    });
+                }
+            });
+        }
+
+        //当clickToSelect=true时，如果不阻止事件冒泡，则点击自定义CHECKBOX时会没有反应
+        function stopButtonEvent() {
+            if (window.event) {//IE下阻止冒泡
+                event.cancelBubble = true;
+            } else {
+                event.stopPropagation();
+            }
+        }
+
+        //初始化操作按钮的方法
+        window.operateEvents = {
+            'click .RoleOfadd': function (e, value, row, index) {
+                selectThis(row, index);
+            }
+        };
+
+        // 格式化按钮
+        function operateFormatter(value, row, index) {
+            var result = '';
+            if (row.node_type == '1') {
+                result = '<button type="button" class="RoleOfadd btn btn-sm  btn-info" style="margin-right:15px;"><i class="fa fa-arrow-right" ></i>&nbsp;选择此库</button>';
+            }
+            return [
+                result
+            ].join('');
+        }
+
+        function selectThis(row, index) {
+            parent.closeSlctTableFrm();
+            parent.tableName = row.code;
+
+            var t = '@ViewData["type"]';
+            if(t == 'p')
+                parent.primSearch();//打开基本搜索界面
+            else if(t == 's')
+                parent.highLevelSearch();//打开高级搜索界面
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-treegrid.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/bootstrap-table/js/jquery.treegrid.js"></script>
+    <script src="~/lib/bootstrap-table/js/jquery.treegrid.bootstrap3.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

@@ -1,0 +1,51 @@
+﻿
+@{
+    ViewData["Title"] = "Modal Window";
+}
+
+@section head {
+    <link href="~/lib/modal-panel/jspanel.css" rel="stylesheet" />
+}
+
+@section body {
+    <button type="button" class="btn btn-success" onclick="popupWin1();">打开窗口</button>
+    <button type="button" class="btn btn-danger" id="closeButton" onclick="closeWin1();">关闭窗口</button>
+
+
+    <script>
+        var panel1;
+        var popupWin1 = function () {
+            panel1 = jsPanel.modal.create({
+                headerControls: {
+                    smallify: "remove",
+                    minimize: "hide",
+                    size: 'lg'
+                },
+                dragit: {
+                    opacity: 0.6
+                },
+                resizeit: {
+                    containment: 0
+                },
+                theme: '#d7ebf9',
+                borderRadius: 6,
+                headerTitle: '信息提示',
+                contentSize: {
+                    width: 830,
+                    height: 420
+                },
+                contentOverflow: 'hidden',
+                content: '<iframe src="ValidateForm/Index" style="width: 100%; height: 100%;border:0;"></iframe>'
+            });
+        }
+
+        var closeWin1 = function () {
+            panel1.close();
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/modal-panel/jspanel.js"></script>
+    <script src="~/lib/modal-panel/jspanel.modal.js"></script>
+}

@@ -1,0 +1,187 @@
+﻿@using System.Data;
+@{
+    ViewData["Title"] = "基本搜索";
+}
+@model DataTable
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+}
+
+@section body {
+    <style>
+        .primSearchTable {
+            width: 100%;
+        }
+
+            .primSearchTable td {
+                padding: 5px;
+            }
+    </style>
+    <div class="container-fluid">
+        <form class="form-inline" role="form">
+            <table class="primSearchTable">
+                @{
+                    var r = 0;
+                    var c = 0;
+                    var m = Model.Rows.Count % 3;
+                    if (m == 0)
+                    {
+                        r = Model.Rows.Count / 3;
+                        for (int j = 0; j < r; j++)
+                        {
+                            DataRow row = Model.Rows[c];
+                            c++;
+                            string rcolName = row["col_name"].ToString();
+                            <tr>
+                                <td class="col-sm-1" style="text-align:right;">
+                                    <label id="@("Lbl_" + rcolName)" for="@("Txt_" + rcolName)">@(row["show_name"].ToString())</label>
+                                    <input type="hidden" id="@("hd_" + rcolName)" value="@(row["code_value"].ToString())">
+                                </td>
+                                <td class="col-sm-3">
+                                    <input type="text" id="@("Txt_" + rcolName)" class="form-control" style="width:100%;" placeholder="@(row["code_name"].ToString())" />
+                                </td>
+                                @{row = Model.Rows[c];
+                                    c++;
+                                    rcolName = row["col_name"].ToString();
+                                }
+                                <td class="col-sm-1" style="text-align:right;">
+                                    <label id="@("Lbl_" + rcolName)" for="@("Txt_" + rcolName)">@(row["show_name"].ToString())</label>
+                                    <input type="hidden" id="@("hd_" + rcolName)" value="@(row["code_value"].ToString())">
+                                </td>
+                                <td class="col-sm-3">
+                                    <input type="text" id="@("Txt_" + rcolName)" class="form-control" style="width:100%;" placeholder="@(row["code_name"].ToString())" />
+                                </td>
+                                @{row = Model.Rows[c];
+                                    c++;
+                                    rcolName = row["col_name"].ToString();
+                                }
+                                <td class="col-sm-1" style="text-align:right;">
+                                    <label id="@("Lbl_" + rcolName)" for="@("Txt_" + rcolName)">@(row["show_name"].ToString())</label>
+                                    <input type="hidden" id="@("hd_" + rcolName)" value="@(row["code_value"].ToString())">
+                                </td>
+                                <td class="col-sm-3">
+                                    <input type="text" id="@("Txt_" + rcolName)" class="form-control" style="width:100%;" placeholder="@(row["code_name"].ToString())" />
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        r = Model.Rows.Count / 3 + 1;
+                        for (int j = 0; j < r - 1; j++)
+                        {
+                            DataRow row = Model.Rows[c];
+                            c++;
+                            string rcolName = row["col_name"].ToString();
+                            <tr>
+                                <td class="col-sm-1" style="text-align:right;">
+                                    <label id="@("Lbl_" + rcolName)" for="@("Txt_" + rcolName)">@(row["show_name"].ToString())</label>
+                                    <input type="hidden" id="@("hd_" + rcolName)" value="@(row["code_value"].ToString())">
+                                </td>
+                                <td class="col-sm-3">
+                                    <input type="text" id="@("Txt_" + rcolName)" class="form-control" style="width:100%;" placeholder="@(row["code_name"].ToString())" />
+                                </td>
+                                @{row = Model.Rows[c];
+                                    c++;
+                                    rcolName = row["col_name"].ToString();
+                                }
+                                <td class="col-sm-1" style="text-align:right;">
+                                    <label id="@("Lbl_" + rcolName)" for="@("Txt_" + rcolName)">@(row["show_name"].ToString())</label>
+                                    <input type="hidden" id="@("hd_" + rcolName)" value="@(row["code_value"].ToString())">
+                                </td>
+                                <td class="col-sm-3">
+                                    <input type="text" id="@("Txt_" + rcolName)" class="form-control" style="width:100%;" placeholder="@(row["code_name"].ToString())" />
+                                </td>
+                                @{row = Model.Rows[c];
+                                    c++;
+                                    rcolName = row["col_name"].ToString();
+                                }
+                                <td class="col-sm-1" style="text-align:right;">
+                                    <label id="@("Lbl_" + rcolName)" for="@("Txt_" + rcolName)">@(row["show_name"].ToString())</label>
+                                    <input type="hidden" id="@("hd_" + rcolName)" value="@(row["code_value"].ToString())">
+                                </td>
+                                <td class="col-sm-3">
+                                    <input type="text" id="@("Txt_" + rcolName)" class="form-control" style="width:100%;" placeholder="@(row["code_name"].ToString())" />
+                                </td>
+                            </tr>
+                        }
+
+                        <tr>
+                            @{
+                                for (int k = 0; k < m; k++)
+                                {
+                                    DataRow row = Model.Rows[c];
+                                    c++;
+                                    string rcolName = row["col_name"].ToString();
+                                    <td class="col-sm-1" style="text-align:right;">
+                                        <label id="@("Lbl_" + rcolName)" for="@("Txt_" + rcolName)">@(row["show_name"].ToString())</label>
+                                        <input type="hidden" id="@("hd_" + rcolName)" value="@(row["code_value"].ToString())">
+                                    </td>
+                                    <td class="col-sm-3">
+                                        <input type="text" id="@("Txt_" + rcolName)" class="form-control" style="width:100%;" placeholder="@(row["code_name"].ToString())" />
+                                    </td>
+                                }
+                                for (int l = 0; l < 3 - m; l++)
+                                {
+                                    <td class="col-sm-1"></td>
+                                    <td class="col-sm-3"></td>
+                                }
+                            }
+                        </tr>
+                        Model.Dispose();
+                    }
+                }
+
+            </table>
+        </form>
+        <div style="text-align:center;">
+            <button type="button" class="btn btn-info" id="okSearchBtn">确定</button>
+            <button type="button" class="btn btn-warning" id="cancelBtn">重置</button>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+            $("#h_loading").css("display", "none");
+
+            $("#okSearchBtn").bind("click", collectCondition);
+            $("#cancelBtn").bind("click", cancelSearch);
+            parent.fieldsStr = "@Html.Raw(ViewData["fieldStr"])";// added on 2020年3月19日
+            parent.colFieldStr = "@Html.Raw(ViewData["colFields"])";
+        });
+
+        var collectCondition = function () {
+            var conditions = [];
+            $("input[type='text']").each(function () {
+                var v = $(this).val();
+                if ($.trim(v) != '') {
+                    var tid = $(this).attr("id");
+                    var colName = tid.substring(4);
+                    var oprator = $('#hd_' + colName).val();
+                    var d = {
+                        ColName: colName,
+                        Oprator: oprator,
+                        InputValue: v
+                    }
+                    conditions.push(d);
+                }
+            });
+            parent.primParamList = conditions;//向父页面传参
+            parent.searchByCustomCondition();
+        }
+
+        var cancelSearch = function () {
+            $("input[type='text']").each(function () {
+                var v = $(this).val('');
+            });
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+}

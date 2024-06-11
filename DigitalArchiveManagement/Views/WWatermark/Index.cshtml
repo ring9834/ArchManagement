@@ -1,0 +1,248 @@
+﻿
+@{
+    ViewData["Title"] = "原文水印配置";
+}
+@section head {
+    <link href="~/lib/bootstrap-select/bootstrap-select.min.css" rel="stylesheet" />
+    <link href="~/lib/jquery-radiocheck/jquery-labelauty.css" rel="stylesheet" />
+}
+
+@section body {
+    <style>
+        input.labelauty + label {
+            font: 12px "Microsoft Yahei";
+        }
+    </style>
+
+    <div class="container-fluid" style="position: relative;transform: translateY(calc(50vh - 160px));">
+        <div class="row" style="padding: 5px">
+        </div>
+        <div class="row">
+            <div class="col-md-4"></div>
+            <div class="form-group col-md-4">
+                <div class="input-group">
+                    <span class="input-group-addon">水印文字</span>
+                    <input class="form-control" type="text" id="words" placeholder="请填写用于水印的文字内容！">
+                </div>
+            </div>
+            <div class="col-md-4"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4"></div>
+            <div class="form-group col-md-4">
+                <div class="input-group">
+                    <span class="input-group-addon">每页水印行数</span>
+                    <input class="form-control" type="text" id="rows" placeholder="仅允许填写正整数！">
+                </div>
+            </div>
+            <div class="col-md-4"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4"></div>
+            <div class="form-group col-md-4">
+                <div class="input-group">
+                    <span class="input-group-addon">每页水印列数</span>
+                    <input class="form-control" type="text" id="cols" placeholder="仅允许填写正整数！">
+                </div>
+            </div>
+            <div class="col-md-4"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4"></div>
+            <div class="form-group col-md-4">
+                <div class="input-group">
+                    <span class="input-group-addon">水印颜色</span>
+                    <select id="pdfColor" class="form-control" data-width="150px" title="请选择"></select>
+                </div>
+            </div>
+            <div class="col-md-4"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4"></div>
+            <div class="form-group col-md-4">
+                <div class="input-group">
+                    <span class="input-group-addon">透明度</span>
+                    <input class="form-control" type="text" id="trsparency" placeholder="仅允许填写大于0小于等于1的小数，如0.5">
+                </div>
+            </div>
+            <div class="col-md-4"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4"></div>
+            <div class="form-group col-md-4">
+                <div class="input-group">
+                    <span class="input-group-addon">旋转度</span>
+                    <input class="form-control" type="text" id="rotate" placeholder="仅允许填写-180至180的整数，如-60">
+                </div>
+            </div>
+            <div class="col-md-4"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-4"></div>
+            <div class="form-group col-md-4" style="margin-bottom:2px;">
+                <input type="button" class="btn btn-success" id="okbutton" onclick="sureConfig();" value="确定" />
+                <input type="button" class="btn btn-danger" onclick="clearContent();" value="重置" />
+            </div>
+            <div class="col-md-4"></div>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            $("#rows").onlyNum();// 只限输入正整数
+            $("#cols").onlyNum();// 只限输入正整数
+            fillColorSelect();
+        });
+
+        var fillColorSelect = function () {
+            $.ajax({
+                type: 'get',
+                url: '/WWatermark/GetPdfColors',
+                dataType: "json",
+                success: function (data) {
+                    //拼接下拉框
+                    for (var i = 0; i < data.length; i++) {
+                        $("#pdfColor").append("<option value='" + data[i].key + "'>" + data[i].value + "</option>");
+                    }
+
+                    initialParam();
+
+                    $("#h_loading_mask").css("display", "none");
+                    $("#h_loading").css("display", "none");
+                }
+            });
+        };
+
+        var initialParam = function () {
+            $.ajax({
+                type: 'get',
+                url: '/WWatermark/GetWatermarkParam',
+                dataType: "json",
+                success: function (data) {
+                    if (data.length > 0) {
+                        $("#words").val(data[0].mark_words);
+                        $("#rows").val(data[0].mark_rows);
+                        $("#cols").val(data[0].mark_cols);
+                        $("#trsparency").val(data[0].transparency);
+                        $("#rotate").val(data[0].rotation);
+                        $("#pdfColor").val(data[0].mark_color);
+                    }
+                }
+            });
+        }
+
+        // 限制只能输入字母
+        $.fn.onlyNumAlpha = function () {
+            $(this).keypress(function (event) {
+                var eventObj = event || e;
+                var keyCode = eventObj.keyCode || eventObj.which;
+                if ((keyCode >= 65 && keyCode <= 90) || (keyCode >= 97 && keyCode <= 122))
+                    return true;
+                else
+                    return false;
+            });
+            $(this).keyup(function () {
+                var regExp = /[a-z]$/;
+                if (!regExp.test($(this).val())) {
+                    $(this).val("");
+                }
+            });
+        }
+
+        // 限制只能输入正整数
+        $.fn.onlyNum = function () {
+            $(this).keypress(function (event) {
+                var eventObj = event || e;
+                var keyCode = eventObj.keyCode || eventObj.which;
+                if (keyCode >= 48 && keyCode <= 57)
+                    return true;
+                else
+                    return false;
+            });
+            $(this).keyup(function () {
+                var regExp = /(^[1-9]\d*$)/;  //输入数字的正则是：/^\d+$|^\d+[.]?\d+$/
+                if (!regExp.test($(this).val())) {
+                    $(this).val("");
+                }
+            });
+        }
+
+        var validateBeforeSummit = function () {
+            if ($("#words").val() == '') {
+                HM.alertWin("用于水印的文字不能为空！");
+                return 0;
+            }
+            if ($("#rows").val() == '') {
+                HM.alertWin("每页所加水印的行数不能为空！");
+                return 0;
+            }
+            if ($("#cols").val() == '') {
+                HM.alertWin("每页所加水印的列数不能为空！");
+                return 0;
+            }
+            if ($("#trsparency").val() == '') {
+                HM.alertWin("水印的透明度不能为空！");
+                return 0;
+            }
+            if ($("#rotate").val() == '') {
+                HM.alertWin("水印的旋转度数不能为空！");
+                return 0;
+            }
+            var trp = $("#trsparency").val();
+            if (!(/0\.[0-9]+/.test(trp))) {
+                HM.alertWin("水印透明度必须为大于0小于1的小数！");
+                return 0;
+            }
+            var trp = $("#rotate").val();
+            if (!(/^-?[1-9]\d*$/.test(trp))) {
+                HM.alertWin("水印的旋转度数必须为整数！");
+                return 0;
+            }
+            if (Math.abs(trp) > 180) {
+                HM.alertWin("水印的旋转度数必须在-180和180之间！");
+                return 0;
+            }
+        }
+
+        function sureConfig() {
+            var r = validateBeforeSummit();
+            if (r == 0) {//验证有误则返回
+                return;
+            }
+            var w = $("#words").val();
+            var r = $("#rows").val();
+            var c = $("#cols").val();
+            var t = $("#trsparency").val();
+            var rt = $("#rotate").val();
+            var cl = $("#pdfColor").find("option:selected").val();
+
+            $.ajax({
+                type: 'POST',
+                url: "/WWatermark/SetWatermarkParam",
+                data: { words: w, rows: r, cols: c, trsparency: t, rotate: rt, color: cl },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin("水印参数配置成功！");
+                    }
+                }
+            });
+        }
+
+        function clearContent() {
+            $("#words").val('');
+            $("#rows").val('');
+            $("#cols").val('');
+            $("#trsparency").val('');
+            $("#rotate").val('');
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-select/bootstrap-select.min.js"></script>
+    <script src="~/lib/jquery-radiocheck/jquery-labelauty.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

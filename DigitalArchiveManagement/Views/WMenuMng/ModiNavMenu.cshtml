@@ -1,0 +1,162 @@
+﻿
+@{
+    ViewData["Title"] = "修改菜单信息";
+}
+@section head {
+    <link href="~/lib/jquery-radiocheck/jquery-labelauty.css" rel="stylesheet" />
+}
+
+@section body {
+    <style>
+        input.labelauty + label {
+            font: 12px "Microsoft Yahei";
+        }
+    </style>
+    <div class="container-fluid">
+        <div class="row" style="padding: 5px">
+        </div>
+        <div class="row">
+            <div class="form-group col-lg-6">
+                <div class="input-group">
+                    <span class="input-group-addon">菜单名称</span>
+                    <input class="form-control" type="text" id="menuName" placeholder="菜单或子孙菜单的名称（*必填）">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-lg-6">
+                <div class="input-group">
+                    <span class="input-group-addon">URL路径</span>
+                    <input class="form-control" type="text" id="menuUrl" placeholder="打开页面所需的URL路径，如“/controller/action”（*选填）">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-lg-6">
+                <div class="input-group">
+                    <span class="input-group-addon">全局菜单？</span>
+                    <ul style="margin:0;list-style-type:none;">
+                        <li style="margin-top:8px;display:inline-block;"><input type="radio" name="relateNodeRadio" data-labelauty="全局菜单" value="1"></li>
+                        <li style="margin-top:8px;display:inline-block;"><input type="radio" name="relateNodeRadio" data-labelauty="局部菜单" value="0"></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-lg-6">
+                <div class="input-group">
+                    <span class="input-group-addon">CSS样式</span>
+                    <input class="form-control" type="text" id="menuCss" placeholder="一级菜单每项对应的菜单装饰，如font-awesome的一个样式（*选填）">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-lg-6">
+                <div class="input-group">
+                    <span class="input-group-addon">子菜单ID</span>
+                    <input class="form-control" type="text" id="menuLiid" placeholder="菜单项自身的ID（*必填）">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6" style="margin-bottom:2px;text-align:center;">
+                <input type="button" class="btn btn-success" id="okbutton" onclick="modiMenuInfo();" value="确定" />
+                <input type="button" class="btn btn-danger" onclick="resetInfo();" value="重置" />
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var param;//通过iframe父窗体的$("#mainfrm")[0].contentWindow.param = 传参到子页面来
+
+        $(function () {
+            $(':input').labelauty();//初始化按钮样式的radio
+            getMenuInfoById('@ViewData["uniqueCode"]');
+
+        });
+
+        var getMenuInfoById = function(id){
+             $.ajax({
+                type: 'POST',
+                url: "/WMenuMng/getMenuInfoById",
+                data: { unique_code: id},
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.length > 0) {
+                        $("#menuName").val(data[0].name);
+                        $("#menuUrl").val(data[0].hrl);
+                        $("#menuCss").val(data[0].css_class);
+                        $("#menuLiid").val(data[0].li_id);
+                        if (data[0].ntl == '0') {
+                          $('input[type=radio][name=relateNodeRadio]').eq(1).attr("checked", "checked");
+                         }
+                        else if (data[0].ntl == '1') {
+                           $('input[type=radio][name=relateNodeRadio]').eq(0).attr("checked", "checked");
+                         }
+                     }
+                    $("#h_loading_mask").css("display", "none");
+                    $("#h_loading").css("display", "none");
+                }
+            });
+        }
+
+        var validateBeforeSummit = function () {
+            if ($("#menuName").val() == '') {
+                HM.alertWin("菜单名称不能为空！");
+                return 0;
+            }
+            var isCheck = $('input[type=radio][name=relateNodeRadio]:checked').val();
+            if (isCheck == undefined || isCheck == null) {
+                HM.alertWin("请选择“全局菜单”或“局部菜单”！");
+                return 0;
+            }
+            if ($("#menuLiid").val() == '') {
+                HM.alertWin("菜单ID不能为空！");
+                return 0;
+            }
+        }
+
+        var modiMenuInfo = function () {
+            var r = validateBeforeSummit();
+            if (r == 0) {//验证有误则返回
+                return;
+            }
+            var name = $("#menuName").val();
+            var url = $("#menuUrl").val();
+            var css = $("#menuCss").val();
+            var liid = $("#menuLiid").val();
+            var sphere = $('input[type=radio][name=relateNodeRadio]:checked').val();//全局或局部菜单
+
+            $.ajax({
+                type: 'POST',
+                url: "/WMenuMng/ModiMenuInfo",
+                data: { name: name, url: url, css: css, liid: liid, sphere: sphere, unique_code: '@ViewData["uniqueCode"]'},
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst == '1') {
+                        parent.closeDealWin('modimenuFrm');
+                        parent.refreshTable();
+                        parent.hintWin("菜单信息修改成功！");
+                    }
+                    if (data.rst == '-2') {//modifed on 20201125
+                        parent.closeDealWin('modimenuFrm');
+                        parent.hntAlrdyWhnUpdt();
+                    }
+                }
+            });
+        }
+
+        var resetInfo = function () {
+            $("#menuName").val('');
+            $("#menuUrl").val('');
+            $("#menuCss").val('');
+            $("#menuLiid").val('');
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/jquery-radiocheck/jquery-labelauty.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

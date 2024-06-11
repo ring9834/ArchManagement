@@ -1,0 +1,1090 @@
+﻿
+@{
+    ViewData["Title"] = "预归档库";
+}
+
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+    <link href="~/css/arch-button.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div id="archCrudToolbar">
+            @*<div class="btn-group">*@
+            <div class="btn-group" id="catalogRecvBtn">
+                <button type="button" class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="catalogRecv();"><i class="fa fa-random"></i> 接收目录</button>
+                <button type="button" class="btn btn-archbutton dropdown-toggle" data-toggle="dropdown" style="border-color:#99D1FF;" aria-haspopup="true" aria-expanded="false">
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a href="#" onclick="catalogRecvRec();"><i class="fa fa-sticky-note-o"></i> 接收记录管理</a></li>
+                </ul>
+            </div>
+            
+
+            <div class="btn-group" id="contentRecBtnGrp">
+                <button type="button" id="contentRecvBtn" class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="contentRecv();"><i class="fa fa-sign-in"></i> 挂接原文</button>
+                <button type="button" class="btn btn-archbutton dropdown-toggle" data-toggle="dropdown" style="border-color:#99D1FF;" aria-haspopup="true" aria-expanded="false">
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a href="#" onclick="cntRecFrmClient();"><i class="fa fa-sign-in"></i> 挂接客户端原文</a></li>
+                </ul>
+            </div>
+
+            <button type="button" id="catalogAddBtn" class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="catalogAdd();"><i class="fa fa-pencil-square-o"></i> 目录著录</button>
+            <div class="btn-group" id="catalogModiBtn">
+                <button type="button" class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="modifySingle();"><i class="fa fa-pencil"></i> 修改</button>
+                <button type="button" class="btn btn-archbutton dropdown-toggle" data-toggle="dropdown" style="border-color:#99D1FF;" aria-haspopup="true" aria-expanded="false">
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a href="#" onclick="bunchUpdate();"><i class="fa fa-pencil"></i> 批量修改</a></li>
+                </ul>
+            </div>
+            <div class="btn-group" id="catalogDelBtn">
+                <button type="button" class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="deleteSingle();"><i class="fa fa-remove"></i> 删除</button>
+                <button type="button" class="btn btn-archbutton dropdown-toggle" data-toggle="dropdown" style="border-color:#99D1FF;" aria-haspopup="true" aria-expanded="false">
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a href="#" onclick="deleteBunch();"><i class="fa fa-remove"></i> 批量删除</a></li>
+                </ul>
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="primSearch();"><i class="fa fa-search"></i> 基本搜索</button>
+                <button type="button" class="btn btn-archbutton dropdown-toggle" data-toggle="dropdown" style="border-color:#99D1FF;" aria-haspopup="true" aria-expanded="false">
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a href="#" onclick="highLevelSearch();"><i class="fa fa-search"></i> 高级搜索</a></li>
+                </ul>
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="toStableStore();"><i class="fa fa-mail-reply"></i> 入档案总库</button>
+                <button type="button" class="btn btn-archbutton dropdown-toggle" data-toggle="dropdown" style="border-color:#99D1FF;" aria-haspopup="true" aria-expanded="false">
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a href="#" onclick="allToStableStore();"><i class="fa fa-mail-reply-all"></i> 全部入档案总库</a></li>
+                    <li><a href="#" onclick="getDoneAudits();"><i class="fa fa-crosshairs"></i> 已审核待入库</a></li>
+                    <li id="checkingArches"><a href="#" onclick="getAllAuditing();"><i class="fa fa-crosshairs"></i> 入库正审核记录</a></li>
+                    <li title="所有审核记录"><a href="#" onclick="getAllAudits();"><i class="fa fa-crosshairs"></i> 所有入库审核记录</a></li>
+                </ul>
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="generateSArchNum();"><i class="fa fa-list-ul"></i> 生成档号</button>
+                <button type="button" class="btn btn-archbutton dropdown-toggle" data-toggle="dropdown" style="border-color:#99D1FF;" aria-haspopup="true" aria-expanded="false">
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a href="#" onclick="generateArchNum();"><i class="fa fa-list-ul"></i> 批量生成档号</a></li>
+                </ul>
+            </div>
+            <div class="btn-group" id="contentEncrypt">
+                <button type="button" class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="encryptSConfirm();"><i class="fa fa-lock"></i> 原文加密</button>
+                <button type="button" class="btn btn-archbutton dropdown-toggle" data-toggle="dropdown" style="border-color:#99D1FF;" aria-haspopup="true" aria-expanded="false">
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a href="#" onclick="encryptContent();"><i class="fa fa-lock"></i> 检索记录原文加密</a></li>
+                    <li><a href="#" onclick="decryptSAccess();"><i class="fa fa-unlock"></i> 原文解密</a></li>
+                    <li><a href="#" onclick="decryptContent();"><i class="fa fa-unlock"></i> 检索记录原文解密</a></li>
+                    <li><a href="#" onclick="watermarkSConfirm();"><i class="fa fa-flag"></i> 原文加水印</a></li>
+                    <li><a href="#" onclick="waterMarkContent();"><i class="fa fa-flag"></i> 检索记录原文加水印</a></li>
+                    @*<li><a href="#" onclick="clearWaterMarkSContent();"><i class="fa fa-flag-o"></i> 原文去水印</a></li>
+                <li><a href="#" onclick="clearWaterMarkContent();"><i class="fa fa-flag-o"></i> 原文批量去水印</a></li>*@
+                </ul>
+            </div>
+            <button id="exportBtn" type="button" class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="exportData();"><i class="glyphicon glyphicon-list-alt"></i> 导出数据</button>
+            @*</div>*@
+        </div>
+
+        <div class="specified-table">
+            <table id="manageStoregrid"></table>
+        </div>
+
+    </div>
+    <script>
+        var whereConditon = '';//基本搜索、高级搜索和本页初始加载 的搜索条件记录在此
+        var sqlParams = null;//whereConditon对应的sqlparameter[]
+        var searchMode = 0;//0 表示初始检索，1表示基本检索，2表示高级检索
+
+        $(function () {
+            var fstr = "@Html.Raw(@ViewData["colFields"])";
+            if ($.trim(fstr) == '') {
+                $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                $("#h_loading").css("display", "none");
+                HM.alertWin('此档案类型库还未进行显示配置，请配置后继续！');
+                $('#archCrudToolbar').css("display", "none");//added on 20201108
+                return;
+            }
+            hideBtnByLoggedUser();
+            loadTable();
+        });
+
+        var loadTable = function(){
+            var url = '/WManageStore/ShowInitialSearchRecs';
+            loadTableData(url, null);//初始加载数据
+        }
+
+        var loadTableData = function (url,paramlist) {
+            $('#manageStoregrid').bootstrapTable('destroy');
+            $table = $('#manageStoregrid').bootstrapTable({
+                url: url,
+                method: 'POST',                      //请求方式（*）
+                contentType: "application/x-www-form-urlencoded",
+                silent: true, //静态刷新
+                toolbar: '#archCrudToolbar',              //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                pagination: true,                   //是否显示分页（*）
+                sortable: true,                     //是否启用排序
+                sortOrder: "asc",                   //排序方式
+                sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+                pageNumber: 1,                      //初始化加载第一页，默认第一页,并记录
+                pageSize: 15,                     //每页的记录行数（*）
+                pageList: [15, 30, 50, 100],        //可供选择的每页的行数（*）
+                search: false,                      //是否显示表格搜索
+                strictSearch: true,
+                showColumns: true,                  //是否显示所有的列（选择显示的列）
+                showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                clickToSelect: true,                //是否启用点击选中行
+                //height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                uniqueId: "Unique_code",                     //每一行的唯一标识，一般为主键列
+                showToggle: true,                   //是否显示详细视图和列表视图的切换按钮
+                showExport: true,
+                cardView: false,                    //是否显示详细视图
+                detailView: false,                  //是否显示父子表
+                paginationLoop: false,
+                showLoading: false,
+                singleSelect: false,                //true只能单选，false为多选
+                exportDataType: "selected",        //导出checkbox选中的行数
+                showFullscreen: true,
+                useRowAttrFunc: true,
+                reorderableRows: true,
+                //得到查询的参数
+                queryParams: function (params) {
+                    //这里的键的名字和控制器的变量名必须一致，这边改动，控制器也需要改成一样的
+                    var temp = {
+                        pageSize: params.limit,                         //页面大小
+                        pageIndex: params.offset / params.limit,   //页码
+                        tableName: '@ViewData["table"]',
+                        fieldsStr: '@ViewData["fieldStr"]',
+                        pList: paramlist//从搜索条件窗口传过来的动态参数，对应后台的List<>
+                    };
+                    return temp;
+                },
+                columns: [
+                    {
+                        field: 'check', checkbox: true, formatter: function (value, row, index) {
+                            if (row.check == true) {
+                                return { checked: true };//设置选中
+                            }
+                        }
+                    },
+                    @Html.Raw(ViewData["colFields"])
+                    , { field: 'operate', title: '看原文', align: 'center', width: '50px', events: operateEvents, formatter: 'operateFormatter' }
+                ],
+                onLoadSuccess: function (data) {
+                    whereConditon = data.conditon;//记录返回的查询条件
+                    sqlParams = data.pms;//记录查询参数
+                    searchMode = data.searchmode;//searchMode = 0 表示初始检索，1表示基本检索，2表示高级检索
+
+                    $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                    $("#h_loading").css("display", "none");
+                },
+                formatLoadingMessage: function () {
+                    return "请稍等，正在加载中···";
+                },
+                onPostBody: function () {
+                    //改变复选框样式
+                    $('#manageStoregrid').find("input:checkbox").each(function (i) {
+                        var $check = $(this);
+                        if ($check.attr("id") && $check.next("label")) {
+                            return;
+                        }
+                        var name = $check.attr("name");
+                        var id = name + "-" + i;
+                        var $label = $('<label for="' + id + '" onclick=stopButtonEvent();></label>');
+                        $check.attr("id", id)
+                            .parent()
+                            .addClass("bella-checkbox")
+                            .children("span").remove();
+                        $check.parent().append($label);
+                    });
+
+                    //动态设置checkbox的那个td的css,不让它触发table的specified-table table td:hover
+                    $("#manageStoregrid").find("tr").each(function () {
+                        var tdArr = $(this).children();
+                        tdArr.eq(0).css("overflow","hidden").css("white-space","nowrap");
+                    });
+                },
+            });
+        }
+
+        //当clickToSelect=true时，如果不阻止事件冒泡，则点击自定义CHECKBOX时会没有反应
+        function stopButtonEvent() {
+            if (window.event) {//IE下阻止冒泡
+                event.cancelBubble = true;
+            } else {
+                event.stopPropagation();
+            }
+        }
+
+        var primSearch = function () {
+            var content = "<iframe id='primSearchFrame' src='/WManageStore/CreateSearchControls/" + '@ViewData["table"]' + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 830, 360, '搜索条件窗口-基本搜索','primSearch');
+        }
+
+        var primParamList;
+        var searchByCustomCondition = function () {
+            var url = '/WManageStore/GetSearchResultByCon';
+            loadTableData(url, primParamList);//加载根据条件查询到的数据
+            closeDealWin('primSearch');//modified on 20201119
+        }
+
+        var superParamList;
+        var superSearchByCustomCondition = function () {
+            //alert(JSON.stringify(superParamList));
+            var url = '/WManageStore/GetSuperSearchResultByCon';
+            loadTableData(url, superParamList);//加载根据条件查询到的数据-高级
+            closeDealWin('highLevelSearch');//modified on 20201119
+        }
+
+        var highLevelSearch = function () {
+            var content = "<iframe id='superSearchFrame' src='/WManageStore/SuperSearchView/"+ '@ViewData["table"]' +"' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 980,560,'搜索条件窗口-高级搜索','highLevelSearch');
+        }
+
+         var catalogAdd = function () {
+            var content = "<iframe id='catalogAddFrame' src='/WManageStore/CatalogAddView/"+ '@ViewData["table"]' +"/"+ '@ViewData["userid"]' +"' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 1000,560,'目录著录窗口','catalogAdd');
+        }
+
+        var closeDealWin = function (winid) {
+            pop.close('deal-win-' + winid);
+        }
+
+        var popHintWin = function () {
+            HM.hintWin('目录著录成功！');
+        }
+
+        var popModiHintWin = function () {
+            HM.hintWin('目录修改成功！');
+        }
+
+        var popAlertWin = function () {
+            HM.alertWin('目录著录失败！若找不到原因，请联系系统管理员！');
+        }
+
+        var popModifySuccessWin = function () {
+            HM.hintWin('批量修改成功！');
+        }
+
+        var refreshTableData = function () {
+            $('#manageStoregrid').bootstrapTable('refresh');
+        }
+
+        var modifySingle = function () {
+            var sl = $('#manageStoregrid').bootstrapTable('getSelections');
+            if (sl.length == 0 || sl.length > 1) {
+                HM.alertWin('请选择一条记录后再修改！');
+                return;
+            }
+            var selected = sl[0];
+            var content = "<iframe id='catalogmodifyFrame' src='/WManageStore/CatalogUpdateView/" + '@ViewData["table"]' + "/" + '@ViewData["userid"]' + "/" + selected.unique_code + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 1000, 560, '目录修改窗口','modifySingle');
+            //var frame = document.getElementById("catalogmodifyFrame");
+            //frame.onload = function () {//等待iframe中的页面加载完毕，再执行子页面中的函数
+            //    var fwin = frame.contentWindow;
+            //    fwin.rowData = JSON.stringify(selected);//给子窗口传值,2020年3月13日，从URL传值，修改为通过iframe传值
+            //};
+        }
+
+        var bunchUpdate = function () {
+            var content = "<iframe id='catalogbunchModifyFrame' src='/WManageStore/BunchUpdateView/" + '@ViewData["table"]' + "/" + searchMode + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 680, 440, '批量修改窗口','bunchUpdate');
+            var frame = document.getElementById("catalogbunchModifyFrame");
+            frame.onload = function () {//等待iframe中的页面加载完毕，再执行子页面中的函数
+                var fwin = frame.contentWindow;
+                fwin.loggedUser = '@ViewData["userid"]';//给子窗口传值
+                //fwin.whereConditon = escape(whereConditon);
+                fwin.whereConditon = whereConditon; console.log(whereConditon);
+                fwin.params = JSON.stringify(sqlParams); console.log(JSON.stringify(sqlParams));
+            };
+
+        }
+
+        var deleteSingle = function () {
+            var sl = $('#manageStoregrid').bootstrapTable('getSelections');
+            if (sl.length == 0 || sl.length > 1) {
+                HM.alertWin('请选择一条记录后再删除！');
+                return;
+            }
+
+            HM.confirmWin(sl[0].unique_code, '确认删除本条目录吗？', '确认删除', 'delone', confirmDelete);
+        }
+
+        var confirmDelete = function (uniqueid) {
+            $.ajax({
+                type: 'POST',
+                url: "/WManageStore/DeleteSingleCatalog",
+                data: { uniquecode: uniqueid, table: '@ViewData["table"]', userid:'@ViewData["userid"]'},
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin('本条目录删除成功！');
+                        pop.close('confirm-win_delone');
+                        refreshTableData();
+                    }
+                }
+            });
+        }
+
+        var deleteBunch = function () {
+            var sl = $('#manageStoregrid').bootstrapTable('getSelections');
+            if (sl.length == 0 ) {
+                HM.alertWin('请至少选择一条记录后再删除！');
+                return;
+            }
+            var ids = [];
+            for (var i = 0; i < sl.length; i++) {
+                ids.push(sl[i].unique_code);
+            }
+
+            HM.confirmWin(ids, '确认删除所选目录吗？', '确认删除', 'delbunch', confirmBunchDelete);
+        }
+
+        var confirmBunchDelete = function (ids) {
+            HM.pageLoading();
+            $.ajax({
+                type: 'POST',
+                url: "/WManageStore/DeleteBunchCatalog",
+                data: { ids: ids, table:'@ViewData["table"]', userid:'@ViewData["userid"]'},
+                dataType: "JSON",
+                success: function (data) {
+                    HM.closePageLoading();
+                    if (data.rst > 0) {
+                        HM.hintWin('所选目录删除成功！');
+                        pop.close('confirm-win_delbunch');
+                        refreshTableData();
+                    }
+                }
+            });
+        }
+
+        var toStableStore = function () {
+            var sl = $('#manageStoregrid').bootstrapTable('getSelections');
+            if (sl.length == 0) {
+               HM.alertWin('请至少选择一条记录后再入档案总库！');
+               return;
+            }
+            var ids = [];
+            for (var i = 0; i < sl.length; i++) {
+                ids.push(sl[i].unique_code);
+            }
+            $.ajax({
+                type: 'POST',
+                url: "/WAuditing/VerifyIfAdtNeeded",
+                data: { table: '@ViewData["table"]', ids: ids },
+                dataType: "JSON",
+                async:true, //同步执行，这样可以等待VerifyIfAdtNeeded返回数据后再执行verifyIfAuditNeeded之后的函数
+                success: function (data) {
+                    if (data.ifcheck == 0) {//不需要入库审批
+                        HM.confirmWin(ids, '确认将所选目录入档案总库吗？', '确认入档案总库', 'toStable', confirmToStableStore);
+                    }
+                    else {
+                        if (data.nocheck > 0) {//入库审核
+                            var content = "<iframe id='ifAdtNeededFrame' src='/WAuditing/ShowApplctWin/" + '@ViewData["table"]' + "/" + '@ViewData["userid"]' + "' style='border:0;width:100%;height:100%;'></iframe>";
+                            HM.dealwinWithId(content, 680, 440, '入库审批申请窗口','toStableApply');
+
+                            var frame = document.getElementById("ifAdtNeededFrame");
+                            frame.onload = function () {//等待iframe中的页面加载完毕，再执行子页面中的函数
+                                var fwin = frame.contentWindow;
+                                fwin.ids = ids;//给子窗口传值
+                            };
+                        }
+                        else if (data.haveChecked == 0) {//全部已审核通过，即可入库
+                            HM.confirmWin(ids, '确认将所选目录入档案总库吗？', '确认入档案总库', 'toStable', confirmToStableStore);
+                        }
+                        else {
+                            HM.alertWin('选择的记录中存在正在审核的条目，无法入库！');
+                        }
+                    }
+                }
+            });
+        }
+
+        var confirmToStableStore = function (ids) {
+             $.ajax({
+                type: 'POST',
+                url: "/WManageStore/ToStableStore",
+                data: { ids: ids, table:'@ViewData["table"]',userid:'@ViewData["userid"]'},
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin('所选目录入档案总库成功！');
+                        pop.close('confirm-win_toStable');
+                        refreshTableData();
+                    }
+                }
+            });
+        }
+
+        var allToStableStore = function () {
+            HM.confirmWin('', '确认将所有页的目录入档案总库吗？', '确认入档案总库', 'allToStable', confirmAllToStableStore);
+        }
+
+        var confirmAllToStableStore = function (id) {
+            $.ajax({
+                type: 'POST',
+                url: "/WAuditing/VerifyIfAdtNeededForAll",
+                data: { table: '@ViewData["table"]', searchmode: searchMode, where: whereConditon, pms: JSON.stringify(sqlParams)},
+                dataType: "JSON",
+                async:true, //同步执行，这样可以等待VerifyIfAdtNeeded返回数据后再执行verifyIfAuditNeeded之后的函数
+                success: function (data) {
+                    if (data.ifcheck == 0) {//不需要入库审核
+                        HM.pageLoading();
+                        $.ajax({
+                            type: 'POST',
+                            url: "/WManageStore/AllToStableStore",
+                            data: { table: '@ViewData["table"]', searchmode: searchMode, where: whereConditon, pms: JSON.stringify(sqlParams),userid:'@ViewData["userid"]'},
+                            dataType: "JSON",
+                            success: function (data) {
+                                HM.closePageLoading();
+                                if (data.rst > 0) {
+                                    HM.hintWin('全部入档案总库成功！');
+                                    pop.close('confirm-win_allToStable');
+                                    refreshTableData();
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        if (data.nocheck > 0) {//入库审核
+                            var content = "<iframe id='ifAdtNeededFrame' src='/WAuditing/ShowApplctWin/" + '@ViewData["table"]' + "/" + '@ViewData["userid"]' + "' style='border:0;width:100%;height:100%;'></iframe>";
+                            HM.dealwinWithId(content, 680, 440, '入库审批申请窗口','toStableApply');
+                            var frame = document.getElementById("ifAdtNeededFrame");
+                            frame.onload = function () {//等待iframe中的页面加载完毕，再执行子页面中的函数
+                                var fwin = frame.contentWindow;
+                                fwin.whereCondition = whereConditon;//给子窗口传值
+                                fwin.parmas = sqlParams;//把where中的参数值也传过去
+                                fwin.searchMode = searchMode;//基本搜索还是高级
+                            };
+                            pop.close('confirm-win_allToStable');
+                        }
+                        else if (data.haveChecked == 0) {//全部已审核通过，即可入库
+                            HM.pageLoading();
+                            $.ajax({
+                               type: 'POST',
+                               url: "/WManageStore/AllToStableStore",
+                               data: { table: '@ViewData["table"]', searchmode: searchMode, where: whereConditon, pms: JSON.stringify(sqlParams),userid:'@ViewData["userid"]'},
+                               dataType: "JSON",
+                                success: function (data) {
+                                    HM.closePageLoading();
+                                   if (data.rst > 0) {
+                                       HM.hintWin('全部入档案总库成功！');
+                                       pop.close('confirm-win_allToStable');
+                                       refreshTableData();
+                                   }
+                               }
+                            });
+                        }
+                        else{//有正在审核的条目，不能入库
+                            HM.alertWin('记录中存在正在审核的条目，无法入库！');
+                            pop.close('confirm-win_allToStable');
+                            return;
+                        }
+                    }
+                }
+            });
+        }
+
+        var generateArchNum = function () {
+            HM.confirmWin('', '确认将所有页的目录生成档号吗？(可对搜索结果批量生成档号)', '确认生成档号', 'archnum', confirmGenerateArchNum);
+        }
+
+        var confirmGenerateArchNum = function () {
+            HM.pageLoading();
+            $.ajax({
+                type: 'POST',
+                url: "/WManageStore/GenerateArchNumber",
+                data: { table: '@ViewData["table"]', searchmode: searchMode, where: whereConditon, pms: JSON.stringify(sqlParams),userid: '@ViewData["userid"]'},
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst == 1) {
+                        HM.hintWin(data.info);
+                        pop.close('confirm-win_archnum');
+                        refreshTableData();
+                    }
+                    else if (data.rst == 0) {
+                        HM.alertWin(data.info);
+                        pop.close('confirm-win_archnum');
+                    }
+                    else if (data.rst == -2) {//added on 20201108
+                        HM.alertWin('有记录在生成档号时，受档号字段长度的限制，档号未生成成功！');
+                        pop.close('confirm-win_archnum');
+                    }
+                    else if (data.rst == -3) {//added on 20201125
+                        HM.alertWin('所选记录中组成档号的字段存在空值的数据，档号未生成成功！');
+                        pop.close('confirm-win_archnum');
+                    }
+                    HM.closePageLoading();
+                }
+            });
+        }
+
+        //查看原文
+        window.operateEvents = {
+            'click .RoleOfView': function (e, value, row, index) {
+                var ywtype = '@ViewData["ContentType"]';
+                if (ywtype == '' || ywtype == null || ywtype == undefined) {
+                    return;
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: "/WConfigCodeHlp/GetSubCodeById",
+                    data: { id: ywtype },
+                    dataType: "JSON",
+                    success: function (data) {
+                        if (data.length > 0) {
+                            var ywtype2 = data[0].code_value.toLowerCase().trim(); //console.log(ywtype2);
+                            if (ywtype2.indexOf('pdf') >= 0) {
+                                viewYw(row);
+                            }
+                            if (ywtype2.indexOf('jpg') >= 0 ||
+                                ywtype2.indexOf('jpeg') >= 0 ||
+                                ywtype2.indexOf('tiff') >= 0 ||
+                                ywtype2.indexOf('tif') >= 0 ||
+                                ywtype2.indexOf('bmp') >= 0
+                                ) {
+                                viewYwXml(row);
+                            }
+                        }
+                    }
+                });
+            }
+        };
+
+        // 格式化按钮
+        function operateFormatter(value, row, index) {
+            //console.log(row.yw); console.log(row.yw_xml);
+            if ((row.yw == null || row.yw == 'undefined' || row.yw == '') &&
+                (row.yw_xml == null || row.yw_xml == 'undefined' || row.yw_xml == '')) {
+                return [
+                    '<button type="button" class="RoleOfView btn btn-sm  btn-default" style="margin-right:15px;"><i class="glyphicon glyphicon-file" ></i>&nbsp;原文</button>'
+                ].join('');
+            }
+            else {
+                return [
+                    '<button type="button" class="RoleOfView btn btn-sm  btn-info" style="margin-right:15px;"><i class="glyphicon glyphicon-file" ></i>&nbsp;原文</button>'
+                ].join('');
+            }
+        }
+
+        function viewYw(row) {
+            //console.log(JSON.stringify(row));
+            $.ajax({
+                type: 'POST',
+                url: "/WPdfView/IfYwExists",
+                data: { table: '@ViewData["table"]', userid: '@ViewData["userid"]', uniquecode: row.unique_code },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst == 0) {
+                        HM.alertWin(data.info);
+                        return;
+                    }
+                    else {
+                        var ulr = '/WPdfView/Index/' + '@ViewData["table"]' + '/' + '@ViewData["userid"]' + '/' + row.unique_code;
+                        //var ulr = '/WPdfView/Index1/' + escape(data.ywpath);
+                        //top.location.href = ulr;
+                        window.open(ulr,'_blank');
+                    }
+                }
+            });
+        }
+
+        function viewYwXml(row) {//图片原文，在后台生成PDF后再返回单前端显示2020.0503
+            //console.log(JSON.stringify(row));
+            $.ajax({
+                type: 'POST',
+                url: "/WPdfView/IfXmlYwExists",
+                data: { table: '@ViewData["table"]', userid: '@ViewData["userid"]', uniquecode: row.unique_code },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst == 0) {
+                        HM.alertWin(data.info);
+                        return;
+                    }
+                    else {
+                        var ulr = '/WPdfView/XmlYwShow/' + '@ViewData["table"]' + '/' + '@ViewData["userid"]' + '/' + row.unique_code;
+                        window.open(ulr,'_blank');
+                    }
+                }
+            });
+        }
+
+        var hideBtnByLoggedUser = function() {
+            $.ajax({
+               type: 'POST',
+               url: "/WFunctionAccess/GetFuncAccessByUser",
+               data: { userName: '@ViewData["userid"]' },
+               dataType: "JSON",
+                success: function (data) {
+                    //alert(JSON.stringify(data));
+                    for (var i = 0; i < data.length; i++) {
+                        var func = data[i].func_symble;
+                        if (func == 'catalog_add') {
+                            var vbl = data[i].func_visible;
+                            if (vbl == false || vbl.toLowerCase() == 'false') {
+                                $('#catalogAddBtn').css('display','none');
+                            }
+                        }
+                        if (func == 'catalog_modi') {
+                            var vbl = data[i].func_visible;
+                            if (vbl == false || vbl.toLowerCase() == 'false') {
+                                $('#catalogModiBtn').css('display', 'none');
+                            }
+                        }
+                        if (func == 'catalog_del') {
+                            var vbl = data[i].func_visible;
+                            if (vbl == false || vbl.toLowerCase() == 'false') {
+                                $('#catalogDelBtn').css('display', 'none');
+                            }
+                        }
+                        if (func == 'yw_view') {
+                            var vbl = data[i].func_visible;
+                            if (vbl == false || vbl.toLowerCase() == 'false') {
+                                $('#manageStoregrid').bootstrapTable('hideColumn', 'operate');
+                            }
+                        }
+                        if (func == 'crypt_func') {
+                            var vbl = data[i].func_visible;
+                            if (vbl == false || vbl.toLowerCase() == 'false') {
+                                $('#contentEncrypt').css('display', 'none');
+                            }
+                        }
+                        if (func == 'rec_export') {
+                            var vbl = data[i].func_visible;
+                            if (vbl == false || vbl.toLowerCase() == 'false') {
+                                $('#exportBtn').css('display', 'none');
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        var catalogRecv = function () {
+            var content = "<iframe id='catalogRecvFrame' src='/WRecvCatalog/Index/"+ '@ViewData["table"]' +"/"+ '@ViewData["userid"]' +"' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 1000,560,'目录接收窗口','catalogRecv');
+        }
+
+        var catalogRecvRec = function () {
+            var content = "<iframe id='catalogRecvRecFrame' src='/WRecvCatalog/ImpCataRecView/"+ '@ViewData["table"]' +"/"+ '@ViewData["userid"]' +"' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 1000,560,'目录接收记录窗口','catalogRecvRec');
+        }
+
+        var contentRecv = function () {
+            var content = "<iframe id='contentRecvFrame' src='/WConnContent/Index/" + '@ViewData["table"]' + "/" + '@ViewData["userid"]' +"/"+ '@ViewData["HasContent"]' +"/"+ @ViewData["ContentType"] +"' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 1200,700,'原文挂接窗口','contentRecv');
+        }
+
+        var getAllAuditing = function () {
+            var content = "<iframe id='auditRecFrame' src='/WAuditing/GetAuditRecs/" + '@ViewData["table"]' + "/" + '@ViewData["userid"]' +"/" + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 1200,620,'入库正审批记录窗口','getAllAuditing');
+        }
+
+        var getDoneAudits = function () {
+            var content = "<iframe id='auditRecFrame' src='/WAuditing/GetAuditDoneRecs/" + '@ViewData["table"]' + "/" + '@ViewData["userid"]' +"/" + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 1200, 620,'入库申请已审批待入库窗口','getDoneAudits');
+        }
+
+        var getAllAudits = function () {
+            var content = "<iframe id='auditsRecFrame' src='/WAuditing/GetAuditAllRecs/" + '@ViewData["table"]' + "/" + '@ViewData["userid"]' +"/" + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 1200, 620,'所有入库审批记录窗口','getAllAudits');
+        }
+
+        //判断是否需要入库审核
+        var verifyIfAuditNeeded = function () {
+            $.ajax({
+                type: 'POST',
+                url: "/WAuditing/VerifyIfAdtNeeded",
+                data: { table: '@ViewData["table"]' },
+                dataType: "JSON",
+                async:false, //同步执行，这样可以等待VerifyIfAdtNeeded返回数据后再执行verifyIfAuditNeeded之后的函数
+                success: function (data) {
+                    if (data.rst > 0) {
+                        return true;
+                    }
+                    return false;
+                }
+            });
+        }
+
+        function closeAuditWin() {
+            pop.close("deal-win-auditApply");
+            HM.hintWin("申请审核成功！可在系统首页查看审核结果！或在“入档案总库”下拉按钮中查看审核进度。");
+        }
+
+        var exportData = function () {
+            HM.confirmWin('', '当前界面中所有页数据都将保存到EXCEL中（一次最多65536条）并下载。\r\n 可通过基本搜索或高级搜索精确查找后，再导出EXCEL。', '确认导出', 'okexport', exportDataExc);
+        }
+
+        function exportDataExc() {
+            HM.pageLoading();
+
+            var xmlRequest;
+            if (window.XMLHttpRequest) {     //   Mozilla   浏览器
+                xmlRequest = new XMLHttpRequest();
+            } else if (window.ActiveXObject) {   //   IE   浏览器
+                try {
+                    xmlRequest = new ActiveXObject("Msxml2.XMLHTTP");
+                } catch (e) {
+                    try {
+                        xmlRequest = new ActiveXObject("Microsoft.XMLHTTP");
+                    } catch (e) { }
+                }
+            }
+
+            var form = new FormData();
+            form.append('table', '@ViewData["table"]');
+            form.append('searchmode', searchMode);
+            form.append('where', whereConditon);
+            form.append('pms', JSON.stringify(sqlParams));
+
+            xmlRequest.open("POST", "/WManageStore/ExportToExcel", true);
+            xmlRequest.responseType = "blob";//必须加，否则后台返回来的excel中是乱码 2020年3月14日
+            //xmlRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");//不能加，否则参数传递不到后台
+
+            xmlRequest.onload = function () {
+                if ((xmlRequest.status >= 200 && xmlRequest.status < 300) || xmlRequest.status === 304) {
+                    var content = xmlRequest.response;
+                    //数据转换为文件下载
+                    var elink = document.createElement('a');
+                    var tm = new Date().Format("yyyy-MM-dd-HH-mm-ss");
+                    elink.download = tm + '.xlsx';
+                    elink.style.display = 'none';
+                    var blob = new Blob([content]);
+                    elink.href = URL.createObjectURL(blob);
+                    document.body.appendChild(elink);
+                    elink.click();
+                    document.body.removeChild(elink);
+                    HM.closePageLoading();
+                    pop.close('confirm-win_okexport');
+                }
+                if (xmlRequest.status == 500) {//服务器错误
+                    HM.alertWin("导出EXCEL文件失败，数据量可能已超过最大限制！如有疑问，可联系系统管理员。");
+                    HM.closePageLoading();
+                    pop.close('confirm-win_okexport');
+                }
+            }
+            xmlRequest.send(form);
+        }
+
+        var downExcelFile = function(){
+            //使用jquery的ajax无法实现文件下载，
+            //以下方法使用form的submit方法，无刷新 2020年3月14日
+            HM.pageLoading();
+            var form = $("<form>");//定义一个form表单
+            form.attr("style", "display:none");
+            form.attr("target", "");
+            form.attr("method", "post");
+            form.attr("action", "/WManageStore/ExportToExcel");
+            var input1 = $("<input>");
+            input1.attr("type", "hidden");
+            input1.attr("name", "table");
+            input1.attr("value", '@ViewData["table"]');
+            var input2 = $("<input>");
+            input2.attr("type", "hidden");
+            input2.attr("name", "searchmode");
+            input2.attr("value", searchMode);
+            var input3 = $("<input>");
+            input3.attr("type", "hidden");
+            input3.attr("name", "where");
+            input3.attr("value", whereConditon);
+            var input4 = $("<input>");
+            input4.attr("type", "hidden");
+            input4.attr("name", "pms");
+            input4.attr("value", JSON.stringify(sqlParams));
+            $("body").append(form);//将表单放置在web中
+            form.append(input1);
+            form.append(input2);
+            form.append(input3);
+            form.append(input4);
+            form.submit();//表单提交
+            HM.closePageLoading();
+            pop.close('confirm-win_okexport');
+        }
+
+        // 对Date的扩展，将 Date 转化为指定格式的String
+        // 月(M)、日(d)、小时(h)、分(m)、秒(s)、季度(q) 可以用 1-2 个占位符，
+        // 年(y)可以用 1-4 个占位符，毫秒(S)只能用 1 个占位符(是 1-3 位的数字)
+        Date.prototype.Format = function (fmt) { //author: meizz
+            var o = {
+                "M+": this.getMonth() + 1, //月份
+                "d+": this.getDate(), //日
+                "H+": this.getHours(), //小时
+                "m+": this.getMinutes(), //分
+                "s+": this.getSeconds(), //秒
+                "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+                "S": this.getMilliseconds() //毫秒
+            };
+            if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            for (var k in o)
+                if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+            return fmt;
+        }
+
+        var generateSArchNum = function () {
+            var sl = $('#manageStoregrid').bootstrapTable('getSelections');
+            if (sl.length == 0) {
+                HM.alertWin('请选择记录后再生成！');
+                return;
+            }
+            var ids = [];
+            for (var i = 0; i < sl.length; i++) {
+                ids.push(sl[i].unique_code);//搜集已选记录的ID
+            }
+
+            HM.pageLoading();
+            $.ajax({
+                type: 'POST',
+                url: "/WManageStore/GenerateSArchNumber",
+                 data: { table: '@ViewData["table"]', pms: ids,userid: '@ViewData["userid"]'},
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst == 1) {
+                        HM.hintWin(data.info);
+                        pop.close('confirm-win_archnum');
+                        refreshTableData();
+                    }
+                    else if (data.rst == 0) {
+                        HM.alertWin(data.info);
+                        pop.close('confirm-win_archnum');
+                    }
+                    else if (data.rst == -2) {//added on 20201108
+                        HM.alertWin('所选记录中有记录在生成档号时，受档号字段长度的限制，档号未生成成功！');
+                        pop.close('confirm-win_archnum');
+                    }
+                    else if (data.rst == -3) {//added on 20201125
+                        HM.alertWin('所选记录中组成档号的字段存在空值的数据，档号未生成成功！');
+                        pop.close('confirm-win_archnum');
+                    }
+                    HM.closePageLoading();
+                }
+            });
+        }
+
+        var encryptSConfirm = function () {
+            var sl = $('#manageStoregrid').bootstrapTable('getSelections');
+            if (sl.length == 0) {
+                HM.alertWin('请选择记录后继续加密工作！');
+                return;
+            }
+            HM.confirmWin('', '将使用系统管理员统一配置的打开原文密码和原文操作密码这两个密码对原文进行加密，打开或解密原文时将分别使用这两个密码。索要密码，请联系系统管理员。确认加密吗？', '确认加密', 'encryptFirm', encryptSContent);
+        }
+
+        var encryptSContent = function () {
+            var sl = $('#manageStoregrid').bootstrapTable('getSelections');
+            //if (sl.length == 0) {
+            //    HM.alertWin('请选择记录后继续加密工作！');
+            //    return;
+            //}
+            var ids = [];
+            for (var i = 0; i < sl.length; i++) {
+                ids.push(sl[i].unique_code);//搜集已选记录的ID
+            }
+
+            HM.pageLoading();
+            $.ajax({
+                type: 'POST',
+                url: "/WManageStore/EncryptSContent",
+                 data: { table: '@ViewData["table"]', pms: ids,userid: '@ViewData["userid"]'},
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin(data.info);
+                        //pop.close('confirm-win_archnum');
+                    }
+                    else {
+                        HM.alertWin(data.info);
+                    }
+                    pop.close('confirm-win_encryptFirm');
+                    HM.closePageLoading();
+                }
+            });
+        }
+
+        var encryptContent = function () {
+            HM.confirmWin('', '确认将所有页的记录所对应的原文进行加密吗？(可对精确搜索结果批量加密)', '确认加密', 'encrypt', confirmEncryptSContent);
+        }
+
+        var confirmEncryptSContent = function () {
+            HM.pageLoading();
+            $.ajax({
+                type: 'POST',
+                url: "/WManageStore/EncryptContent",
+                data: { table: '@ViewData["table"]', searchmode: searchMode, where: whereConditon, pms: JSON.stringify(sqlParams),userid: '@ViewData["userid"]'},
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin(data.info);
+                        pop.close('confirm-win_encrypt');
+                    }
+                    else {
+                        HM.alertWin(data.info);
+                    }
+                    HM.closePageLoading();
+                }
+            });
+        }
+
+        var decryptSAccess = function () {
+            var sl = $('#manageStoregrid').bootstrapTable('getSelections');
+            if (sl.length == 0) {
+                HM.alertWin('请选择记录后继续解密工作！');
+                return;
+            }
+            var content = "<iframe id='daFrame' src='/WEncrypt/DecryptAccessV'style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 640,240,'解密授权窗口','decryptSAccess');
+        }
+
+        var decryptSContent = function () {
+            var sl = $('#manageStoregrid').bootstrapTable('getSelections');
+            var ids = [];
+            for (var i = 0; i < sl.length; i++) {
+                ids.push(sl[i].unique_code);//搜集已选记录的ID
+            }
+
+            HM.pageLoading();
+            $.ajax({
+                type: 'POST',
+                url: "/WManageStore/DecryptSContent",
+                data: { table: '@ViewData["table"]', pms: ids,userid: '@ViewData["userid"]'},
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin(data.info);
+                        //pop.close('confirm-win_archnum');
+                    }
+                    else {
+                        HM.alertWin(data.info);
+                    }
+                    HM.closePageLoading();
+                }
+            });
+        }
+
+        var decryptContent = function () {
+            HM.confirmWin('', '确认将所有页的记录所对应的原文进行解密吗？(可对精确搜索结果批量加密)', '确认解密', 'decrypt', confirmDecryptContent);
+        }
+
+        var confirmDecryptContent = function () {
+            var content = "<iframe id='daFrame' src='/WEncrypt/DecryptGAccessV'style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 400, 240, '解密授权窗口','decryptContent');
+            pop.close('confirm-win_decrypt');
+        }
+
+        var confirmDecrypt = function () {
+            HM.pageLoading();
+            $.ajax({
+                type: 'POST',
+                url: "/WManageStore/DecryptContent",
+                data: { table: '@ViewData["table"]', searchmode: searchMode, where: whereConditon, pms: JSON.stringify(sqlParams),userid: '@ViewData["userid"]'},
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin(data.info);
+                        pop.close('confirm-win_decrypt');
+                    }
+                    else {
+                        HM.alertWin(data.info);
+                        pop.close('confirm-win_decrypt');
+                    }
+                    HM.closePageLoading();
+                }
+            });
+        }
+
+        var watermarkSConfirm = function () {
+            var sl = $('#manageStoregrid').bootstrapTable('getSelections');
+            if (sl.length == 0) {
+                HM.alertWin('请选择记录后继续添加水印工作！');
+                return;
+            }
+            HM.confirmWin('', '水印添加完成后，将不能被去掉。确认继续吗？', '确认加水印', 'watermarkFirm', waterMarkSContent);
+        }
+
+        function waterMarkSContent() {
+            var sl = $('#manageStoregrid').bootstrapTable('getSelections');
+            //if (sl.length == 0) {
+            //    HM.alertWin('请选择记录后继续添加水印工作！');
+            //    return;
+            //}
+            var ids = [];
+            for (var i = 0; i < sl.length; i++) {
+                ids.push(sl[i].unique_code);//搜集已选记录的ID
+            }
+
+            HM.pageLoading();
+            $.ajax({
+                type: 'POST',
+                url: "/WWatermark/WaterMarkSContent",
+                 data: { table: '@ViewData["table"]', pms: ids,userid: '@ViewData["userid"]'},
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin(data.info);
+                        pop.close('confirm-win_watermarkFirm');
+                    }
+                    else {
+                        HM.alertWin(data.info);
+                        pop.close('confirm-win_watermarkFirm');
+                    }
+                    HM.closePageLoading();
+                }
+            });
+        }
+
+        var waterMarkContent = function () {
+            HM.confirmWin('', '确认将所有页的记录所对应的原文添加水印吗？(可对精确搜索结果批量加密)', '确认添加水印', 'watermark', confirmWaterMarkContent);
+        }
+
+        var confirmWaterMarkContent = function () {
+            HM.pageLoading();
+            $.ajax({
+                type: 'POST',
+                url: "/WWatermark/WaterMarkContent",
+                data: { table: '@ViewData["table"]', searchmode: searchMode, where: whereConditon, pms: JSON.stringify(sqlParams),userid: '@ViewData["userid"]'},
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin(data.info);
+                        pop.close('confirm-win_watermark');
+                    }
+                    HM.closePageLoading();
+                }
+            });
+        }
+
+        var cntRecFrmClient = function () {
+            var content = "<iframe id='cntClientRecFrame' src='/WConnContent/RecCtnFrmClientView/" + '@ViewData["table"]' + "/" + '@ViewData["userid"]' +"/" + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 1200, 620,'挂接客户端（非从服务器）原文窗口','clientRecCtnFrm');
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

@@ -1,0 +1,152 @@
+﻿
+@{
+    ViewData["Title"] = "馆藏数量统计效果预览";
+}
+
+@section head {
+    <script src="~/lib/echart/echarts.min.js"></script>
+    <link href="~/css/arch-button.css" rel="stylesheet" />
+}
+
+@section body {
+    <style>
+        .stadiv {
+            height: 150px;
+            float: left;
+            background-color: white;
+            margin: 8px;
+            padding: 8px 0 8px 0;
+            box-shadow: 0 0 5px lightgray;
+            -moz-box-shadow: 0 0 5px lightgray;
+            -webkit-box-shadow: 0 0 5px lightgray;
+        }
+
+        .stasubdiv {
+            position: relative;
+            top: 50%; /*偏移*/
+            height: 30px;
+            margin-top: -15px;
+            font-size: 25px;
+        }
+    </style>
+    <div style="height:100%;width:100%;">
+        <div style="padding:5px;">
+            <button class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="prvExsting();"><i class="fa fa-refresh"></i> 预览现有数据</button>
+            <button class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="prvAfterUpdate();"><i class="fa fa-refresh"></i> 更新数据后预览</button>
+        </div>
+        <div style="padding:5px 5px 0 5px;">
+            <div class="panel panel-info" style="margin-bottom:0;">
+                <div class="panel-heading">
+                    <h3 class="panel-title">预览结果</h3>
+                </div>
+                <div id="scontainer" class="panel-body">
+                    <div id="mainChart" style="height:400px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        $(function () {            
+            $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+            $("#h_loading").css("display", "none");
+        });
+
+        function prvExsting() {
+            //showPie(); return;
+            HM.pageLoading();
+            var myChart = echarts.init(document.getElementById('mainChart'));
+            $.ajax({
+                type: 'post',
+                url: '/WStatisticsStockPrd/GetStckPrdStatiscInfo',
+                dataType: "json",
+                success: function (data) {
+                    var dts = '[';
+                    for (var i = 0; i < data.length; i++) {//拼凑成series，字符串形式
+                        if (i == 0) {
+                            dts += '{name:"' + data[i].field + '",value:"' + data[i].value + '"}';
+                        }
+                        else {
+                            dts += ',{name:"' + data[i].field + '",value:"' + data[i].value + '"}';
+                        }
+                    }
+                    dts += ']';
+                    //alert(dts); return;
+                    myChart.setOption({
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: '{a} <br/>{b} : {c}'
+                        },
+                        series: [
+                            {
+                                name: '保管期限馆藏统计',
+                                type: 'pie',    // 设置图表类型为饼图
+                                radius: '75%',  // 饼图的半径，外半径为可视区尺寸（容器高宽中较小一项）的 55% 长度。
+                                data: eval('(' + dts + ')') // JSON字符串转JSON对象
+                            }
+                        ]
+                    });
+                    HM.closePageLoading();
+                }
+            });
+        }
+
+        function prvAfterUpdate() {
+            HM.pageLoading();
+            var myChart = echarts.init(document.getElementById('mainChart'));
+            $.ajax({
+                type: 'post',
+                url: '/WStatisticsStockPrd/GetStckPrdStatiscInfo2',
+                dataType: "json",
+                success: function (data) {
+                    var dts = '[';
+                    for (var i = 0; i < data.length; i++) {//拼凑成series，字符串形式
+                        if (i == 0) {
+                            dts += '{name:"' + data[i].field + '",value:"' + data[i].value + '"}';
+                        }
+                        else {
+                            dts += ',{name:"' + data[i].field + '",value:"' + data[i].value + '"}';
+                        }
+                    }
+                    dts += ']';
+
+                    myChart.setOption({
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: '{a} <br/>{b} : {c}'
+                        },
+                        series: [
+                            {
+                                name: '保管期限馆藏统计',
+                                type: 'pie',    // 设置图表类型为饼图
+                                radius: '75%',  // 饼图的半径，外半径为可视区尺寸（容器高宽中较小一项）的 55% 长度。
+                                data: eval('(' + dts + ')') // JSON字符串转JSON对象
+                            }
+                        ]
+                    });
+                    HM.closePageLoading();
+                }
+            });
+        }
+
+        //十六进制颜色随机
+        function color16() {
+            var r = Math.floor(Math.random() * 256);
+            var g = Math.floor(Math.random() * 256);
+            var b = Math.floor(Math.random() * 256);
+            var color = '#' + r.toString(16) + g.toString(16) + b.toString(16);
+            return color;
+        }
+
+    </script>
+}
+
+@section script {
+
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

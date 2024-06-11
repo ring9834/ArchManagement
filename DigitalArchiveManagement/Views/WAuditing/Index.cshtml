@@ -1,0 +1,153 @@
+﻿
+@{
+    ViewData["Title"] = "用户角色";
+}
+
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+    <link href="~/css/arch-button.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div id="userToolbar">
+            <button class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="addOneRole();"><i class="fa fa-user-plus"></i> 增加角色</button>
+        </div>
+        <table id="roleGrid"></table>
+    </div>
+
+    <script>
+        $(function () {
+            loadTableData();
+        });
+
+        var loadTableData = function () {
+            $('#roleGrid').bootstrapTable('destroy');
+            $table = $('#roleGrid').bootstrapTable({
+                url: '/WRole/GetRoles',                      //请求后台的URL（*）
+                method: 'POST',                      //请求方式（*）
+                contentType: "application/x-www-form-urlencoded",
+                silent: true, //静态刷新
+                toolbar: '#userToolbar',              //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                search: false,                      //是否显示表格搜索
+                //strictSearch: true,
+                showColumns: true,                  //是否显示所有的列（选择显示的列）
+                showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                //clickToSelect: true,                //是否启用点击选中行
+                //height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                uniqueId: "unique_code",                     //每一行的唯一标识，一般为主键列
+                //showToggle: true,                   //是否显示详细视图和列表视图的切换按钮
+                showExport: true,
+                cardView: false,                    //是否显示详细视图
+                detailView: false,                  //是否显示父子表
+                showLoading: false,
+                //singleSelect: true,                //true只能单选，false为多选
+                exportDataType: "selected",        //导出checkbox选中的行数
+                showFullscreen: true,
+                columns: [
+                    { field: 'role_name', title: '角色名' },
+                    { field: 'operate', title: '操作', align: 'center', width: '250px', events: operateEvents, formatter: 'operateFormatter' },
+                ],
+                formatLoadingMessage: function () {
+                    return "请稍等，正在加载中···";
+                },
+                onLoadSuccess: function (data) {
+                    //alert(JSON.stringify(data));
+                    $("#h_loading_mask").css("display", "none");//关闭页面加载指示器
+                    $("#h_loading").css("display", "none");
+                },
+                onPreBody: function () {
+
+                }
+            });
+        }
+
+        // 格式化按钮
+        function operateFormatter(value, row, index) {
+            return [
+                '<button type="button" class="RoleOfedit btn btn-sm   btn-info" style="margin-right:15px;"><i class="fa fa-pencil-square-o" ></i>&nbsp;修改</button>',
+                '<button type="button" class="RoleOfdelete btn btn-sm   btn-info" style="margin-right:15px;"><i class="fa fa-trash-o" ></i>&nbsp;删除</button>'
+            ].join('');
+
+        }
+
+        //初始化操作按钮的方法
+        window.operateEvents = {
+            'click .RoleOfdelete': function (e, value, row, index) {
+                del(row);
+            },
+            'click .RoleOfedit': function (e, value, row, index) {
+                update(row, index);
+            }
+        };
+
+        function addOneRole(row) {
+            var content = "<iframe id='addroleframe' src='/WRole/AddRoleView' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 600, 240, '角色信息添加窗口','o');
+        }
+
+        function update(row, index) {
+            var content = "<iframe id='updateRoleFrame' src='/WRole/GetRoleInfo/" + row.unique_code + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 600, 240, '角色信息修改窗口','t');
+        }
+
+        function del(row) {
+            HM.confirmWin(row.unique_code, "所选角色将被删除！确定吗？",'确认删除','userdel', delSelectedRec);
+        }
+
+        function delSelectedRec(id, t) {
+            $.ajax({
+                type: 'POST',
+                url: "/WRole/DeleteRoleInfo",
+                data: { roleId: id },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin("所选角色信息删除成功！");
+                        pop.close('confirm-win_userdel');
+                        refreshTableData();
+                    }
+                }
+            });
+        }
+
+        var closeDealWin = function () { 
+            pop.close('deal-win');
+        }
+
+        var refreshTableData = function () { 
+            $('#roleGrid').bootstrapTable('refresh');
+        }
+
+        var hintAddSucess = function () { 
+            HM.hintWin('角色信息添加成功！');
+        }
+
+        var hintAddFailer = function () { 
+            HM.alertWin('角色信息添加失败！');
+        }
+
+        var hintUpdateSucess = function () {
+            HM.hintWin('角色信息修改成功！');
+        }
+
+        var hintUpdateFailer = function () {
+            HM.alertWin('角色信息修改失败！');
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

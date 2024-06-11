@@ -1,0 +1,198 @@
+﻿
+@{
+    ViewData["Title"] = "条件搜索";
+}
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+    <link href="~/css/arch-button.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div id="toolbarSearch">
+        </div>
+        <div class="specified-table">
+            <table id="searchResultGrid"></table>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+            $("#h_loading").css("display", "none");
+
+            var fstr =  "@Html.Raw(@ViewData["colFields"])";
+            if ($.trim(fstr) == '') {
+                HM.alertWin('此档案类型库还未进行显示配置，请配置后继续！');
+                return;
+            }
+            var url = '/WConditionSearch/ShowInitialSearchRecs';
+            loadTableData(url,null);//初始加载数据
+
+            var html = '<button type="button" class="btn btn-archbutton" id="primSearchBtn" style="border-color:#99D1FF;"><i class="fa fa-search" style="color:green;"></i> 基本检索</button>&nbsp;<button type="button" class="btn btn-archbutton" id="highLevelSearchBtn" style="border-color:#99D1FF;"><i class="fa fa-search" style="color:red;"></i> 高级检索</button>';
+            $("#toolbarSearch").html(html);
+
+            $('#primSearchBtn').bind('click', primSearch);
+            $('#highLevelSearchBtn').bind('click', highLevelSearch);
+        });
+
+        var loadTableData = function (url,paramlist) {
+            $('#searchResultGrid').bootstrapTable('destroy');
+            $table = $('#searchResultGrid').bootstrapTable({
+                url: url,
+                method: 'POST',                      //请求方式（*）
+                contentType: "application/x-www-form-urlencoded",
+                silent: true, //静态刷新
+                toolbar: '#toolbarSearch',              //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                pagination: true,                   //是否显示分页（*）
+                sortable: true,                     //是否启用排序
+                sortOrder: "asc",                   //排序方式
+                sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+                pageNumber: 1,                      //初始化加载第一页，默认第一页,并记录
+                pageSize: 15,                     //每页的记录行数（*）
+                pageList: [15, 30, 50, 100],        //可供选择的每页的行数（*）
+                search: false,                      //是否显示表格搜索
+                strictSearch: true,
+                showColumns: true,                  //是否显示所有的列（选择显示的列）
+                showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                clickToSelect: true,                //是否启用点击选中行
+                //height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                uniqueId: "Unique_code",                     //每一行的唯一标识，一般为主键列
+                showToggle: true,                   //是否显示详细视图和列表视图的切换按钮
+
+                cardView: false,                    //是否显示详细视图
+                detailView: false,                  //是否显示父子表
+                paginationLoop: false,
+                showLoading: false,
+                singleSelect: false,                //true只能单选，false为多选
+                //showExport: true,
+                //exportDataType: "all",        //导出checkbox选中的行数
+                //exportTypes: ['excel'],
+                showFullscreen: true,
+                useRowAttrFunc: true,
+                reorderableRows: true,
+                //得到查询的参数
+                queryParams: function (params) {
+                    //这里的键的名字和控制器的变量名必须一致，这边改动，控制器也需要改成一样的
+                    var temp = {
+                        pageSize: params.limit,                         //页面大小
+                        pageIndex: params.offset / params.limit,   //页码
+                        tableName: '@ViewData["table"]',
+                        fieldsStr: '@ViewData["fieldStr"]',
+                        pList: paramlist//从搜索条件窗口传过来的动态参数，对应后台的List<>
+                    };
+                    return temp;
+                },
+                columns: [
+                    @Html.Raw(ViewData["colFields"])
+                    , { field: 'operate', title: '看原文', align: 'center', width: '50px', events: operateEvents, formatter: 'operateFormatter' }
+                ],
+                onLoadSuccess: function () {
+                    //$("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                    //$("#h_loading").css("display", "none");
+                    hideColByLoggedUser();
+                },
+                formatLoadingMessage: function () {
+                    return "请稍等，正在加载中···";
+                }
+            });
+        }
+
+        var primSearch = function () {
+            var content = "<iframe id='primSearchFrame' src='/WConditionSearch/CreateSearchControls/"+ '@ViewData["table"]' +"' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwin(content, 830,360,'搜索条件窗口-基本搜索');
+        }
+
+        var primParamList;
+        var searchByCustomCondition = function () {
+            var url = '/WConditionSearch/GetSearchResultByCon';
+            loadTableData(url, primParamList);//加载根据条件查询到的数据
+            pop.close('deal-win');
+        }
+
+        var superParamList;
+        var superSearchByCustomCondition = function () {
+            //alert(JSON.stringify(superParamList));
+            var url = '/WConditionSearch/GetSuperSearchResultByCon';
+            loadTableData(url, superParamList);//加载根据条件查询到的数据-高级
+            pop.close('deal-win');
+        }
+
+        var highLevelSearch = function () {
+            var content = "<iframe id='superSearchFrame' src='/WConditionSearch/SuperSearchView/"+ '@ViewData["table"]' +"' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwin(content, 980,560,'搜索条件窗口-高级搜索');
+        }
+
+        //查看原文
+        window.operateEvents = {
+            'click .RoleOfView': function (e, value, row, index) {
+                viewYw(row);
+            }
+        };
+
+        // 格式化按钮
+        function operateFormatter(value, row, index) {
+            return [
+                '<button type="button" class="RoleOfView btn btn-sm  btn-info" style="margin-right:15px;"><i class="glyphicon glyphicon-file" ></i>&nbsp;原文</button>'
+            ].join('');
+        }
+
+        function viewYw(row) {
+            $.ajax({
+                type: 'POST',
+                url: "/WPdfView/IfYwExists",
+                data: { table: '@ViewData["table"]', userid: '@ViewData["userid"]', uniquecode: row.unique_code },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst == 0) {
+                        HM.alertWin(data.info);
+                        return;
+                    }
+                    else {
+                        var ulr = '/WPdfView/Index/' + '@ViewData["table"]' + '/' + '@ViewData["userid"]' + '/' + row.unique_code;
+                        //var ulr = '/WPdfView/Index1/' + escape(data.ywpath);
+                        //top.location.href = ulr;
+                        window.open(ulr,'_blank');
+                    }
+                }
+            });
+        }
+
+        var hideColByLoggedUser = function() {
+            $.ajax({
+               type: 'POST',
+               url: "/WFunctionAccess/GetFuncAccessByUser",
+               data: { userName: '@ViewData["userid"]' },
+               dataType: "JSON",
+                success: function (data) {
+                    //alert(JSON.stringify(data));
+                    for (var i = 0; i < data.length; i++) {
+                        var func = data[i].func_symble;
+                        if (func == 'yw_view') {
+                            var vbl = data[i].func_visible;
+                            if (vbl == false || vbl.toLowerCase() == 'false') {
+                                $('#searchResultGrid').bootstrapTable('hideColumn', 'operate');
+                            }
+                            break;
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+}
+
+@section script {
+    @*<script src="~/lib/bootstrap-table/extension/FileSaver.min.js"></script>
+    <script src="~/lib/bootstrap-table/extension/xlsx.core.min.js"></script>
+    <script src="~/lib/bootstrap-table/extension/tableExport.min.js"></script>
+    <script src="~/lib/bootstrap-table/extension/bootstrap-table-export.js"></script>*@
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

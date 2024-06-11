@@ -1,0 +1,494 @@
+﻿
+@{
+    ViewData["Title"] = "查看调档车";
+}
+
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+    <link href="~/css/arch-button.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="row" style="padding:5px;"></div>
+        <div class="row" style="padding:0 8px 0 8px;">
+            <div class="panel panel-warning">
+                <div class="panel-heading">
+                    <h3 class="panel-title">借出信息</h3>
+                </div>
+                <div class="panel-body">
+                    <i class="fa fa-user"></i> 借档人：<span id="vitalizer"></span>&nbsp;&nbsp;
+                    <i class="fa fa-clock-o"></i> 借档时间：<span id="outtime"></span>&nbsp;&nbsp;
+                    <i class="fa fa-copy"></i> 件数：<span id="pieces"></span>&nbsp;&nbsp;
+                    <i class="fa fa-object-group"></i> 份数：<span id="shares"></span>&nbsp;&nbsp;
+                </div>
+            </div>
+        </div>
+        <div class="row" style="padding:0 8px 0 8px;">
+            <div class="panel panel-danger">
+                <div class="panel-heading">
+                    <h3 class="panel-title">填写归还信息</h3>
+                </div>
+                <div class="panel-body" style="padding-bottom:0px;">
+                    <div class="row">
+                        <div class="form-group col-xs-12">
+                            <div class="form-inline">
+                                <div class="input-group">
+                                    <span class="input-group-addon">归还人</span>
+                                    <input id="userBack" type="text" class="form-control" style="width:80px;" />
+                                </div>
+                                <div class="input-group">
+                                    <span class="input-group-addon">归还份数</span>
+                                    <input id="sharesBack" type="text" class="form-control" style="width:80px;" value="1" />
+                                </div>
+                                <div class="input-group">
+                                    <span class="input-group-addon">备注</span>
+                                    <input id="commentBack" type="text" class="form-control" style="width:750px;" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid" id="toolbars">
+        <div id="tableFtoolbar">
+            <h4><span class="label label-info">全文检索借出的档案</span></h4>
+        </div>
+        <div class="row" style="padding:0 8px 0 8px;">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title">点击下列各表左边按钮逐条归还或延期</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="specified-table" id="gridContainer">
+                        @*<table id="psGrid"></table><table id="fGrid"></table>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+
+        $(function () {
+            $('#totalShares').keyup(function () {//只能输入正整数
+                $(this)[0].value = $(this)[0].value.replace(/^(0+)|[^\d]+/g, '')
+            })
+            showOutInfo();
+            loadDynamicTables();//根据数据库中数据动态加载表格
+        });
+
+        var loadDynamicTables = function () {
+            //基本搜索高级搜索动态加载表格
+            var containerDiv = $('#gridContainer');
+            $.ajax({
+                type: 'POST',
+                url: "/WLookUpSvc/UsingTablesIncart",
+                data: { userid: '@ViewData["userid"]', requestId:'@ViewData["requestId"]'},
+                dataType: "JSON",
+                success: function (data) {
+                    for (var i = 0; i < data.length; i++) {
+                        var dti = data[i];
+                        if ($.trim(dti.fieldsStr) != '') {
+                            //containerDiv.empty();
+                            containerDiv.append('<table id="ps_' + dti.tableName + '"></table>'); //console.log($('#ps_' + dti.tableName).length);
+                            //$('#toolbars').empty();
+                            $('#toolbars').append('<div id="tablePstoolbar_' + dti.tableName +'"><h4><span class="label label-info">基本、高级检索借出的档案</span></h4></div>');
+                            loadTableData('#ps_' + dti.tableName, '/WLookUpSvc/GetCartsPS', dti.tableName, dti.fieldsStr, dti.colFieldStr);
+                        }
+                    }
+                    //顺便加载全文检索唯一表格
+                    containerDiv.append('<table id="f_grid"></table>');
+                    loadStable();
+                    $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                    $("#h_loading").css("display", "none");
+                }
+            });
+        }
+
+        var loadTableData = function (grid ,url, table, fieldsStr, colFieldStr) {
+            var flds = '';
+            if (colFieldStr == '') {
+                flds = '[' + "{ field: 'operate0', title: '还档', align:'center', width:'40px', events: operateEvents, formatter: 'operateFormatter0'},";
+                flds += "{ field: 'operate1', title: '延期', align:'center', width:'40px', events: operateEvents, formatter: 'operateFormatter1'},";
+                flds += colFieldStr + '';
+                flds += "{field: 'beReturned', title: '状态', align:'center', width:'40px',formatter: 'rtnStatusFormatter'},";
+                flds += "{field: 'userBack', title: '还档人', align:'center'},";
+                flds += "{field: 'prolongDays', title: '延期天数', align:'center'},";
+                flds += "{field: 'sharesBack', title: '归还份数', align:'center'},";
+                flds += "{field: 'commentBack', title: '归还说明'}";
+                flds += ']';
+            }
+            else {
+                flds = '[' + "{ field: 'operate0', title: '还档', align:'center', width:'40px', events: operateEvents, formatter: 'operateFormatter0'},";
+                flds += "{ field: 'operate1', title: '延期', align:'center', width:'40px', events: operateEvents, formatter: 'operateFormatter1'},";
+                flds += colFieldStr + ',';
+                flds += "{field: 'beReturned', title: '状态', align:'center', width:'40px',formatter: 'rtnStatusFormatter'},";
+                flds += "{field: 'userBack', title: '还档人', align:'center'},";
+                flds += "{field: 'prolongDays', title: '延期天数', align:'center'},";
+                flds += "{field: 'sharesBack', title: '归还份数', align:'center'},";
+                flds += "{field: 'commentBack', title: '归还说明'},";
+                flds += "{field: 'tableName', visible:false}";
+                flds += ']';
+            }
+
+            $(grid).bootstrapTable('destroy');
+            $table = $(grid).bootstrapTable({
+                url: url,
+                method: 'POST',                      //请求方式（*）
+                contentType: "application/x-www-form-urlencoded",
+                silent: true, //静态刷新
+                toolbar: '#tablePstoolbar_' + table,              //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                pagination: true,                   //是否显示分页（*）
+                sortable: true,                     //是否启用排序
+                sortOrder: "asc",                   //排序方式
+                sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+                pageNumber: 1,                      //初始化加载第一页，默认第一页,并记录
+                pageSize: 15,                     //每页的记录行数（*）
+                pageList: [15, 30, 50, 100],        //可供选择的每页的行数（*）
+                search: false,                      //是否显示表格搜索
+                strictSearch: true,
+                showColumns: true,                  //是否显示所有的列（选择显示的列）
+                showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                clickToSelect: true,                //是否启用点击选中行
+                //height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                uniqueId: "Unique_code",                     //每一行的唯一标识，一般为主键列
+                showToggle: true,                   //是否显示详细视图和列表视图的切换按钮
+                showExport: true,
+                cardView: false,                    //是否显示详细视图
+                detailView: false,                  //是否显示父子表
+                paginationLoop: false,
+                showLoading: false,
+                singleSelect: false,                //true只能单选，false为多选
+                exportDataType: "selected",        //导出checkbox选中的行数
+                showFullscreen: true,
+                useRowAttrFunc: true,
+                reorderableRows: true,
+                //得到查询的参数
+                queryParams: function (params) {
+                    //这里的键的名字和控制器的变量名必须一致，这边改动，控制器也需要改成一样的
+                    var temp = {
+                        pageSize: params.limit,                         //页面大小
+                        pageIndex: params.offset / params.limit,   //页码
+                        tableName: table,
+                        fieldsStr: fieldsStr,
+                        requestId: @ViewData["requestId"],
+                    };
+                    return temp;
+                },
+                columns:eval('(' + flds + ')'),//modified on 2020年3月19日，以JS对象的形式
+                onLoadSuccess: function (data) {
+                    //$("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                    //$("#h_loading").css("display", "none");
+                },
+                formatLoadingMessage: function () {
+                    return "请稍等，正在加载中···";
+                },
+                onPostBody: function () {
+                },
+            });
+        }
+
+        var loadStable = function () {
+            $('#f_grid').bootstrapTable('destroy');
+            $table = $('#f_grid').bootstrapTable({
+                url: '/WLookUpSvc/GetCartsF',
+                method: 'POST',                      //请求方式（*）
+                contentType: "application/x-www-form-urlencoded",
+                silent: true, //静态刷新
+                toolbar: '#tableFtoolbar',              //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                pagination: true,                   //是否显示分页（*）
+                sortable: true,                     //是否启用排序
+                sortOrder: "asc",                   //排序方式
+                sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+                pageNumber: 1,                      //初始化加载第一页，默认第一页,并记录
+                pageSize: 15,                     //每页的记录行数（*）
+                pageList: [15, 30, 50, 100],        //可供选择的每页的行数（*）
+                search: false,                      //是否显示表格搜索
+                strictSearch: true,
+                showColumns: true,                  //是否显示所有的列（选择显示的列）
+                showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                clickToSelect: true,                //是否启用点击选中行
+                //height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                uniqueId: "Unique_code",                     //每一行的唯一标识，一般为主键列
+                showToggle: true,                   //是否显示详细视图和列表视图的切换按钮
+                showExport: true,
+                cardView: false,                    //是否显示详细视图
+                detailView: false,                  //是否显示父子表
+                paginationLoop: false,
+                showLoading: false,
+                singleSelect: false,                //true只能单选，false为多选
+                exportDataType: "selected",        //导出checkbox选中的行数
+                showFullscreen: true,
+                useRowAttrFunc: true,
+                reorderableRows: true,
+                //得到查询的参数
+                queryParams: function (params) {
+                    //这里的键的名字和控制器的变量名必须一致，这边改动，控制器也需要改成一样的
+                    var temp = {
+                        pageSize: params.limit,                         //页面大小
+                        pageIndex: params.offset / params.limit,   //页码
+                        requestId: @ViewData["requestId"],
+                    };
+                    return temp;
+                },
+                columns: [
+                    { field: 'operate0', title: '还档', width: '40px', align: 'center', events: operateEvents, formatter: 'operateFormatter2' },
+                    { field: 'operate1', title: '延期', width: '40px', align: 'center', events: operateEvents, formatter: 'operateFormatter3' }
+                    , { field: 'dh', title: '档号', align: 'center' }
+                    , { field: 'beReturned', title: '状态', align: 'center', width: '40px', formatter: 'rtnStatusFormatter'}
+                    , { field: 'userBack', title: '还档人', align: 'center' }
+                    , { field: 'prolongDays', title: '延期天数', align: 'center' }
+                    , { field: 'sharesBack', title: '归还份数', align: 'center' }
+                    , { field: 'commentBack', title: '归还说明' }
+                ],
+                onLoadSuccess: function (data) {
+                    //$("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                    //$("#h_loading").css("display", "none");
+                },
+                formatLoadingMessage: function () {
+                    return "请稍等，正在加载中···";
+                },
+                onPostBody: function () {
+                },
+            });
+        }
+
+        //查看原文
+        window.operateEvents = {
+            'click .RoleOfRestore': function (e, value, row, index) {
+                restoreArch(row);
+            },
+            'click .RoleOfProlong': function (e, value, row, index) {
+                prolongArchView(row);
+            },
+            'click .RoleOfRestoreF': function (e, value, row, index) {
+                restoreArch(row);
+            },
+            'click .RoleOfProlongF': function (e, value, row, index) {
+                prolongArchView(row);
+            }
+        };
+
+        // 格式化按钮
+        function operateFormatter0(value, row, index) {
+            if (row.beReturned == '1') {//已归还
+                return [
+                    '<button type="button" class="RoleOfRestore btn btn-sm  btn-info" title="点击还挡" disabled><i class="glyphicon glyphicon-inbox" ></i></button>'
+                ].join('');
+            }
+            else {
+                return [
+                    '<button type="button" class="RoleOfRestore btn btn-sm  btn-info" title="点击还挡"><i class="glyphicon glyphicon-inbox" ></i></button>'
+                ].join('');
+            }
+        }
+
+        function operateFormatter1(value, row, index) {
+            if (row.beReturned == '1') {//已归还
+                return [
+                    '<button type="button" class="RoleOfProlong btn btn-sm  btn-info" title="点击延期" disabled><i class="fa fa-star-half-o" ></i></button>'
+                ].join('');
+            }
+            else {
+                return [
+                    '<button type="button" class="RoleOfProlong btn btn-sm  btn-info" title="点击延期"><i class="fa fa-star-half-o" ></i></button>'
+                ].join('');
+            }
+        }
+
+        function operateFormatter2(value, row, index) {
+            if (row.beReturned == '1') {//已归还
+                return [
+                    '<button type="button" class="RoleOfRestoreF btn btn-sm  btn-info" title="点击还挡" disabled><i class="glyphicon glyphicon-inbox" ></i></button>'
+                ].join('');
+            }
+            else {
+                return [
+                    '<button type="button" class="RoleOfRestoreF btn btn-sm  btn-info" title="点击还挡"><i class="glyphicon glyphicon-inbox" ></i></button>'
+                ].join('');
+            }
+        }
+
+        function operateFormatter3(value, row, index) {
+            if (row.beReturned == '1') {//已归还
+                return [
+                    '<button type="button" class="RoleOfProlongF btn btn-sm  btn-info" title="点击延期" disabled><i class="fa fa-star-half-o" ></i></button>'
+                ].join('');
+            }
+            else {
+                return [
+                    '<button type="button" class="RoleOfProlongF btn btn-sm  btn-info" title="点击延期"><i class="fa fa-star-half-o" ></i></button>'
+                ].join('');
+            }
+        }
+
+        function rtnStatusFormatter(value, row, index) {
+            var beOver = '@ViewData["beOver"]'; console.log(beOver);
+            if (value == '0') {
+                if (beOver == '0') {//added on 20201123
+                    return '<span class="label label-default">调档中</span>';
+                }
+                if (beOver == '2') {//added on 20201123
+                    return '<span class="label label-default">借档审批中</span>';
+                }
+                if (beOver == '3' || beOver == '5') {//added on 20201123
+                    return '<span class="label label-default">借出中</span>';
+                }
+                if (beOver == '4') {//added on 20201123
+                    return '<span class="label label-default">借档审批未通过</span>';
+                }
+            }
+            if (value == '1') {
+                return '<span class="label label-default">已归还</span>';
+            }
+            if (value == '2') {
+                return '<span class="label label-default">延期中</span>';
+            }
+        }
+
+        function restoreArch(row) {
+            var flag = infoNeededFilled();
+            if (flag == 0) {
+                return;
+            }
+            HM.confirmWin(row, '确认归还此档案吗？', '确认归还', 'rtrnArch', okReturn);
+        }
+
+        function okReturn(row) {
+            $.ajax({
+                type: 'POST',
+                url: "/WLookUpSvc/RestoreArch",
+                data: { requestId: '@ViewData["requestId"]', itemId: row.recid, userBack: $('#userBack').val(), sharesBack: $('#sharesBack').val(), commentBack: $('#commentBack').val() },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        pop.close('confirm-win_rtrnArch');
+                        if (row.tableName == null || row.tableName == 'undefined') {
+                            $('#f_grid').bootstrapTable('refresh');//刷新全文索引搜索结果表
+                        }
+                        else {
+                            $('#ps_' + row.tableName).bootstrapTable('refresh');//刷新对应的表格
+                        }
+                        HM.hintWin('还档成功！');
+                        //$('#archUseGrid').bootstrapTable('refresh');
+                    }
+                }
+            });
+        }
+
+        function prolongArchView(row) {
+            var flag = infoNeededFilled();
+            if (flag == 0) {
+                return;
+            }
+            var content = "<iframe id='prolongFrame' src='/WLookUpSvc/ProlongDaysView/" + row.unique_code + "/" + row.recid + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwin(content, 240, 80,'填写延期天数');
+        }
+
+        var prolongDays = 0;
+        function prolongArch(itemid) {
+            $.ajax({
+                type: 'POST',
+                url: "/WLookUpSvc/ProlongArch",
+                data: { requestId: '@ViewData["requestId"]', itemId: itemid, days: prolongDays, userBack: $('#userBack').val(), sharesBack: $('#sharesBack').val(), commentBack: $('#commentBack').val()},
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        pop.close("deal-win");
+                        HM.hintWin('延期成功！');
+                        //$('#archUseGrid').bootstrapTable('refresh');
+                    }
+                }
+            });
+        }
+
+        var showOutInfo = function () {
+            $.ajax({
+                type: 'POST',
+                url: "/WLookUpSvc/ShowOutInfo",
+                data: { requestId: '@ViewData["requestId"]' },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.length > 0) {
+                        var d = data[0];
+                        $('#vitalizer').html(d.vitalizer);
+                        $('#outtime').html(d.outtime);
+                        $('#pieces').html(d.pieces);
+                        $('#shares').html(d.shares);
+                        $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                        $("#h_loading").css("display", "none");
+                    }
+                }
+            });
+        }
+
+
+        function infoNeededFilled() {
+            if ($('#userBack').val().trim() == '') {
+                HM.alertWin('归还人姓名必须填写！');
+                return 0;
+            }
+            if ($('#sharesBack').val().trim() == '') {
+                HM.alertWin('归还份数必须填写！');
+                return 0;
+            }
+            return 1;
+        }
+
+        function encode(str) {
+            // 对字符串进行编码
+            var encode = encodeURI(str);
+            // 对编码的字符串转化base64
+            var base64 = btoa(encode);
+            return base64;
+        }
+        // base64转字符串
+        function decode(base64) {
+            // 对base64转编码
+            var decode = atob(base64);
+            // 编码转字符串
+            var str = decodeURI(decode);
+            return str;
+        }
+
+        // 对Date的扩展，将 Date 转化为指定格式的String
+        // 月(M)、日(d)、小时(h)、分(m)、秒(s)、季度(q) 可以用 1-2 个占位符，
+        // 年(y)可以用 1-4 个占位符，毫秒(S)只能用 1 个占位符(是 1-3 位的数字)
+        Date.prototype.Format = function (fmt) { //author: meizz
+            var o = {
+                "M+": this.getMonth() + 1, //月份
+                "d+": this.getDate(), //日
+                "H+": this.getHours(), //小时
+                "m+": this.getMinutes(), //分
+                "s+": this.getSeconds(), //秒
+                "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+                "S": this.getMilliseconds() //毫秒
+            };
+            if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            for (var k in o)
+                if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+            return fmt;
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

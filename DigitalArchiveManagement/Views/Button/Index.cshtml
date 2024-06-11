@@ -1,0 +1,84 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    //var F = Html.F();
+}
+@section head{
+
+}
+@section body{
+    <br /><br />
+    <div class="btn btn-success" id="div1" onclick="about();">基本按钮</div>
+    @*<a id="bt1" class="btn btn-danger" asp-controller="Button" asp-action="About" data-toggle="modal" data-target="#myModal" data-ajax="true" data-ajax-success="dealSuccess();">我的按钮</a>*@
+
+    <a id="bt1" class="btn btn-danger" asp-controller="Button" asp-action="TransferSimpleValueToJs" data-ajax="true" data-ajax-success="onSuccess1">我的按钮</a>
+    <a id="bt2" class="btn btn-info" asp-controller="Button" asp-action="TransferDatatableToJs" data-ajax="true" data-ajax-success="onSuccess2">Net Core</a>
+
+    @{
+        var parms = new Dictionary<string, string>{
+{ "name", "黄球球" },
+{ "age", "9" },
+{ "sex", "true" },
+};
+    }
+    <a id="bt3" class="btn btn-default" asp-controller="Button" asp-action="TransferObjToBackEnd" asp-all-route-data="parms" data-ajax="true" data-ajax-success="onSuccess3" data-ajax-mode="post">向后台传对象</a>
+
+
+    <form asp-controller="Button" asp-action="TransferFormDataToBackEnd" data-ajax="true" data-ajax-success="onSuccess3">
+        <div class="form-group">
+            <label for="email">User Name:</label>
+            <input type="text" class="form-control" name="name" id="name" Bool>
+        </div>
+        <div class="form-group">
+            <label for="age">Age:</label>
+            <input type="text" class="form-control" id="age" name="age">
+        </div>
+        <div class="form-group">
+            <label for="sex">sex:</label>
+            <input type="text" class="form-control" id="sex" name="sex">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
+    <script>
+        var onSuccess1 = function (data) {
+            alert(data);
+        };
+
+        var onSuccess2 = function (data) {
+            //后台通过IActionResult直接返回的javascript对象数组
+            //for (var i = 0; i < data.length; i++) {
+            //    alert(data[i].id + "\r\n" + data[i].image + "\r\n" + data[i].name + "\r\n" + data[i].desc + "\r\n" + data[i].group);
+            //}
+
+            //在不提供对象属性的情况下，遍历对象数组中每个对象的每个属性的值
+            for (var i = 0; i < data.length; i++) {
+                for (x in data[i]) { //遍历每个对象的每个属性的值
+                    alert(data[i][x]);
+                }
+            }
+        };
+
+        var about = function () {
+            $.ajax({
+                type: "GET",
+                url: " button/about",
+                dataType: "json",
+                success: function (data) {
+                    alert(data);
+                },
+                error: function (jqXHR) {
+                    console.log("Error: " + jqXHR.status);
+                }
+            });
+        }
+
+        var onSuccess3 = function (data) {
+            alert(data.name + '  ' + data.age + '  ' + data.sex);
+        }
+    </script>
+}
+
+@section script{ 
+
+}

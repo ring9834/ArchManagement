@@ -1,0 +1,50 @@
+﻿
+@{
+    ViewData["Title"] = "首页保管期限统计";
+}
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.min.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+    <link href="~/css/AmountStatistics.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="statisticsTabs" role="tabpanel">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active"><a href="#Section1" aria-controls="home" role="tab" data-toggle="tab"><i class="fa fa-asterisk"></i><span>统计设置</span></a></li>
+                <li role="presentation"><a href="#Section3" aria-controls="messages" role="tab" data-toggle="tab"><i class="fa fa-industry"></i><span>统计预览</span></a></li>
+            </ul>
+            <!-- Tab panes -->
+            <div class="tab-content tabs">
+                <div role="tabpanel" class="tab-pane fade in active" id="Section1" style="height:100%;">
+                    <iframe id="statisticGearFrm" src="/WStatisticsStockPrd/TypeGear" frameborder="0" style="border:0;height:100%;width:100%;padding:0;"></iframe>
+                </div>
+                <div role="tabpanel" class="tab-pane fade" id="Section3" style="height:100%;">
+                    <iframe id="statisticPrvFrm" src="/WStatisticsStockPrd/TypePreview" frameborder="0" style="border:0;height:100%;width:100%;padding:0;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        $(function () {
+            $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+            $("#h_loading").css("display", "none");
+        });
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.min.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.min.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

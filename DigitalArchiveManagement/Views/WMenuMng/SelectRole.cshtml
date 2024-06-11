@@ -1,0 +1,152 @@
+﻿
+@{
+    ViewData["Title"] = "选择角色，分配给它们显示指定菜单的权限";
+}
+
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <table id="roleGrid"></table>
+        <div class="form-group" style="margin-top:8px;text-align:center;">
+            <input type="button" class="btn btn-success" id="okbutton" onclick="pickthem();" value="确定选择" />
+        </div>
+    </div>
+
+    <script>
+        var rolesFrmParent;
+
+        $(function () {
+            loadTableData();
+        });
+
+        var loadTableData = function () {
+            $('#roleGrid').bootstrapTable('destroy');
+            $('#roleGrid').bootstrapTable({
+                url: '/WRole/GetRoles',                      //请求后台的URL（*）
+                method: 'POST',                      //请求方式（*）
+                contentType: "application/x-www-form-urlencoded",
+                silent: true, //静态刷新
+                //toolbar: '#userToolbar',              //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                search: false,                      //是否显示表格搜索
+                //strictSearch: true,
+                //showColumns: true,                  //是否显示所有的列（选择显示的列）
+                //showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                //clickToSelect: true,                //是否启用点击选中行
+                //height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                uniqueId: "unique_code",                     //每一行的唯一标识，一般为主键列
+                //showToggle: true,                   //是否显示详细视图和列表视图的切换按钮
+                //showExport: true,
+                cardView: false,                    //是否显示详细视图
+                detailView: false,                  //是否显示父子表
+                showLoading: false,
+                //singleSelect: true,                //true只能单选，false为多选
+                //exportDataType: "selected",        //导出checkbox选中的行数
+                //showFullscreen: true,
+                clickToSelect: true,
+                singleSelect: false,
+                columns: [
+                    {
+                        field: 'check', checkbox: true, formatter: function (value, row, index) {
+                            if (row.check == true) {
+                                return { checked: true };//设置选中
+                            }
+                        }
+                    },
+                    { field: 'role_name', title: '角色名' }
+                ],
+                formatLoadingMessage: function () {
+                    return "请稍等，正在加载中···";
+                },
+                onLoadSuccess: function (data) {
+                    //alert(JSON.stringify(data));
+
+                    initiateData();
+                    $("#h_loading_mask").css("display", "none");//关闭页面加载指示器
+                    $("#h_loading").css("display", "none");
+                },
+                onPostBody: function () {
+                    //改变复选框样式
+                    $('#roleGrid').find("input:checkbox").each(function (i) {
+                        var $check = $(this);
+                        if ($check.attr("id") && $check.next("label")) {
+                            return;
+                        }
+                        var name = $check.attr("name");
+                        var id = name + "a-" + i;
+                        var $label = $('<label for="' + id + '" onclick = stopBubbleEvent();></label>');
+                        $check.attr("id", id)
+                            .parent()
+                            .addClass("bella-checkbox")
+                            .children("span").remove();
+                        $check.parent().append($label);
+                    });
+                }
+            });
+        }
+
+        //当clickToSelect=true时，如果不阻止事件冒泡，则点击自定义CHECKBOX时会没有反应
+        var stopBubbleEvent = function () {
+            if (window.event) {//IE下阻止冒泡
+                event.cancelBubble = true;
+            } else {
+                event.stopPropagation();
+            }
+        }
+
+        function pickthem(row) {
+            var rows = $('#roleGrid').bootstrapTable('getSelections');
+            if (rows.length == 0) {
+                HM.alertWin('请选择角色后继续!');
+                return;
+            }
+            var selectedRows = [];
+            for (var i = 0; i < rows.length; i++) {
+                selectedRows.push(rows[i].unique_code);
+            }
+            parent.asignRoles(selectedRows,'@ViewData["uniqueCode"]');//执行父窗口
+        }
+
+        function initiateData() {//added on 20201107
+            var rows = $('#roleGrid').bootstrapTable('getData');
+            //var rowData = escape2Html('@ViewData["roles"]');
+            var rowData = EnDeCoder.decode(rolesFrmParent);
+            //console.log('@ViewData["roles"]')
+            console.log(rowData);
+            var role = $(rowData).find("Role");//操作xml
+            for (var i = 0; i < role.length; i++) {
+                var roleid = $(role[i]).attr("roleid");
+                for (var j = 0; j < rows.length; j++) {
+                    if (roleid == rows[j].unique_code) {
+                        $('#roleGrid').bootstrapTable('check', j);
+                        break;
+                    }
+                }
+            }
+        }
+
+        function escape2Html(str) {
+          var arrEntities={'lt':'<','gt':'>','nbsp':' ','amp':'&','quot':'"'};
+          return str.replace(/&(lt|gt|nbsp|amp|quot);/ig,function(all,t){return arrEntities[t];});
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+    <script src="~/js/endecoder.js"></script>
+}
+
+
+

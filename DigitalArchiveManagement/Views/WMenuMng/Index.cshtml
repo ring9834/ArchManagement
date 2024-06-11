@@ -1,0 +1,400 @@
+﻿
+@{
+    ViewData["Title"] = "菜单权限管理";
+}
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-table/css/jquery.treegrid.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="alert alert-warning" style="margin-top:8px;font-size:13px;">
+            <i class="fa fa-volume-up"></i><strong> 提醒!</strong> 1、权限设置一般由系统管理员设置，其他人员尽量不要触动；2、根节点不可删除；3、所谓“全局菜单”，是指菜单功能不依赖特定的档案类型库，而“局部菜单”依档案类型库不同，所显示信息或功能有差异；4、"分配角色"按钮，用于把对应的菜单显示给相应的角色。选择父节点，可以一起分配菜单的显示权限给子节点。
+        </div>
+        <div class="specified-table">
+            <table id="menuTable"></table>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var $table;
+        var rolesData;
+
+        $(function () {
+            getRoles();
+        });
+
+        function loadTabeData() {
+            $table = $('#menuTable');
+            $table.bootstrapTable({
+                url: '/WMenuMng/GetNavMenus',
+                idField: 'unique_code',
+                parentIdField: 'parent_id', //指定父id列
+                treeShowField: 'name',//在哪一列展开树形
+                //dataType: 'json',
+                pagination: false,
+                clickToSelect: true,
+                singleSelect: true,
+                columns: [
+                    {
+                        field: 'check', checkbox: true, formatter: function (value, row, index) {
+                            if (row.check == true) {
+                                return { checked: true };//设置选中
+                            }
+                        }
+                    },
+                    { field: 'name', title: '名称' },
+                    { field: 'hrl', title: 'URL' },
+                    { field: 'ntl', title: '是否全局菜单项' },
+                    { field: 'css_class', title: '菜单样式' },
+                    { field: 'li_id', title: '子菜单ID' },
+                    { field: 'roles', title: '分配给的角色', width: '100px;', formatter: 'xmlFormatter' },
+                    { field: 'operate', title: '操作', align: 'center', width: '360px', events: operateEvents, formatter: 'operateFormatter' },
+                ],
+                onPreBody: function () {
+                },
+
+                //加载后台数据库时用onLoadSuccess；加载JSON数据文件时，用onResetView
+                onLoadSuccess: function (data) {
+                    $table.treegrid({
+                        //initialState: 'collapsed',
+                        treeColumn: 1,
+                        expandAll: true,  //是否全部展开
+                        expanderExpandedClass: 'glyphicon glyphicon-minus',
+                        expanderCollapsedClass: 'glyphicon glyphicon-plus',
+                        onChange: function () {
+                            $table.bootstrapTable('resetWidth');
+                        }
+                    });
+
+                    $("#h_loading_mask").css("display", "none");
+                    $("#h_loading").css("display", "none");
+                },
+                onResetView: function (data) {
+                    $table.treegrid({
+                        treeColumn: 1,
+                    });
+                },
+                onCheck: function (row) {
+                    var datas = $table.bootstrapTable('getData');
+                    // 勾选子类
+                    //selectChilds(datas, row, "unique_code", "parent_id", true);
+                    // 刷新数据
+                    //$table.bootstrapTable('load', datas);
+                },
+                onPostBody: function () {
+                    //改变复选框样式
+                    $('#menuTable').find("input:checkbox").each(function (i) {
+                        var $check = $(this);
+                        if ($check.attr("id") && $check.next("label")) {
+                            return;
+                        }
+                        var name = $check.attr("name");
+                        var id = name + "a-" + i;
+                        var $label = $('<label for="' + id + '" onclick = stopBubbleEvent();></label>');
+                        $check.attr("id", id)
+                            .parent()
+                            .addClass("bella-checkbox")
+                            .children("span").remove();
+                        $check.parent().append($label);
+                    });
+
+                    //动态设置checkbox的那个td的css,不让它触发table的specified-table table td:hover
+                    $("#menuTable").find("tr").each(function () {
+                        var tdArr = $(this).children();
+                        tdArr.eq(0).css("overflow", "hidden").css("white-space", "nowrap");
+                    });
+                }
+            });
+        }
+
+        var getRoles = function () {
+            $.ajax({
+                type: 'POST',
+                url: "/WRole/GetRoles",
+                dataType: "JSON",
+                success: function (data) {
+                    rolesData = data;
+                    loadTabeData();
+                }
+            });
+
+        }
+
+        //当clickToSelect=true时，如果不阻止事件冒泡，则点击自定义CHECKBOX时会没有反应
+        var stopBubbleEvent = function () {
+            if (window.event) {//IE下阻止冒泡
+                event.cancelBubble = true;
+            } else {
+                event.stopPropagation();
+            }
+        }
+
+        // 格式化按钮
+        function operateFormatter(value, row, index) {
+            return [
+                '<button type="button" class="RoleOfadd btn btn-sm  btn-info" style="margin-right:15px;"><i class="fa fa-plus" ></i>&nbsp;新增</button>',
+                '<button type="button" class="RoleOfedit btn btn-sm   btn-info" style="margin-right:15px;"><i class="fa fa-pencil-square-o" ></i>&nbsp;修改</button>',
+                '<button type="button" class="RoleOfdelete btn btn-sm   btn-info" style="margin-right:15px;"><i class="fa fa-trash-o" ></i>&nbsp;删除</button>',
+                '<button type="button" class="RoleOfMenu btn btn-sm   btn-warning" style="margin-right:15px;"><i class="fa fa-key" ></i>&nbsp;角色分配</button>'
+            ].join('');
+        }
+
+        //初始化操作按钮的方法
+        window.operateEvents = {
+            'click .RoleOfadd': function (e, value, row, index) {
+                add(row, index);
+            },
+            'click .RoleOfdelete': function (e, value, row, index) {
+                del(row);
+            },
+            'click .RoleOfedit': function (e, value, row, index) {
+                update(row, index);
+            },
+            'click .RoleOfMenu': function (e, value, row, index) {
+                configAccess(row, index);
+            }
+        };
+
+        function xmlFormatter(value, row, index) {
+            var result = '';
+            var xmlStr = row.roles;
+            var role = $(xmlStr).find("Role");//操作xml
+            for (i = 0; i < role.length; i++) {
+                var roleid = $(role[i]).attr("roleid");
+                for (var j = 0; j < rolesData.length; j++) {
+                    if (rolesData[j].unique_code == roleid) {
+                        if (result == '')
+                            result += rolesData[j].role_name;
+                        else
+                            result += ',' + rolesData[j].role_name;
+                    }
+                }
+            }
+            return result;
+        }
+
+        function refreshTable() {
+            $('#menuTable').bootstrapTable("refresh");
+        }
+
+        function add(row, index) {
+            var content = "<iframe id='menuFrame' src='/WMenuMng/AddNavMenuV' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 680, 480, '增添菜单信息窗口','addmenuFrm');
+            var frame = document.getElementById("menuFrame");
+            frame.onload = function () {//等待iframe中的页面加载完毕，再执行子页面中的函数
+                var p = {};//向子页面传值
+                p.pid = row.parent_id;
+                p.id = row.unique_code;
+                p.index = index;
+                var fwin = frame.contentWindow;
+                fwin.param = p;
+            };
+        }
+
+        function update(row, index) {
+            if (row.parent_id > 0) {
+                var content = "<iframe id='menuFrame' src='/WMenuMng/ModiNavMenuV/" + row.unique_code + "' style='border:0;width:100%;height:100%;'></iframe>";
+                HM.dealwinWithId(content, 680, 400, '修改菜单信息窗口','modimenuFrm');
+            }
+            else {
+                HM.alertWin("根节点不能被修改！");
+            }
+        }
+
+        function del(row) {
+            if (row.parent_id == 0) {
+                HM.alertWin('根节点不能被删除！');
+                return;
+            }
+
+            var flag = verifyIfHasChilds(row);
+            if (flag) {//
+                HM.alertWin("此节点还有子菜单（节点），不能被删除！");
+            }
+            else {
+                HM.confirmWin(row.unique_code, "此菜单信息将被删除！确定吗？", '确认删除', 'delmenu', delSelectedNode);
+            }
+        }
+
+        var closeDealWin = function (winid) {
+            pop.close('deal-win-' + winid);
+        }
+
+        var closeConfirmWin = function () {
+            pop.close("confirm-win_delmenu");
+        }
+
+        var hintAddedAlready = function () { 
+            HM.alertWin('菜单信息已存在，无法重复添加！');
+        }
+
+        var hntAlrdyWhnUpdt = function () { 
+            HM.alertWin('同名菜单信息已存在，修改失败！');
+        }
+
+        var hintWin = function (t) {
+            HM.hintWin(t);
+        }
+
+        function delSelectedNode(id) {
+            $.ajax({
+                type: 'POST',
+                url: "/WMenuMng/DelMenInfo",
+                data: { unique_code: id },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin("菜单信息删除成功！");
+                        closeConfirmWin();
+                        refreshTable();
+                    }
+                }
+            });
+        }
+
+        function verifyIfHasChilds(row) {
+            var datas = $('#menuTable').bootstrapTable('getData');
+            for (var i in datas) {
+                if (datas[i]["parent_id"] == row["unique_code"]) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function selectChilds(datas, row, id, pid, checked) {
+            for (var i in datas) {
+                if (datas[i][pid] == row[id]) {
+                    datas[i].check = checked;
+                    selectChilds(datas, datas[i], id, pid, checked);
+                };
+            }
+        }
+
+        var configAccess = function (row, index) {
+            if (row.parent_id == 0) {
+                HM.alertWin('根节点不能分配角色！');
+                return;
+            }
+            //console.log(row.roles);
+            var content = "<iframe id='roleFrame' src='/WMenuMng/SelectRoleV/" + row.unique_code + "' style='border:0;width:100%;height:100%;'></iframe>";
+            //var content = "<iframe id='roleFrame' src='/WMenuMng/SelectRoleV/" + row.unique_code + "/"+ EnDeCoder.encode(row.roles) +"' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 680, 400, '选择角色窗口','slcroleFrm');
+            var frame = document.getElementById("roleFrame");
+            frame.onload = function () {//等待iframe中的页面加载完毕，再执行子页面中的函数
+                var fwin = frame.contentWindow;
+                fwin.rolesFrmParent =  EnDeCoder.encode(row.roles);//给子窗口传值
+            };
+        }
+
+        //子页面调用
+
+        var asignRoles = function (roles, menuId) {
+            var flag = verifyIfHasChilds2(menuId);
+            var ids = [];
+            if (flag) {//有子节点，提示是否也给子节点分配同样的角色
+                var title = "子菜单也分配同样的角色请选“带子菜单”，只给当前菜单分配请选“不带子菜单”，不分配请选“取消”！";
+                pop.custom({
+                    title: "<i class='fa fa-info-circle' style='color:#f0b308;font-size:15px;padding:15px 0 0 10px;'> 确认提示</i>",
+                    content: "<table style='height:100%;width:calc(100% - 20px);margin:0 10px 0px 10px;'><tr><td style='width:58px;'><i class='fa fa-exclamation-triangle' style='color:#f0b308;font-size:58px; float:left;'></i></td><td style='height:100%;vertical-align:middle;'><span style='font-size:15px;'>" + title + "</span></td></tr></table> ",
+                    button: [
+                        ["info", "带子菜单", function () {
+                            asignRolesWithSons(roles, menuId);
+                        }],
+                        ["warning", "不带子菜单", function () {
+                            asignRolesSelf(roles, menuId);
+                        }],
+                        ["default", "取消", function (e) {
+                            pop.close(e);
+                        }]],
+                    sizeAdapt: false,
+                    buttonSpcl: "",
+                    anim: "fadeIn-zoom",
+                    width: 450,
+                    height: 200,
+                    id: "confirm-win_menurole",
+                    place: 5,
+                    drag: true,
+                    index: true,
+                    toClose: false,
+                    mask: true,
+                    class: false
+                });
+            }
+            else {
+                asignRolesSelf(roles, menuId);
+            }
+
+        }
+
+        var asignRolesSelf = function (roles, menuId) {
+            var ids = [];
+            ids.push(menuId);
+            $.ajax({
+                type: 'POST',
+                url: "/WMenuMng/AsignRoles",
+                data: { ids: ids, roles: roles },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin('分配角色成功！');
+                        closeDealWin('slcroleFrm');
+                        pop.close('confirm-win_menurole');
+                        $('#menuTable').bootstrapTable('refresh');
+                    }
+                }
+            });
+        }
+
+        var asignRolesWithSons = function (roles, menuId) {
+            var ids = [];
+            ids.push(menuId);
+            var all = $('#menuTable').bootstrapTable('getData');
+            for (var j = 0; j < all.length; j++) {
+                if (all[j].parent_id == menuId) {
+                    ids.push(all[j].unique_code);
+                }
+            }
+            $.ajax({
+                type: 'POST',
+                url: "/WMenuMng/AsignRoles",
+                data: { ids: ids, roles: roles },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin('分配角色成功！');
+                        closeDealWin('slcroleFrm');
+                        pop.close('confirm-win_menurole');
+                        $('#menuTable').bootstrapTable('refresh');
+                    }
+                }
+            });
+        }
+
+        function verifyIfHasChilds2(menuId) {
+            var datas = $('#menuTable').bootstrapTable('getData');
+            for (var i in datas) {
+                if (datas[i]["parent_id"] == menuId) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-treegrid.js"></script>
+    <script src="~/lib/bootstrap-table/js/jquery.treegrid.js"></script>
+    <script src="~/lib/bootstrap-table/js/jquery.treegrid.bootstrap3.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+    <script src="~/js/endecoder.js"></script>
+}
+

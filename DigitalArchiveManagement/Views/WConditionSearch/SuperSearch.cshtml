@@ -1,0 +1,173 @@
+﻿@using System.Data;
+@{
+    ViewData["Title"] = "高级搜索";
+}
+@model DataTable
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div id="div1"></div>
+        <div style="text-align:center;" id="btndiv"></div>
+    </div>
+
+    <script>
+
+        var operatorSelectData;
+        var andorSelectData;
+        var rowdatas = 0;//字段列表
+
+        $(function () {
+
+
+            $.ajax({
+                type: 'post',
+                url: '/WConditionSearch/GetOperators',
+                dataType: "json",
+                success: function (data) {
+                    operatorSelectData = data;
+                    loadTable();//加载控件列表
+
+                    var h = '<button type="button" class="btn btn-info" id="okSearchBtn" onclick="executeSearch();">确定</button>&nbsp;<button type="button" class="btn btn-warning" id="cancelBtn" onclick="cancelClick();">重置</button>';
+                    $("#btndiv").html(h);
+
+                    $("#h_loading_mask").css("display", "none");//关闭加载提示
+                    $("#h_loading").css("display", "none");
+                }
+            });
+            $.ajax({
+                type: 'post',
+                url: '/WConditionSearch/GetAndOrs',
+                dataType: "json",
+                success: function (data) {
+                    andorSelectData = data;
+                }
+            });
+
+        });
+
+        var loadTable = function () {
+             $.ajax({
+                type: 'post',
+                url: '/WConditionSearch/CreateSuperSearchControls',
+                dataType: "json",
+                data: {id:'@ViewData["table"]'},
+                success: function (data) {
+                    var html = addTableTrs(data);
+                    $("#div1").html(html);
+                    rowdatas = data;
+                }
+            });
+        }
+
+        var addTableTrs = function (datas) {
+            var htmlArr = [];
+            htmlArr.push('<table style="width:100%;">');
+            for (var i = 0; i < datas.length; i++) {
+                var colname = datas[i].col_name;
+                var showname = datas[i].show_name;
+                var html = addTrControls(colname, showname, operatorSelectData);
+                htmlArr.push(html);
+            }
+            htmlArr.push('</table>');
+            return htmlArr.join('');
+        }
+
+        var addTrControls = function (colname, showname, opdatas) {
+            var html = [
+                '<tr>',
+                '<td style="width:60px;"><b>',
+                showname,
+                '</b></td>',
+                '<td style="padding:5px;"><div class="form-inline" id="div_' + colname + '"><div class="form-group" >',
+                '<input type="hidden" value="0" id="hide_' + colname +'"></input>',
+                '<select class="form-control" id="opr0_' + colname + '" style="width:100px;margin-right:2px;">' + addSelectOpts(opdatas) + '</select>',
+                '<input type="text" class="form-control" id="txt0_' + colname + '" style="width:100px;;margin-right:2px;"></input>',
+                '<button type="text" class="form-control" id="btn0_' + colname + '" onclick="additionalCtrls(this);">增加</button>',
+                '</div></div></td>',
+                '</tr>',
+            ].join('');
+            return html;
+        }
+
+        var addSelectOpts = function (datas) {
+            var html = '';
+            for (var i = 0; i < datas.length; i++) {
+                html += "<option value='" + datas[i].code_value + "'>" + datas[i].code_name + "</option>";
+            }
+            return html;
+        }
+
+        var additionalCtrls = function (t) {
+            var btnid = $(t).attr("id");
+            var colname = btnid.substring(5);
+            var c = parseInt($("#hide_" + colname).val());
+            c = c + 1;
+            if (c > 2) {
+                HM.alertWin("增加不能超过两次！");
+                return;
+            }
+            $("#hide_" + colname).val(c)
+            var html = additionalTrControls(colname, operatorSelectData, andorSelectData, c);
+            $("#div_" + colname).append(html);
+            $(t).remove();
+        }
+
+        var additionalTrControls = function (colname, opdatas, andordatas,c) {
+            var html = [
+                '<div class="form-group">',
+                '<select class="form-control" id="andor'+ c +'_' + colname + '" style="width:80px;margin:0 2px 0 5px;">' + addSelectOpts(andordatas) + '</select>',
+                '<select class="form-control" id="opr'+ c +'_' + colname + '" style="width:100px;margin-right:2px;">' + addSelectOpts(opdatas) + '</select>',
+                '<input type="text" class="form-control" id="txt'+ c +'_' + colname + '" style="width:100px;;margin-right:2px;"></input>',
+                '<button type="text" class="form-control" id="btn'+ c +'_' + colname + '" onclick="additionalCtrls(this);">增加</button>',
+                '</div>',
+            ].join('');
+            return html;
+        }
+
+        var cancelClick = function () {
+            window.location.reload();
+        }
+
+        var executeSearch = function () {
+            var toBackEndParams = [];
+            for (var i = 0; i < rowdatas.length; i++) {
+                var rowParams = [];
+                var colName = rowdatas[i].col_name;
+                $("input[type='text'][id*='" + colName + "']").each(function () {//*=包含某字符串
+                    var v = $(this).val();
+                    if ($.trim(v) != '') {
+                        var txtId = $(this).attr('id');
+                        var counter = txtId.substring(3, 4);
+                        var c = parseInt(counter);
+                        var d = {
+                            ID: c,
+                            AndOr: $("#andor" + c + "_" + colName).length == 0 ? 'AND' : $("#andor" + c + "_" + colName).val(),
+                            Condition: $("#opr" + c + "_" + colName).val(),
+                            Value: v,
+                            Field: colName
+                        };
+                        rowParams.push(d);
+                    }
+                });
+                if (rowParams.length > 0) {
+                    toBackEndParams.push(rowParams);
+                }
+            }
+
+            parent.superParamList = toBackEndParams;//向父页面传参
+            parent.superSearchByCustomCondition();//执行查询
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

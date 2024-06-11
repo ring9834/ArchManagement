@@ -1,0 +1,45 @@
+﻿.btn-archbutton {
+    color: #337ab7;
+    background-color: #CCE8FF;
+    border-color: #99D1FF;
+}
+
+    .btn-archbutton:hover,
+    .btn-archbutton:focus,
+    .btn-archbutton:active,
+    .btn-archbutton.active,
+    .open .dropdown-toggle.btn-archbutton {
+        color: #337ab7;
+        background-color: #C0E0FA;
+        border-color: #99D1FF;
+    }
+
+    .btn-archbutton:active,
+    .btn-archbutton.active,
+    .open .dropdown-toggle.btn-archbutton {
+        background-image: none;
+    }
+
+    .btn-archbutton.disabled,
+    .btn-archbutton[disabled],
+    fieldset[disabled] .btn-archbutton,
+    .btn-archbutton.disabled:hover,
+    .btn-archbutton[disabled]:hover,
+    fieldset[disabled] .btn-archbutton:hover,
+    .btn-archbutton.disabled:focus,
+    .btn-archbutton[disabled]:focus,
+    fieldset[disabled] .btn-archbutton:focus,
+    .btn-archbutton.disabled:active,
+    .btn-archbutton[disabled]:active,
+    fieldset[disabled] .btn-archbutton:active,
+    .btn-archbutton.disabled.active,
+    .btn-archbutton[disabled].active,
+    fieldset[disabled] .btn-archbutton.active {
+        background-color: #CCE8FF;
+        border-color: #99D1FF;
+    }
+
+    .btn-archbutton .badge {
+        color: #CCE8FF;
+        background-color: #337ab7;
+    }

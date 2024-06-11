@@ -1,0 +1,236 @@
+﻿
+@{
+    ViewData["Title"] = "查看调档车";
+}
+
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+    <link href="~/css/arch-button.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid" id="toolbars">
+        <div class="specified-table" id="gridContainer">
+            @*<table id="psGrid"></table>
+            <table id="fGrid"></table>*@
+        </div>
+
+    </div>
+    <script>
+
+        $(function () {
+            loadDynamicTables();//根据数据库中数据动态加载表格
+        });
+
+
+        var loadDynamicTables = function () {
+            //基本搜索高级搜索动态加载表格
+            var containerDiv = $('#gridContainer');
+            containerDiv.empty();//added on 20201117 for debugging
+            $.ajax({
+                type: 'POST',
+                url: "/WVirStock/GetTablesInSquare",
+                data: { userid: '@ViewData["userid"]', stockFrm:'@ViewData["StockFrmInfo"]'},
+                dataType: "JSON",
+                success: function (data) {
+                    for (var i = 0; i < data.length; i++) {
+                        var dti = data[i];                       
+                        if ($.trim(dti.fieldsStr) != '') {//this condition added on 20201116
+                            containerDiv.append('<table id="ps_' + dti.tableName + '"></table>'); //console.log($('#ps_' + dti.tableName).length);
+                            $('#toolbars').append('<div id="tablePstoolbar_' + dti.tableName + '"><h4><span class="label label-info">档案格内档案</span></h4></div>');
+                            loadTableData('#ps_' + dti.tableName, '/WVirStock/GetArchsByLocate', dti.tableName, dti.fieldsStr, dti.colFieldStr);
+                        }                        
+                    }
+                    $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                    $("#h_loading").css("display", "none");
+                }
+            });
+        }
+
+        var loadTableData = function (grid ,url, table, fieldsStr, colFieldStr) {
+            var flds = '';
+            if (colFieldStr == '') {
+                flds = '[' + colFieldStr + "{ field: 'operate', title: '操作', align: 'center', events: operateEvents, formatter: 'operateFormatter1' }]";
+            }
+            else {
+                flds = '[' + colFieldStr + ",{ field: 'operate', title: '操作', align: 'center', events: operateEvents, formatter: 'operateFormatter1' }]";
+            }
+
+            $(grid).bootstrapTable('destroy');
+            $table = $(grid).bootstrapTable({
+                url: url,
+                method: 'POST',                      //请求方式（*）
+                contentType: "application/x-www-form-urlencoded",
+                silent: true, //静态刷新
+                toolbar: '#tablePstoolbar_' + table,              //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                pagination: true,                   //是否显示分页（*）
+                sortable: true,                     //是否启用排序
+                sortOrder: "asc",                   //排序方式
+                sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+                pageNumber: 1,                      //初始化加载第一页，默认第一页,并记录
+                pageSize: 15,                     //每页的记录行数（*）
+                pageList: [15, 30, 50, 100],        //可供选择的每页的行数（*）
+                search: false,                      //是否显示表格搜索
+                strictSearch: true,
+                showColumns: true,                  //是否显示所有的列（选择显示的列）
+                showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                clickToSelect: true,                //是否启用点击选中行
+                //height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                uniqueId: "Unique_code",                     //每一行的唯一标识，一般为主键列
+                showToggle: true,                   //是否显示详细视图和列表视图的切换按钮
+                showExport: true,
+                cardView: false,                    //是否显示详细视图
+                detailView: false,                  //是否显示父子表
+                paginationLoop: false,
+                showLoading: false,
+                singleSelect: false,                //true只能单选，false为多选
+                exportDataType: "selected",        //导出checkbox选中的行数
+                showFullscreen: true,
+                useRowAttrFunc: true,
+                reorderableRows: true,
+                //得到查询的参数
+                queryParams: function (params) {
+                    //这里的键的名字和控制器的变量名必须一致，这边改动，控制器也需要改成一样的
+                    var temp = {
+                        pageSize: params.limit,                         //页面大小
+                        pageIndex: params.offset / params.limit,   //页码
+                        tableName: table,
+                        fieldsStr: fieldsStr,
+                        stockFrm: '@ViewData["StockFrmInfo"]',
+                    };
+                    return temp;
+                },
+                columns:eval('(' + flds + ')'),//modified on 2020年3月19日，以JS对象的形式
+                onLoadSuccess: function (data) {
+                    //$("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                    //$("#h_loading").css("display", "none");
+                },
+                formatLoadingMessage: function () {
+                    return "请稍等，正在加载中···";
+                },
+                onPostBody: function () {
+                },
+            });
+        }
+
+        //查看原文
+        window.operateEvents = {
+            'click .RoleOfView': function (e, value, row, index) {
+                viewYw(row);//基本高级检索看原文
+            },
+            'click .RoleOfDel': function (e, value, row, index) {
+                delrec(row);
+            }
+        };
+
+        // 格式化按钮
+        function operateFormatter1(value, row, index) {
+            if ((row.yw == null || row.yw == 'undefined' || row.yw == '') &&
+                (row.yw_xml == null || row.yw_xml == 'undefined' || row.yw_xml == '')) {
+                return [
+                    '<button type="button" class="RoleOfView btn btn-sm  btn-default" style="margin-right:15px;"><i class="glyphicon glyphicon-file" ></i>&nbsp;原文</button>',
+                    '<button type="button" class="RoleOfDel btn btn-sm  btn-danger" style="margin-right:15px;"><i class="glyphicon glyphicon-file" ></i>&nbsp;删除</button>'
+                ].join('');
+            }
+            else {
+                return [
+                    '<button type="button" class="RoleOfView btn btn-sm  btn-info" style="margin-right:15px;"><i class="glyphicon glyphicon-file" ></i>&nbsp;原文</button>',
+                    '<button type="button" class="RoleOfDel btn btn-sm  btn-danger" style="margin-right:15px;"><i class="glyphicon glyphicon-file" ></i>&nbsp;删除</button>'
+                ].join('');
+            }
+        }
+
+        function viewYw(row) {
+            $.ajax({
+                type: 'POST',
+                url: "/WPdfView/IfYwExists",
+                data: { table: row.tableName, userid: '@ViewData["userid"]', uniquecode: row.unique_code },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst == 0) {
+                        HM.alertWin(data.info);
+                        return;
+                    }
+                    else {
+                        var ulr = '/WPdfView/Index/' + row.tableName + '/' + '@ViewData["userid"]' + '/' + row.unique_code;
+                        //var ulr = '/WPdfView/Index1/' + escape(data.ywpath);
+                        //top.location.href = ulr;
+                        window.open(ulr,'_blank');
+                    }
+                }
+            });
+        }
+
+        function delrec(row) {
+            HM.confirmWin(row, '确认删除吗？', '确认删除', 'delone', confirmDelete);
+        }
+
+        function confirmDelete(row) {
+            $.ajax({
+                type: 'POST',
+                url: "/WVirStock/DelSquareData",
+                data: { id: row.unique_code, table: row.tableName,stockFrm: '@ViewData["StockFrmInfo"]'},
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        pop.close('confirm-win_delone');
+                        HM.hintWin('删除成功！');                        
+                        loadDynamicTables();//刷新表格
+                        parent.MakeSummaryByLocate();//刷新密集架中档号集合的数据 modified on 20201128
+                    }
+                }
+            });
+        }
+
+        function encode(str) {
+            // 对字符串进行编码
+            var encode = encodeURI(str);
+            // 对编码的字符串转化base64
+            var base64 = btoa(encode);
+            return base64;
+        }
+        // base64转字符串
+        function decode(base64) {
+            // 对base64转编码
+            var decode = atob(base64);
+            // 编码转字符串
+            var str = decodeURI(decode);
+            return str;
+        }
+
+        // 对Date的扩展，将 Date 转化为指定格式的String
+        // 月(M)、日(d)、小时(h)、分(m)、秒(s)、季度(q) 可以用 1-2 个占位符，
+        // 年(y)可以用 1-4 个占位符，毫秒(S)只能用 1 个占位符(是 1-3 位的数字)
+        Date.prototype.Format = function (fmt) { //author: meizz
+            var o = {
+                "M+": this.getMonth() + 1, //月份
+                "d+": this.getDate(), //日
+                "H+": this.getHours(), //小时
+                "m+": this.getMinutes(), //分
+                "s+": this.getSeconds(), //秒
+                "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+                "S": this.getMilliseconds() //毫秒
+            };
+            if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            for (var k in o)
+                if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+            return fmt;
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

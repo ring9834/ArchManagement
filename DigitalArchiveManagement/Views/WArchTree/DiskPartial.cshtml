@@ -1,0 +1,36 @@
+﻿@using System.IO
+@model List<FilePathInfo>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>文件名</th>
+            <th>磁盘路径</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @if (item.Attributes == FileAttributes.Directory)
+                    {
+                        <img src="/images/icon/Directory1.jpg" /><a href="#" onclick="loadDirectories2('@item.FullName');">@item.Name</a>
+                    }
+                    else if (item.Attributes == FileAttributes.Archive)
+                    {
+                        <img src="/images/icon/@(item.Extension.GetExtensionIcon())" />@item.Name//当时具体文件时，只显示文件名，不能点进去打开
+                    }
+                    else
+                    {
+                        <img src="/images/icon/@(item.Extension.GetExtensionIcon())" /><a href="#" onclick="loadDirectories2('@item.FullName');">@item.Name</a>
+                    }
+                    @*@item.Attributes*@
+                </td>
+                <td>@item.FullName</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+

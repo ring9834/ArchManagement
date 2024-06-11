@@ -1,0 +1,88 @@
+﻿@charset "utf-8";
+
+#top_navigation {
+    height: 54px;
+    z-index: 99999;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    background: #0099cc;
+    font-family: "Kreon";
+}
+
+#top_navigation a {
+    color:#fff;
+}
+    .navigation_center {
+    width: 100%;
+    padding-top: 0;
+}
+
+    .navigation_center ul li {
+        display: inline;
+        float: left;
+        position: relative;
+    }
+
+.logo_Top,
+.vm_top {
+    margin-left: 30px;
+    margin-top: 6px;
+    color: #ffffff;
+    font-weight: bold;
+    font-family: "微软雅黑"
+}
+
+.vm_top {
+    position: relative;
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: normal;
+    background-image: url(../i/2vm.png);
+    background-repeat: no-repeat;
+    background-position: 3px center;
+    height: 20px;
+    padding-left: 25px;
+    line-height: 20px;
+    border: 1px solid #414141;
+    padding-right: 5px;
+    border-radius: 5px;
+}
+
+.vm_self {
+    position: absolute;
+    top: 20px;
+    left: 0px;
+    background-color: #fff;
+    height: 170px;
+    width: 150px;
+    display: none;
+    padding: 30px;
+}
+
+.vm_top:hover .vm_self {
+    display: block;
+}
+
+.logo_Top a:hover {
+    text-decoration: underline;
+}
+
+li.remove_frame {
+    margin-left: 17px;
+    float: right !important;
+    margin-right: 30px;
+}
+
+    li.remove_frame a {
+        background: url(../i/cross2.png) no-repeat 0 0;
+        width: 20px;
+        height: 21px;
+        display: block;
+        margin-top: 18px;
+        transition: all .3s ease-out 0s;
+    }
+
+        li.remove_frame a:hover {
+            background-position: 0 -21px;
+        }

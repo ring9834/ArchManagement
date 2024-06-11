@@ -1,0 +1,114 @@
+﻿
+@{
+    ViewData["Title"] = "查看借阅单审批";
+}
+
+@section head {
+    <link href="~/lib/jquery-radiocheck/jquery-labelauty.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="alert alert-warning" style="margin-top:8px;font-size:13px;">
+            <i class="fa fa-volume-up"></i><strong> 提醒!</strong> 1、此页面为借阅单审批人所用；2、审批说明很重要，请认真填写。
+        </div>
+        <div class="row" style="padding: 5px">
+        </div>
+        <div class="row">
+            <div class="form-group col-md-12">
+                <div class="input-group">
+                    <span class="input-group-addon">申请信息</span>
+                    <div style="padding:3px; margin-left:5px;color:#555555;">
+                        <div id="applier" style="padding:2px;">申请人：</div>
+                        <div id="applyInfo" style="padding:2px;">申请事由：</div>
+                        <div id="applyComment" style="padding:2px;">备注信息：</div>
+                        <div id="expDate" style="padding:2px;">申请查看期限：</div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-12">
+                <div class="input-group">
+                    <span class="input-group-addon">审批结果</span>
+                    <ul style="margin:0;list-style-type:none;">
+                        <li style="margin-top:8px;display:inline-block;"><input type="radio" name="chkResultRadio" data-labelauty="允许查看" value="yes"></li>
+                        <li style="margin-top:8px;display:inline-block;"><input type="radio" name="chkResultRadio" data-labelauty="拒绝查看" value="no"></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-12">
+                <div class="input-group">
+                    <span class="input-group-addon">审批说明</span>
+                    <textarea class="form-control" rows="3" id="checkComment"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-12" style="margin-bottom:2px;">
+                <input type="button" class="btn btn-success" id="okbutton" onclick="summitApplct();" value="确定" />
+                <input type="button" class="btn btn-danger" value="重置" />
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            GetApplierInfo();
+            $(':input').labelauty();//初始化按钮样式的radio
+
+            var rd = $('input[type=radio][name=chkResultRadio]');
+            rd.eq(0).attr("checked", "checked");
+
+            $("#h_loading_mask").css("display", "none");
+            $("#h_loading").css("display", "none");
+        });
+
+        function GetApplierInfo() {
+            $.ajax({
+                type: 'post',
+                url: '/WUseRcdAuditing/GetApplierInfo',
+                dataType: "json",
+                data: { uniquecode: '@ViewData["id"]'},
+                success: function (data) {
+                    if (data.length > 0) {
+                        $('#applier').text('申请人：' + data[0].nick_name + '(' + data[0].applier +')');
+                        $('#applyInfo').text('申请事由：' + data[0].application_info);
+                        $('#applyComment').text('备注信息：' + data[0].comment);
+                        $('#expDate').text('申请查看期限：' + data[0].expdate);
+                    }
+                }
+            });
+        }
+
+        var summitApplct = function () {
+            var result = $('input[type=radio][name=chkResultRadio]:checked').val()
+            var comment = $('#checkComment').val();
+            $.ajax({
+                type: 'post',
+                url: '/WUseRcdAuditing/UpdateAuditResult',
+                dataType: "json",
+                data: { uniquecode: '@ViewData["id"]', checkResult: result, checkComment: comment },
+                success: function (data) {
+                    if (data > 0) {
+                        parent.closeAuditWin();//关闭审批窗
+                        parent.getAuditTodoList();//刷新列表
+                    }
+                }
+            });
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/jquery-radiocheck/jquery-labelauty.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

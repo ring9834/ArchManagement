@@ -1,0 +1,144 @@
+﻿
+@{
+    ViewData["Title"] = "目录批量修改";
+}
+@model List<ColDictionary>
+
+@section head {
+    <link href="~/lib/jquery-radiocheck/jquery-labelauty.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <form class="form-horizontal" role="form" style="margin-top:8px;">
+            <div class="form-group">
+                <label for="fieldsSelect" class="col-sm-2 control-label">修改字段</label>
+                <div class="col-sm-10">
+                    <select class="form-control" id="fieldsSelect"></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="updateTypeRadio" class="col-sm-2 control-label">修改方式</label>
+                <div class="col-sm-10">
+                    <ul style="margin-left:-35px;list-style-type:none;">
+                        <li style="margin-top:8px;display:inline-block;"><input type="radio" name="updateTypeRadio" data-labelauty="内容全部替换" value="0"></li>
+                        <li style="margin-top:8px;display:inline-block;"><input type="radio" name="updateTypeRadio" data-labelauty="空白内容替换" value="1"></li>
+                        <li style="margin-top:8px;display:inline-block;"><input type="radio" name="updateTypeRadio" data-labelauty="内容部分替换" value="2" checked="checked"></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="updateTypeRadio" class="col-sm-2 control-label">内容</label>
+                <div class="col-sm-10">
+                    <div class="form-inline">
+                        <input type="text" class="form-control" style="margin-bottom:8px;" id="updateSore" placeholder="要替换的原内容">
+                        <input type="text" class="form-control" style="margin-bottom:8px;" id="updateValue" placeholder="替换为的内容">
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div style="text-align:center;">
+            <button type="button" class="btn btn-info" id="okbunchBtn">确定</button>
+            <button type="button" class="btn btn-warning" id="cancelBtn">重置</button>
+        </div>
+    </div>
+    <script>
+        var loggedUser = '';
+        var whereConditon = '';
+        var params;
+        $(function () {
+            $(':input').labelauty();//初始化按钮样式的radio
+            initFieldsSelect();
+
+            $("#okbunchBtn").bind("click", bunchUpdateCatalog);
+            $("#cancelBtn").bind("click", resetrec);
+
+            $('input[type=radio][name=updateTypeRadio]').change(function () {
+                if (this.value == '0' || this.value == '1') {
+                    $('#updateSore').css('display','none');
+                }
+                else {
+                    $('#updateSore').css('display', 'block');
+                }
+            });
+        });
+
+        var initFieldsSelect = function () {
+            $.ajax({
+                type: 'POST',
+                url: "/WManageStore/GetFieldsByTableName/"+'@ViewData["table"]',
+                dataType: "JSON",
+                success: function (data) {
+                    var select = $('#fieldsSelect');
+                    select.append("<option value='-1'>--请选择--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                        select.append("<option value='" + data[i].col_name + "'>" + data[i].show_name + "</option>");
+                    }
+
+                    $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                    $("#h_loading").css("display", "none");
+                }
+            });
+        }
+
+        var bunchUpdateCatalog = function () {
+            if ($('#fieldsSelect').val() == '-1') {
+                HM.alertWin('请选择批量修改的目标字段！');
+                return;
+            }
+            var radios = $('input:radio[name="updateTypeRadio"]:checked');
+            if (radios.val() == '2') {
+                var updateSore = $('#updateSore').val();
+                if ($.trim(updateSore) == '') {
+                    HM.alertWin('要替换的原内容,不能为空！');
+                    return;
+
+                }
+            }
+            var updateValue = $('#updateValue').val();
+            if ($.trim(updateValue) == '') {
+                HM.alertWin('替换为的内容,不能为空！');
+                return;
+            }
+
+            HM.confirmWin('@ViewData["table"]', '预归档库中的记录都将被修改，确认吗？如果想在另外的记录集中修改，请使用基本搜索和高级搜索。', '确认修改','bunchUpdate', executeBunchUpdate);
+        }
+
+        var executeBunchUpdate = function (table) {
+            //alert(table);
+            HM.pageLoading();
+            var radios = $('input:radio[name="updateTypeRadio"]:checked');
+            $.ajax({
+                type: 'POST',
+                url: "/WManageStore/BunchUpdateRecs",
+                data: { table: '@ViewData["table"]', where: whereConditon, pms: params, searchmode: '@ViewData["searchMode"]', field: $('#fieldsSelect').val(), source: $('#updateSore').val(), dest: $('#updateValue').val(), flag: radios.val(), userid: loggedUser },
+                dataType: "JSON",
+                success: function (data) {
+                    HM.closePageLoading();
+                    if (data.rst > 0) {
+                        pop.close('confir-win_bunchUpdate');//关闭确认窗口
+                        parent.closeDealWin('bunchUpdate');//通过父页面关闭本窗口
+                        parent.refreshTableData();
+                        parent.popModifySuccessWin();//提示更新成功
+                    }
+                }
+            });
+        }
+
+        var resetrec = function () {
+            $('#fieldsSelect').val('-1');
+            $('input[type=radio][name=updateTypeRadio]').eq(2).attr('checked', 'checked');
+            $('#updateSore').val('');
+            $('#updateValue').val('');
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/jquery-radiocheck/jquery-labelauty.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

@@ -1,0 +1,336 @@
+﻿
+@{
+    ViewData["Title"] = "Drag To Another Table";
+}
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.min.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+    <link href="~/lib/jquery-ui/js/jquery-ui.min.css" rel="stylesheet" />
+}
+
+@section body {
+
+    <div class="container">
+        <div class="row">
+            <div id="toolbar_right" class="btn-group">
+                <button id="btn_cancel" type="button" class="btn btn-default">
+                    <i class="glyphicon glyphicon-backward" aria-hidden="true"></i> 撤销
+                </button>
+                <button id="btn_insertorder" type="button" class="btn btn-default">
+                    <i class="glyphicon glyphicon-plus" aria-hidden="true"></i> 插单
+                </button>
+            </div>
+            <div id="div_left" class="col-md-6">
+                <table id="tb_left"></table>
+            </div>
+            <div id="div_right" class="col-md-6">
+                <table id="tb_right"></table>
+            </div>
+        </div>
+        <div class="alert alert-warning">
+            <i class="fa fa-volume-up"></i><strong> 提醒!</strong> 1、左边表格的内容可以拖动到右边表格内；2、若想撤销，请点右边表格上方的“撤销”按钮。
+        </div>
+    </div>
+
+    <script>
+        var i_statuindex = 0;
+        //此数组用于保存撤销操作每一步的数据
+        var arrdata = [];
+        var m_oTable = null;
+
+        window.onload = function () {
+            m_oTable = new oTableInit();
+            m_oTable.initiateLeftTb();
+            m_oTable.initiateRightTb();
+            $('#tb_right > tr').sortable();
+            buttonInit();
+        };
+
+        //当clickToSelect=true时，如果不阻止事件冒泡，则点击自定义CHECKBOX时会没有反应
+        var stopBubbleEvent = function () {
+            if (window.event) {//IE下阻止冒泡
+                event.cancelBubble = true;
+            } else {
+                event.stopPropagation();
+            }
+        }
+
+        var oTableInit = function () {
+            this.initiateLeftTb = function () {
+                //初始化左边表格
+                $('#tb_left').bootstrapTable('destroy');
+                $('#tb_left').bootstrapTable({
+                    url: '/DragToAnotherTable/GetUsersWithPageA?rnd=' + Math.random(),                      //请求后台的URL（*）
+                    method: 'POST',                      //请求方式（*）
+                    contentType: "application/x-www-form-urlencoded",
+                    silent: true, //静态刷新
+                    //toolbar: '#archCrudToolbar',              //工具按钮用哪个容器
+                    striped: true,                      //是否显示行间隔色
+                    cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                    pagination: true,                   //是否显示分页（*）
+                    sortable: true,                     //是否启用排序
+                    sortOrder: "asc",                   //排序方式
+                    sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+                    pageNumber: 1,                      //初始化加载第一页，默认第一页,并记录
+                    pageSize: 10,                     //每页的记录行数（*）
+                    pageList: [10, 25, 50, 100],        //可供选择的每页的行数（*）
+                    search: false,                      //是否显示表格搜索
+                    strictSearch: true,
+                    showColumns: true,                  //是否显示所有的列（选择显示的列）
+                    showRefresh: true,                  //是否显示刷新按钮
+                    minimumCountColumns: 2,             //最少允许的列数
+                    clickToSelect: true,                //是否启用点击选中行
+                    //height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                    uniqueId: "ID",                     //每一行的唯一标识，一般为主键列
+                    showToggle: true,                   //是否显示详细视图和列表视图的切换按钮
+                    showExport: true,
+                    cardView: false,                    //是否显示详细视图
+                    detailView: false,                  //是否显示父子表
+                    paginationLoop: false,
+                    showLoading: false,
+                    singleSelect: false,                //true只能单选，false为多选
+                    exportDataType: "selected",        //导出checkbox选中的行数
+                    showFullscreen: true,
+                    //得到查询的参数
+                    queryParams: function (params) {
+                        //这里的键的名字和控制器的变量名必须一致，这边改动，控制器也需要改成一样的
+                        var temp = {
+                            pageSize: params.limit,                         //页面大小
+                            pageIndex: params.offset / params.limit   //页码
+                        };
+                        return temp;
+                    },
+                    columns: [
+                        {
+                            field: 'check', checkbox: true, formatter: function (value, row, index) {
+                                if (row.check == true) {
+                                    // console.log(row.serverName);
+                                    //设置选中
+                                    return { checked: true };
+                                }
+                            }
+                        }, {
+                            field: 'ID',
+                            title: 'ID'
+                        }, {
+                            field: 'UserName',
+                            title: '用户名'
+                        }, {
+                            field: 'Sex',
+                            title: '性别'
+                        }, {
+                            field: 'Age',
+                            title: '年龄'
+                        },
+                    ],
+                    formatLoadingMessage: function () {
+                        return "请稍等，正在加载中···";
+                    },
+                    onPostBody: function () {
+                        //改变复选框样式
+                        $('#tb_left').find("input:checkbox").each(function (i) {
+                            var $check = $(this);
+                            if ($check.attr("id") && $check.next("label")) {
+                                return;
+                            }
+                            var name = $check.attr("name");
+                            var id = name + "a-" + i;
+                            var $label = $('<label for="' + id + '" onclick = stopBubbleEvent();></label>');
+                            $check.attr("id", id)
+                                .parent()
+                                .addClass("bella-checkbox")
+                                .children("span").remove();
+                            $check.parent().append($label);
+                        });
+                    },
+                    onLoadSuccess: function (data) {
+                        //表格加载完成之后初始化拖拽
+                        InitDrag();
+                    }
+                });
+            };
+
+            this.initiateRightTb = function () {
+                //初始化右边表格
+                $('#tb_right').bootstrapTable('destroy');
+                $('#tb_right').bootstrapTable({
+                    url: "/DragToAnotherTable/GetUsersWithPageB",                      //请求后台的URL（*）
+                    method: 'POST',                      //请求方式（*）
+                    contentType: "application/x-www-form-urlencoded",
+                    silent: true, //静态刷新
+                    toolbar: '#toolbar_right',              //工具按钮用哪个容器
+                    striped: true,                      //是否显示行间隔色
+                    cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                    pagination: true,                   //是否显示分页（*）
+                    sortable: true,                     //是否启用排序
+                    sortOrder: "asc",                   //排序方式
+                    sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+                    pageNumber: 1,                      //初始化加载第一页，默认第一页,并记录
+                    pageSize: 10,                     //每页的记录行数（*）
+                    pageList: [10, 25, 50, 100],        //可供选择的每页的行数（*）
+                    search: false,                      //是否显示表格搜索
+                    strictSearch: true,
+                    showColumns: true,                  //是否显示所有的列（选择显示的列）
+                    showRefresh: true,                  //是否显示刷新按钮
+                    minimumCountColumns: 2,             //最少允许的列数
+                    clickToSelect: true,                //是否启用点击选中行
+                    //height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                    uniqueId: "ID",                     //每一行的唯一标识，一般为主键列
+                    showToggle: true,                   //是否显示详细视图和列表视图的切换按钮
+                    showExport: true,
+                    cardView: false,                    //是否显示详细视图
+                    detailView: false,                  //是否显示父子表
+                    paginationLoop: false,
+                    showLoading: false,
+                    singleSelect: false,                //true只能单选，false为多选
+                    exportDataType: "selected",        //导出checkbox选中的行数
+                    showFullscreen: true,
+                    useRowAttrFunc: true,
+                    reorderableRows: true,
+                    //得到查询的参数
+                    queryParams: function (params) {
+                        //这里的键的名字和控制器的变量名必须一致，这边改动，控制器也需要改成一样的
+                        var temp = {
+                            pageSize: params.limit,                         //页面大小
+                            pageIndex: params.offset / params.limit   //页码
+                        };
+                        return temp;
+                    },
+                    columns: [
+                        {
+                            field: 'check', checkbox: true, formatter: function (value, row, index) {
+                                if (row.check == true) {
+                                    // console.log(row.serverName);
+                                    //设置选中
+                                    return { checked: true };
+                                }
+                            }
+                        }, {
+                            field: 'ID',
+                            title: 'ID'
+                        }, {
+                            field: 'UserName',
+                            title: '用户名'
+                        }, {
+                            field: 'Sex',
+                            title: '性别'
+                        }, {
+                            field: 'Age',
+                            title: '年龄'
+                        },
+                    ],
+                    formatLoadingMessage: function () {
+                        return "请稍等，正在加载中···";
+                    },
+                    onPostBody: function () {
+                        //改变复选框样式
+                        $('#tb_right').find("input:checkbox").each(function (i) {
+                            var $check = $(this);
+                            if ($check.attr("id") && $check.next("label")) {
+                                return;
+                            }
+                            var name = $check.attr("name");
+                            var id = name + "b-" + i;
+                            var $label = $('<label for="' + id + '" onclick=stopBubbleEvent();></label>');
+                            $check.attr("id", id)
+                                .parent()
+                                .addClass("bella-checkbox")
+                                .children("span").remove();
+                            $check.parent().append($label);
+                        });
+                    },
+                    onLoadSuccess: function (data) {
+                        //表格加载完成之后初始化放拖
+                        InitDrop();
+                    }
+                });
+            };
+
+        };
+
+        //注册表格行的draggable事件
+        var InitDrag = function () {
+            $('#tb_left tr').draggable({
+                helper: "clone",
+                start: function (event, ui) {
+                    var old_left_data = JSON.stringify($('#tb_left').bootstrapTable("getData"));
+                    var old_right_data = JSON.stringify($('#tb_right').bootstrapTable("getData"));
+                    var odata = { index: ++i_statuindex, left_data: old_left_data, right_data: old_right_data };
+                    arrdata.push(odata);
+                },
+                stop: function (event, ui) {
+                }
+            });
+        };
+
+        //注册右边表格的droppable事件
+        var InitDrop = function () {
+            $("#tb_right").droppable({
+                drop: function (event, ui) {
+                    var arrtd = $(ui.helper[0]).find("td");
+                    var rowdata = {
+                        ID: $(arrtd[1]).text(),
+                        UserName: $(arrtd[2]).text(),
+                        Sex: $(arrtd[3]).text(),
+                        Age: $(arrtd[4]).text()
+                    };
+                    var oTop = ui.helper[0].offsetTop;
+                    var iRowHeadHeight = 40;
+                    var iRowHeight = 37;
+                    var rowIndex = 0;
+                    if (oTop <= iRowHeadHeight + iRowHeight / 2) {
+                        rowIndex = 0;
+                    }
+                    else {
+                        rowIndex = Math.ceil((oTop - iRowHeadHeight) / iRowHeight);
+                    }
+                    //插入右边表格指定位置行数据
+                    $("#tb_right").bootstrapTable("insertRow", { index: rowIndex, row: rowdata });
+                    $('#tb_left').bootstrapTable("removeByUniqueId", $(arrtd[1]).text());
+                    InitDrag();
+                }
+            });
+        };
+
+        //注册撤销操作点击事件
+        var buttonInit = function () {
+            //撤销操作点击事件
+            $("#btn_cancel").click(function () {
+                if (i_statuindex <= 0) {
+                    return;
+                }
+                for (var i = 0; i < arrdata.length; i++) {
+                    if (arrdata[i].index != i_statuindex) {
+                        continue;
+                    }
+                    var arr_left_data = eval(arrdata[i].left_data);
+                    var arr_right_data = eval(arrdata[i].right_data);
+
+                    $('#tb_left').bootstrapTable('removeAll');
+                    $('#tb_right').bootstrapTable('removeAll');
+                    $('#tb_left').bootstrapTable('append', arr_left_data);
+                    for (var x = 0; x < arr_right_data.length; x++) {
+                        $("#tb_right").bootstrapTable("insertRow", { index: x, row: arr_right_data[x] });
+                    }
+
+                    //$('#tb_right').bootstrapTable('append', arr_right_data);//append之后不能drop
+                    break;
+                }
+                i_statuindex--;
+
+                //重新注册可拖拽
+                InitDrag();
+                //m_oTable.InitDrop();
+            });
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.min.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.min.js"></script>
+    <script src="~/lib/jquery-ui/css/jquery-ui.min.js"></script>
+}
+

@@ -1,0 +1,281 @@
+﻿
+@{
+    ViewData["Title"] = "目录接收记录";
+}
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+    <link href="~/css/arch-button.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div id="recvRecToolbar">
+            <button type="button" class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="updateStoreInfo();"><i class="fa fa-mail-forward"></i> 更新所在库信息</button>
+        </div>
+        <div class="specified-table">
+            <table id="impCataRecTable"></table>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            getTableData();
+        });
+
+        function getTableData() {
+             //记录页面bootstrap-table全局变量$table，方便应用
+            $('#impCataRecTable').bootstrapTable('destroy');
+            var $table = $('#impCataRecTable').bootstrapTable({
+                url: '/WRecvCatalog/ShowCatalogImgRecs',                      //请求后台的URL（*）
+                method: 'POST',                      //请求方式（*）
+                contentType: "application/x-www-form-urlencoded",
+                silent: true, //静态刷新
+                toolbar: '#recvRecToolbar',              //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                sortable: true,                     //是否启用排序
+                sortOrder: "asc",                   //排序方式
+                pagination: true,                   //是否显示分页（*）
+                sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+                pageNumber: 1,                      //初始化加载第一页，默认第一页,并记录
+                pageSize: 30,                     //每页的记录行数（*）
+                pageList: [30, 60, 100, 200],        //可供选择的每页的行数（*）
+                paginationLoop: false,
+                search: false,                      //是否显示表格搜索
+                strictSearch: true,
+                showColumns: true,                  //是否显示所有的列（选择显示的列）
+                showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                clickToSelect: true,                //是否启用点击选中行
+                //height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                uniqueId: "Unique_code",                     //每一行的唯一标识，一般为主键列
+                showToggle: true,                   //是否显示详细视图和列表视图的切换按钮
+                showExport: true,
+                cardView: false,                    //是否显示详细视图
+                detailView: false,                  //是否显示父子表
+                showLoading: false,
+                singleSelect: true,                //true只能单选，false为多选
+                exportDataType: "selected",        //导出checkbox选中的行数
+                showFullscreen: true,
+                queryParams: function (params) {
+                    var temp = {
+                        pageSize: params.limit,                         //页面大小
+                        pageIndex: params.offset / params.limit,   //页码
+                        tableName: '@ViewData["tableName"]',                         //对应的数据库表
+                    };
+                    return temp;
+                },
+                columns: [
+                    {
+                        field: 'check', checkbox: true, formatter: function (value, row, index) {
+                            if (row.check == true) {
+                                //设置选中
+                                return { checked: true };
+                            }
+                        }
+                    },
+                    { field: 'excel_file_name', title: '导入的目录文件名' },
+                    { field: 'import_time', title: '导入时间', align: 'center' },
+                    { field: 'record_number', title: '记录条数' },
+                    { field: 'import_user', title: '导入人代码' },
+                    { field: 'import_time', title: '导入时间', align: 'center' },
+                    { field: 'which_store', title: '所在库', align: 'center'},
+                    { field: 'operate', title: '操作', width: 120, align: 'center', valign: 'middle', formatter: actionFormatter },
+                ],
+                formatLoadingMessage: function () {
+                    return "请稍等，正在加载中···"; 
+                },
+                onLoadSuccess: function (data) {
+                    hideColByLoggedUser();
+                    $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                    $("#h_loading").css("display", "none");
+                },
+                onPostBody: function () {
+                    //改变复选框样式
+                    $('#impCataRecTable').find("input:checkbox").each(function (i) {
+                        var $check = $(this);
+                        if ($check.attr("id") && $check.next("label")) {
+                            return;
+                        }
+                        var name = $check.attr("name");
+                        var id = name + "-" + i;
+                        var $label = $('<label for="' + id + '" onclick=stopButtonEvent();></label>');
+                        $check.attr("id", id)
+                            .parent()
+                            .addClass("bella-checkbox")
+                            .children("span").remove();
+                        $check.parent().append($label);
+                    });
+
+                    //动态设置checkbox的那个td的css,不让它触发table的specified-table table td:hover
+                    $("#impCataRecTable").find("tr").each(function () {
+                        var tdArr = $(this).children();
+                        tdArr.eq(0).css("overflow", "hidden").css("white-space", "nowrap");
+                    });
+                },
+            });
+        }
+
+        //当clickToSelect=true时，如果不阻止事件冒泡，则点击自定义CHECKBOX时会没有反应
+        function stopButtonEvent() {
+            if (window.event) {//IE下阻止冒泡
+                event.cancelBubble = true;
+            } else {
+                event.stopPropagation();
+            }
+        }
+
+        //操作栏的格式化
+        function actionFormatter(value, row, index) {
+            var id = row.unique_code;
+            var result = "";
+            result += "<a href='javascript:;' class='btn btn-xs btn-info' onclick=\"ViewById('" + id + "')\" title='查看记录明细' style='margin-right:2px;'><span class='glyphicon glyphicon-search'></span></a>";
+            result += "<a href='javascript:;' class='btn btn-xs btn-danger' onclick=\"DeleteByIds('" + id + "')\" title='删除导入记录' style='margin-right:2px;'><span class='glyphicon glyphicon-remove'></span></a>";
+            return result;
+        }
+
+        //function whichStoreFormatter(value, row, index) {
+        //    if (value === '0' || value == null || value =='undefined') {
+        //        return '<span class="label label-default">未入库</span>';
+        //    } else if(value == '1') {
+        //        return '<span class="label label-warning">预归档库</span>';
+        //    } else if (value == '2') {
+        //        return '<span class="label label-success">资源总库</span>';
+        //    }
+        //}
+
+        function ViewById(id) {
+            var content = "<iframe id='viewImpRecFrame' src='/WRecvCatalog/BundleImpRecDetailView/"+ '@ViewData["tableName"]' +"/-1/"+ id +"'+ style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwin(content, 960, 500, '导入目录明细窗口');
+        }
+
+        var closeDealWin = function() {
+            pop.close('deal-win');
+        }
+
+        var failerHintToManageStore = function () {
+            HM.alertWin('本批数据入预归档库失败！请联系管理员。');
+        }
+
+        var succeedToManageStore = function () {
+            HM.hintWin('本批数据入预归档库成功！');
+        }
+
+        function DeleteByIds(id) {
+            HM.confirmWin(id, '本条导入记录及其对应的目录数据都将删除，确认？','执行删除','delimpbundle', deleteImpBundle);
+        }
+
+        var deleteImpBundle = function (id) {
+            $.ajax({
+                type: 'POST',
+                url: "/WRecvCatalog/DeleteImportBundle",
+                data: { tableName: '@ViewData["tableName"]', impBundle: id ,userid:'@ViewData["loggedUser"]'},
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst == 0) {
+                        pop.close("confirm-win_delimpbundle");
+                        HM.alertWin(data.info);
+                        return;
+                    }
+                    if (data.rst == 1) {
+                        pop.close("confirm-win_delimpbundle");
+                        $('#impCataRecTable').bootstrapTable('refresh');
+                        HM.hintWin(data.info);
+                    }
+                }
+            });
+        }
+
+        var toManageStore = function () {
+            var rows = $('#impCataRecTable').bootstrapTable('getSelections')
+            if (rows.length == 0) {
+                HM.alertWin('请选择一条目录导入记录！');
+                return;
+            }
+            if (rows.length > 1) {
+                HM.alertWin('请只选择一条目录导入记录！');
+                return;
+            }
+            var importId = rows[0].unique_code;
+
+            $.ajax({
+                type: 'POST',
+                url: "/WRecvCatalog/VerifyInMangeStore",
+                data: { tableName: '@ViewData["tableName"]',impBundle: importId },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.alertWin('本批导入目录数据已经存在于预归档库或资源总库，无需重复导入！');
+                        return;
+                    }
+                    $.ajax({
+                        type: 'POST',
+                        url: "/WRecvCatalog/ImportToMangeStore",
+                        data: { tableName: '@ViewData["tableName"]', impBundle: importId },
+                        dataType: "JSON",
+                        success: function (data) {
+                            if (data.rst > 0) {
+                                $('#impCataRecTable').bootstrapTable('refresh');
+                                closeDealWin();//关闭详细页面
+                                succeedToManageStore();//提示成功
+                            }
+                            else {
+                                failerHintToManageStore();//提示失败
+                                closeDealWin();
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        var hideColByLoggedUser = function() {
+            $.ajax({
+               type: 'POST',
+               url: "/WFunctionAccess/GetFuncAccessByUser",
+               data: { userName: '@ViewData["loggedUser"]' },
+               dataType: "JSON",
+               success: function (data) {
+                    for (var i = 0; i < data.length; i++) {
+                        var func = data[i].func_symble;
+                        if (func == 'catalog_recv_del') {
+                            var vbl = data[i].func_visible;
+                            if (vbl == false || vbl.toLowerCase() == 'false') {
+                                $('#impCataRecTable').bootstrapTable('hideColumn', 'operate');
+                            }
+                            break;
+                        }
+                    }
+                }
+            });
+        }
+
+        var updateStoreInfo = function () {
+            HM.pageLoading();
+            $.ajax({
+               type: 'POST',
+               url: "/WRecvCatalog/GetUpdatedStoreInfo",
+               data: { table: '@ViewData["tableName"]' },
+               dataType: "JSON",
+                success: function (data) {
+                    if (data == '1') {
+                        $('#impCataRecTable').bootstrapTable('refresh');
+                        HM.closePageLoading();
+                    }
+               }
+            });
+        }
+    </script>
+
+}
+
+@section script {
+
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+

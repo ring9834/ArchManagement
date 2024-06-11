@@ -1,0 +1,257 @@
+﻿
+@{
+    ViewData["Title"] = "被统计字段配置";
+}
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.min.css" rel="stylesheet" />
+    <link href="~/lib/jquery-radiocheck/jquery-labelauty-small.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="row">
+            <div id="toolbar_left" class="btn-group">
+                <h4><span class="label label-warning">可选被统计字段</span></h4>
+            </div>
+            <div id="toolbar_right" class="btn-group">
+                <div style="float:left;">
+                    <h4><span class="label label-warning">已选被统计字段</span></h4>
+                </div>
+                <div style="float:left;margin-top:-9px;margin-left:-20px;">
+                    <ul style="margin:0;list-style-type:none;">
+                        <li style="margin-top:8px;display:inline-block;">
+                            <input type="radio" id="notNumStcRadio" name="numRadio" data-labelauty="不统计数量" value="-1">
+                        </li>
+                        <li style="margin-top:8px;display:inline-block;">
+                            <input type="radio" id="distinctRadio" name="numRadio" data-labelauty="数量显示为去重后的数目" value="0">
+                        </li>
+                        <li style="margin-top:8px;display:inline-block;">
+                            <input type="radio" id="sumRadio" name="numRadio" data-labelauty="数量显示为总和" value="1">
+                        </li>
+                    </ul>
+                </div>   
+            </div>
+            <div id="div_left" class="col-md-6">
+                <table id="tb_left"></table>
+            </div>
+            <div id="div_match" class="col-md-6">
+                <table id="tb_right"></table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var sc;
+        var m_oTable = null;
+
+        $(function () {
+            sc = parent.tempStatisticCondition;//访问父页面的参数（传参）
+            $(':input').labelauty();//初始化按钮样式的radio
+
+            if (!sc.isNumStatistic) {//初始化radiogroups的选择状态
+                $('input[type=radio][name=numRadio]').eq(0).attr("checked", "checked");
+            } else {
+                if (!sc.isSum) {
+                    $('input[type=radio][name=numRadio]').eq(1).attr("checked", "checked");
+                } else { 
+                    $('input[type=radio][name=numRadio]').eq(2).attr("checked", "checked");
+                }
+            }            
+
+            //getConditions();
+            m_oTable = new oTableInit();
+            m_oTable.initiateLeftTb();
+            m_oTable.initiateRightTb();
+
+            $('input[type=radio][name=numRadio]').change(function () {
+                if (this.value == '0') {
+                    sc.isSum = false;//统计后的数量字段，显示为去重后的数目
+                    sc.isNumStatistic = true;//是数量类型的统计
+                }
+                else if (this.value == '1') {
+                    sc.isSum = true;//统计后的数量字段，显示为字段总和（Group后）
+                    sc.isNumStatistic = true;//是数量类型的统计
+                }
+                else if (this.value == '-1') {
+                    sc.isNumStatistic = false;//不统计数量，被统计的字段显示为字段本身的信息（使用distinct后）
+                }
+            });
+
+            showTemplateData();//从模板加载数据到右边表格的数据
+        });
+
+        var oTableInit = function () {
+            this.initiateLeftTb = function () {
+                //初始化左边表格
+                $('#tb_left').bootstrapTable('destroy');
+                $('#tb_left').bootstrapTable({
+                    url: '/WStatistics/GetFieldsByTableName/'+ '@ViewData["table"]',
+                    method: 'POST',                      //请求方式（*）
+                    contentType: "application/x-www-form-urlencoded",
+                    toolbar: '#toolbar_left',
+                    silent: true, //静态刷新
+                    striped: true,                      //是否显示行间隔色
+                    cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                    sortable: true,                     //是否启用排序
+                    sortOrder: "asc",                   //排序方式
+                    search: false,                      //是否显示表格搜索
+                    strictSearch: true,
+                    showColumns: true,                  //是否显示所有的列（选择显示的列）
+                    minimumCountColumns: 2,             //最少允许的列数
+                    //clickToSelect: true,                //是否启用点击选中行
+                    uniqueId: "unique_code",                     //每一行的唯一标识，一般为主键列
+                    cardView: false,                    //是否显示详细视图
+                    detailView: false,                  //是否显示父子表
+                    showLoading: false,
+                    singleSelect: true,                //true只能单选，false为多选
+                    showFullscreen: true,
+                    showExport: true,
+                    exportDataType:'all',
+                    columns: [
+                        { field: 'show_name', title: '字段显示名'},
+                        { field: 'col_name', title: '字段名'},
+                        //{ field: 'condition', title: '搜索条件', align: 'center', events: operateEvents, formatter: 'searchConditionFormatter'},
+                        //{ field: 'inputV', title: '值', align: 'center', width: '120px', formatter: 'searchValueFormatter'},
+                        //{ field: 'andOr', title: '并或', align: 'center', events: operateEvents, formatter: 'andOrFormatter'},
+                        { field: 'operate', title: '添加字段到右表', align: 'center', events: operateEvents, formatter: 'operateFormatter' },
+                    ],
+                    formatLoadingMessage: function () {
+                        return "请稍等，正在加载中···";
+                    },
+                    onLoadSuccess: function (data) {
+                        //表格加载完成之后初始化拖拽
+                        $("#h_loading_mask").css("display", "none");//关闭加载提示
+                        $("#h_loading").css("display", "none");
+                    }
+                });
+            };
+
+             this.initiateRightTb = function () {
+                //初始化右边表格
+                $('#tb_right').bootstrapTable('destroy');
+                $('#tb_right').bootstrapTable({
+                    url: '',
+                    method: 'POST',                      //请求方式（*）
+                    contentType: "application/x-www-form-urlencoded",
+                    toolbar: '#toolbar_right',
+                    silent: true, //静态刷新
+                    toolbar: '#toolbar_right',              //工具按钮用哪个容器
+                    striped: true,                      //是否显示行间隔色
+                    cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                    sortable: true,                     //是否启用排序
+                    sortOrder: "asc",                   //排序方式
+                    search: false,                      //是否显示表格搜索
+                    strictSearch: true,
+                    showColumns: true,                  //是否显示所有的列（选择显示的列）
+                    minimumCountColumns: 2,             //最少允许的列数
+                    //clickToSelect: true,                //是否启用点击选中行
+                    uniqueId: "unique_code",                     //每一行的唯一标识，一般为主键列
+                    cardView: false,                    //是否显示详细视图
+                    detailView: false,                  //是否显示父子表
+                    showLoading: false,
+                    singleSelect: true,                //true只能单选，false为多选
+                    showFullscreen: true,
+                    columns: [
+                        { field: 'show_name', title: '字段显示名'},
+                        { field: 'col_name', title: '字段名' },
+                        //{ field: 'col_condition', title: '条件', formatter: 'selectedConditionFormatter'},
+                        //{ field: 'col_value', title: '值'},
+                        //{ field: 'col_andor', title: '并或', formatter: 'selectedAndorFormatter'},
+                        { field: 'operate', title: '操作', align: 'center', events: operateEvents, formatter: 'operateFormatter_right' },
+                    ],
+                    formatLoadingMessage: function () {
+                        return "请稍等，正在加载中···";
+                    },
+                    onLoadSuccess: function (data) {
+                        //表格加载完成之后初始化放拖
+                        $("#h_loading_mask").css("display", "none");//关闭加载提示
+                        $("#h_loading").css("display", "none");
+                    }
+                });
+            };
+        };
+
+        //var conditonData;
+        //var getConditions = function () {
+        //    $.ajax({
+        //        type: 'POST',
+        //        url: "/WStatistics/GetSConditions",
+        //        dataType: "JSON",
+        //        success: function (data) {
+        //            conditonData = data;
+        //            //showTemplateData();//加载完搜索条件的所有数据后，在现实右边表格的数据
+        //        }
+        //    });
+        //}
+
+        var showTemplateData = function () {
+            sc = parent.tempStatisticCondition;
+            if (sc.statisticFields.length > 0) {
+                $('#tb_right').bootstrapTable('load', sc.statisticFields)
+            }
+        }
+
+        // 格式化按钮
+        function operateFormatter(value, row, index) {
+            return [
+                '<button type="button" class="RoleOfAdd btn btn-sm  btn-info" style="margin-right:15px;"><i class="fa fa-plus" ></i>&nbsp;添加</button>'
+            ].join('');
+        }
+
+        // 格式化按钮
+        function operateFormatter_right(value, row, index) {
+            return [
+                '<button type="button" class="RoleOfDelete btn btn-sm  btn-danger" style="margin-right:15px;"><i class="fa fa-minus" ></i>&nbsp;删除</button>'
+            ].join('');
+        }
+
+        //初始化select的change方法
+        window.operateEvents = {
+            'click .RoleOfAdd': function (e, value, row, index) {
+                andCondtion(row, index);
+            },
+            'click .RoleOfDelete': function (e, value, row, index) {
+                deleteCondition(row, index);
+            }
+        };
+
+        function andCondtion(row, index) {
+            var toRight = {
+                unique_code: row.unique_code,
+                col_name: row.col_name,
+                show_name: row.show_name
+            }
+            var indexRight = $('#tb_right').bootstrapTable('getData').length;
+            $('#tb_right').bootstrapTable('insertRow', { index: indexRight, row: toRight });
+            $('#tb_left').bootstrapTable('removeByUniqueId', toRight.unique_code);
+        }
+
+        //点击按钮删除某搜索条件
+        function deleteCondition(row, index) {
+            var rightId = row.unique_code;
+            $('#tb_right').bootstrapTable('removeByUniqueId', rightId);
+
+            var toLeft = {
+                unique_code: row.unique_code,
+                col_name: row.col_name,
+                show_name: row.show_name
+            }
+            var indexLeft = $('#tb_right').bootstrapTable('getData').length;
+            $('#tb_left').bootstrapTable('insertRow', { index: indexLeft, row: toLeft });
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.min.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.min.js"></script>
+    <script src="~/lib/jquery-radiocheck/jquery-labelauty.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

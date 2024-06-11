@@ -1,0 +1,88 @@
+﻿
+@{
+    ViewData["Title"] = "Validate Form";
+}
+
+@section head {
+    <link href="~/lib/jquery-validation/dist/jquery.validate.extend.css" rel="stylesheet" />
+    <link href="~/lib/popper/tooltip.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="panel panel-success" style="width:800px;">
+        <div class="panel-heading">
+            <h3 class="panel-title">表单验证</h3>
+        </div>
+        <div class="panel-body">
+            <form id="regForm" asp-controller="ValidateForm" asp-action="ReturnDataToFront" data-ajax="true" data-ajax-success="onSuccess" data-ajax-method="post">
+                <div class="form-group" style="width:800px; float:left;">
+                    <div style="width:150px;float:left;">
+                        <label for="name" style="float:left;">User Name:</label>
+                    </div>
+                    <input type="text" class="form-control" style="width:200px;float:left;" name="name" id="name" placeholder="请输入用户名" autocomplete="off" tip="用户名不可为空，且长度>=6">
+                </div>
+                <div class="form-group" style="width:800px;float:left;">
+                    <div style="width:150px;float:left;">
+                        <label for="age" style="float:left;">Age:</label>
+                    </div>
+                    <input type="text" class="form-control" style="width:200px;float:left;" id="age" name="age" placeholder="请输入年龄" autocomplete="off" tip="年龄不可为空，且必须是数字">
+                </div>
+                <div class="form-group" style="width:800px;float:left;">
+                    <div style="width:150px;float:left;">
+                        <label for="sex" style="float:left;">sex:</label>
+                    </div>
+                    <input type="text" class="form-control" style="width:200px;float:left;" id="sex" name="sex" placeholder="请输入性别" autocomplete="off">
+                </div>
+                <div class="form-group" style="width:800px;float:left;" id="div4">
+                    <div style="width:150px;float:left;">
+                        <label style="float:left;">真是看的我眼花缭乱不知所措</label>
+                    </div>
+                    <div style="float:left;">
+                        <label class="radio-inline" id="rl1"><input type="radio" id="r1" name="optradio">Option 1</label>
+                        <label class="radio-inline" id="rl2"><input type="radio" id="r2" name="optradio">Option 2</label>
+                        <label class="radio-inline" id="rl3"><input type="radio" id="r3" name="optradio">Option 3</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">点击提交</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function () {
+            if ($("#regForm") != null && $("#regForm") != undefined) {
+                $("#regForm").validate({
+                    rules: {
+                        name: {
+                            required: true,
+                            minlength: 5
+                        },
+                        age: {
+                            required: true,
+                            digits: true
+                        },
+                        optradio: {
+                            required: true
+                        }
+                    }
+                });
+            }
+        };
+
+        var onSuccess = function (data) {
+            //如果在iframe中，就点击父窗体的关闭模态窗口按钮（模态窗口中放有这个iframe）
+            if (data.success) {
+                if (self.frameElement != null) {
+                    $('#closeButton', window.parent.document).click();
+                }
+            }
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.extend.js"></script>
+    <script src="~/lib/jquery-validation/dist/messages_zh.js"></script>
+    <script src="~/lib/popper/tooltip.js"></script>
+}

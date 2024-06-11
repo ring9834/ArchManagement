@@ -1,0 +1,86 @@
+﻿
+@{
+    ViewData["Title"] = "利用登记搜索";
+}
+
+
+@section head {
+    <link href="~/lib/bootstrap-datetimepicker/bootstrap-datepicker.min.css" rel="stylesheet" />
+
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="row" style="padding:15px 10px 0 10px;">
+        </div>
+        <div class="row">
+            <div class="form-group col-md-12">
+                <div class="input-group input-daterange">
+                    <input id="fromDate" name="fromDate" type="text" placeholder="查借时间(起)" data-date-format="yyyy-mm-dd" class="form-control" autocomplete="off"/>
+                    <div class="input-group-addon" style="width:18px;">~</div>
+                    <input id="toDate" name="toDate" type="text" placeholder="查借时间(止)" data-date-format="yyyy-mm-dd" class="form-control" autocomplete="off"/>
+                </div>
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-12">
+                <div class="input-group">
+                    <span class="input-group-addon">查借人</span>
+                    <input class="form-control" type="text" id="requester">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-12">
+                <div class="input-group">
+                    <span class="input-group-addon">经办人</span>
+                    <input class="form-control" type="text" id="fileClerk">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-12" style="margin-bottom:2px;">
+                <input type="button" class="btn btn-success" id="okbutton" onclick="okSearch();" value="搜索" />
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            $('.input-daterange input').each(function () {
+                $(this).datepicker({
+                    language: 'zh-CN', //语言
+                    autoclose: true, //选择后自动关闭
+                    clearBtn: true,//清除按钮
+                    format: "yyyy-mm-dd"//日期格式
+                });
+            });
+            $("#h_loading_mask").css("display", "none");
+            $("#h_loading").css("display", "none");
+        });
+
+        var okSearch = function () {
+            var frm = $('#fromDate').val();
+            var to = $('#toDate').val();
+            var rqer = $('#requester').val();
+            var clerk = $('#fileClerk').val();
+            parent.fromdate = frm;
+            parent.toDate = to;
+            parent.requester = rqer;
+            parent.clerk = clerk;
+            parent.searchInfo();
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+    <script src="~/lib/bootstrap-datetimepicker/bootstrap-datepicker.min.js"></script>
+    <script src="~/lib/bootstrap-datetimepicker/bootstrap-datepicker.zh-CN.min.js"></script>
+}
+
+
+

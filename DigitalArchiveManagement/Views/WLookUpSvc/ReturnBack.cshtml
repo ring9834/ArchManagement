@@ -1,0 +1,104 @@
+﻿@{
+    ViewData["Title"] = "归还档案";
+}
+@section head {
+
+}
+@section body {
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+    <div class="container-fluid">
+        <div class="row" style="padding:5px;"></div>
+        <div class="row" style="padding:0 8px 0 8px;">
+            <div class="panel panel-warning">
+                <div class="panel-heading">
+                    <h3 class="panel-title">借出信息</h3>
+                </div>
+                <div class="panel-body">
+                    <i class="fa fa-user"></i> 借档人：<span id="vitalizer"></span>&nbsp;&nbsp;
+                    <i class="fa fa-clock-o"></i> 借档时间：<span id="outtime"></span>&nbsp;&nbsp;
+                    <i class="fa fa-copy"></i> 件数：<span id="pieces"></span>&nbsp;&nbsp;
+                    <i class="fa fa-object-group"></i> 份数：<span id="shares"></span>&nbsp;&nbsp;
+                </div>
+            </div>
+        </div>
+        <div class="row" style="padding:0 8px 0 8px;">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3 class="panel-title">填写归还信息</h3>
+                </div>
+                <div class="panel-body" style="padding-bottom:0px;">
+                    @*<div class="container-fluid">*@
+                    <div class="row">
+                        <div class="form-group col-xs-12">
+                            <div class="form-inline">
+                                <div class="input-group">
+                                    <span class="input-group-addon">归还人</span>
+                                    <input id="daysForUse" type="text" class="form-control" style="width:80px;" />
+                                </div>
+                                <div class="input-group">
+                                    <span class="input-group-addon">归还件数</span>
+                                    <input id="totalPieces" type="text" class="form-control" style="width:80px;" />
+                                </div>
+                                <div class="input-group">
+                                    <span class="input-group-addon">归还份数</span>
+                                    <input id="totalShares" type="text" class="form-control" style="width:80px;" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-xs-12">
+                            <div class="input-group">
+                                <span class="input-group-addon">备注</span>
+                                <textarea id="commentInput" type="text" class="form-control" cols="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-xs-12">
+                            <button class="btn btn-info" id="printBtn"><i class="fa fa-yelp"></i> 确定</button>
+                        </div>
+                    </div>
+                    @*</div>*@
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            showOutInfo();
+        });
+
+        var showOutInfo = function () {
+            $.ajax({
+                type: 'POST',
+                url: "/WLookUpSvc/ShowOutInfo",
+                data: { requestId: '@ViewData["requestId"]' },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.length > 0) {
+                        var d = data[0];
+                        $('#vitalizer').html(d.vitalizer);
+                        $('#outtime').html(d.outtime);
+                        $('#pieces').html(d.pieces);
+                        $('#shares').html(d.shares);
+                        $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                        $("#h_loading").css("display", "none");
+                    }
+                }
+            });
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/jquery-print/jQuery.print.min.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

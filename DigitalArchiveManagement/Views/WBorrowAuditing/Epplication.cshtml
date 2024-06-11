@@ -1,0 +1,116 @@
+﻿
+@{
+    ViewData["Title"] = "借档提交审批";
+}
+
+
+@section head {
+
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="alert alert-warning" style="margin-top:8px;font-size:13px;">
+            <i class="fa fa-volume-up"></i><strong> 提醒!</strong> 1、借档一般都需经过领导审批；2、未经审批的档案，无法打印借档单。
+        </div>
+        <div class="row" style="padding: 5px">
+        </div>
+        <div class="row">
+            <div class="form-group col-md-12">
+                <div class="input-group">
+                    <span class="input-group-addon">借档审批事由</span>
+                    <input class="form-control" type="text" id="appbrief">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-12">
+                <div class="input-group">
+                    <span class="input-group-addon">请选择审核人</span>
+                    <select class="form-control" id="appreplier"></select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-12">
+                <div class="input-group">
+                    <span class="input-group-addon">说明</span>
+                    <textarea class="form-control" rows="3" id="appcomment"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-12" style="margin-bottom:2px;">
+                <input type="button" class="btn btn-success" id="okbutton" onclick="summitApplct();" value="确定" />
+                <input type="button" class="btn btn-danger" onclick="resetInfo();" value="重置" />
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            GetAllUsers();
+            $("#h_loading_mask").css("display", "none");
+            $("#h_loading").css("display", "none");
+        });
+
+        function GetAllUsers() {
+            $.ajax({
+                type: 'post',
+                url: '/WAuditingAccess/GetSelectedUsers',
+                dataType: "json",
+                success: function (data) {
+                    //console.log(data.length);
+                    var strHtml = '';
+                    strHtml += "<option value='-1'>--请选择--</option>";
+                    for (var i = 0; i < data.length; i++) {
+                        strHtml += "<option value='" + data[i].user_name + "'>" + data[i].nick_name + "</option>";
+                    }
+                    $('#appreplier').append(strHtml);
+                }
+            });
+
+        }
+
+        var summitApplct = function () {
+            var v = $('#appbrief').val();
+            if (v.trim() == '') {
+                HM.alertWin('请填写申请事由后再继续！');
+                return;
+            }
+
+            var p = $('#appreplier').val();
+            if (p == '-1') {
+                HM.alertWin('请选择审核人后再继续！');
+                return;
+            }
+            $.ajax({
+                type: 'post',
+                url: '/WBorrowAuditing/RecordAuditInfo',
+                dataType: "json",
+                data: { requestId: '@ViewData["requestId"]', applytitle: v, applier: '@ViewData["userid"]', checker: p, comment:$('#appcomment').val()},
+                success: function (data) {
+                    if (data.rst > 0) {
+                        //HM.hintWin("申请审核成功！可在系统首页查看审核结果！或在“入资源总库”下拉按钮中查看审核进度。");
+                        parent.closeAuditWin();//关闭申请审批窗
+                    }
+                }
+            });
+        }
+
+        function resetInfo() {
+            $('#appbrief').val('');
+            $('#appreplier').val('-1');
+            $('#appcomment').val('');
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

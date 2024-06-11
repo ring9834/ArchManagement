@@ -1,0 +1,271 @@
+﻿
+@{
+    ViewData["Title"] = "增加公用数据字典记录";
+}
+@section head {
+    @*<link href="~/lib/bootstrap-select/bootstrap-select.min.css" rel="stylesheet" />*@
+    <link href="~/lib/jquery-radiocheck/jquery-labelauty.css" rel="stylesheet" />
+}
+
+@section body {
+    <style>
+        input.labelauty + label {
+            font: 12px "Microsoft Yahei";
+        }
+    </style>
+
+    <form class="" role="form">
+        <div class="container-fluid">
+            <div class="row" style="padding: 5px">
+            </div>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-addon">列名</span>
+                        <input class="form-control" type="text" id="colName" placeholder="仅允许输入字母,不允许汉字、数字和特殊字符！">
+                    </div>
+                </div>
+                <div class="form-group col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-addon">显示名</span>
+                        <input class="form-control" type="text" id="showName">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-addon">数据类型</span>
+                        <select id="data_type" name="datatypes" class="form-control" title="请选择" data-width="150px" style=""></select>
+                        @*<select id="data_type" name="datatypes" class="selectpicker" title="请选择" data-width="150px" style=""></select>*@
+                    </div>
+                </div>
+                <div class="form-group col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-addon">最大长度</span>
+                        <input class="form-control" type="text" id="maxLenField">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-addon">是否可为空</span>
+                        <ul style="margin:0;list-style-type:none;">
+                            <li style="margin-top:8px;display:inline-block;"><input type="radio" name="canBeNullRadio" data-labelauty="不可空" value="0"></li>
+                            <li style="margin-top:8px;display:inline-block;"><input type="radio" name="canBeNullRadio" data-labelauty="可为空" value="1" checked="checked"></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="form-group col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-addon">管理或业务<br />字段</span>
+                        <ul style="margin:0;list-style-type:none;">
+                            <li style="margin-top:8px;display:inline-block;"><input type="radio" name="pubBusiRadio" data-labelauty="业务字段" value="0" checked="checked"></li>
+                            <li style="margin-top:8px;display:inline-block;"><input type="radio" name="pubBusiRadio" data-labelauty="管理字段" value="1"></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-addon">默认值</span>
+                        <input class="form-control" type="text" id="defaultVal">
+                    </div>
+                </div>
+                <div class="form-group col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-addon">备注</span>
+                        <input class="form-control" type="text" id="commentField">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-12" style="margin-bottom:2px;">
+                    <input type="button" class="btn btn-success" id="okbutton" onclick="addDataDict();" value="确定" />
+                    <input type="button" class="btn btn-danger" onclick="resetInfo();" value="重置" />
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <script>
+        var param;//通过iframe父窗体的$("#mainfrm")[0].contentWindow.param = 传参到子页面来
+        var dataTypes;
+
+        $(function () {
+            $("#colName").onlyNumAlpha();//列名只限于输入字母
+            $("#maxLenField").onlyNum();//最大长度只限输入正整数
+        });
+
+        window.onload = function () {
+            $.ajax({
+                type: 'get',
+                url: '/WBDataDict/GetDataTypes',
+                dataType: "json",
+                success: function (data) {
+                    dataTypes = data;
+
+                    $("#data_type").append("<option value='-1'>-请选择-</option>");
+                    //拼接下拉框
+                    for (var i = 0; i < data.length; i++) {
+                        $("#data_type").append("<option value='" + data[i].unique_code + "'>" + data[i].code_name + "</option>");
+                    }
+                    ////这一步不要忘记 不然下拉框没有数据
+                    //$("#data_type").selectpicker("refresh");
+
+                    $("#h_loading_mask").css("display", "none");
+                    $("#h_loading").css("display", "none");
+                }
+            });
+
+            $(':input').labelauty();//初始化按钮样式的radio
+
+        };
+
+        // 限制只能输入字母
+        $.fn.onlyNumAlpha = function () {
+            $(this).keypress(function (event) {
+                var eventObj = event || e;
+                var keyCode = eventObj.keyCode || eventObj.which;
+                if ((keyCode >= 65 && keyCode <= 90) || (keyCode >= 97 && keyCode <= 122))
+                    return true;
+                else
+                    return false;
+            });
+            $(this).keyup(function () {
+                //var v = $(this).val();
+                //if (/[^u4e00-u9fa5]/.test(v)) {
+                //    $(this).val('');
+                //    return true;
+                //}
+                var regExp = /[a-zA-Z]$/;
+                if (!regExp.test($(this).val())) {
+                    $(this).val("");
+                }
+            });
+        }
+
+        // 限制只能输入正整数
+        $.fn.onlyNum = function () {
+            $(this).keypress(function (event) {
+                var eventObj = event || e;
+                var keyCode = eventObj.keyCode || eventObj.which;
+                if (keyCode >= 48 && keyCode <= 57)
+                    return true;
+                else
+                    return false;
+            });
+            $(this).keyup(function () {
+                var regExp = /(^[1-9]\d*$)/;  //输入数字的正则是：/^\d+$|^\d+[.]?\d+$/
+                if (!regExp.test($(this).val())) {
+                    $(this).val("");
+                }
+            });
+        }
+
+        var validateBeforeSummit = function () {
+            if ($("#colName").val() == '') {
+                HM.alertWin("列名不能为空！");
+                return 0;
+            }
+            if ($("#showName").val() == '') {
+                HM.alertWin("显示名不能为空！");
+                return 0;
+            }
+
+            if ($("#data_type").val() == '-1') {
+                HM.alertWin("请选择数据类型！");
+                return 0;
+            }
+
+            var order = $("#maxLenField").val();
+            if (!(/(^[1-9]\d*$)/.test(order))) {
+                HM.alertWin("最大长度必须是正整数！");
+                return 0;
+            }
+
+            var defaultVal = $("#defaultVal").val();
+            var datatp = $("#data_type").find("option:selected").text();
+            if (datatp.indexOf("数") >= 0) {
+                if (!(/(^[0-9]*$)/.test(defaultVal))) {
+                    HM.alertWin("当数据类型是“数据型”时，默认值是数字！");
+                    return 0;
+                }
+            }
+        }
+
+        function addDataDict() {
+            var r = validateBeforeSummit();
+            if (r == 0) {//验证有误则返回
+                return;
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: "/WBDataDict/VerifyIfColExist",
+                data: { table: param.code, colName: $("#colName").val() },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.length > 0) {
+                        HM.alertWin("列名已经存在，不能重复添加！");
+                        return;
+                    }
+                    else {
+                        var colName = $("#colName").val();
+                        var showName = $("#showName").val();
+                        var maxLenVal = $("#maxLenField").val();
+                        var datatp = $("#data_type").val();
+                        var comment = $("#commentField").val();
+                        var defaultVal = $("#defaultVal").val();
+                        var canBeNull = $('input[type=radio][name=canBeNullRadio]:checked').val();
+                        var pubBusi = $('input[type=radio][name=pubBusiRadio]:checked').val();
+                        var dataTypeCode = '';
+                        for (var i = 0; i < dataTypes.length; i++) {
+                            if (dataTypes[i].unique_code == datatp) {
+                                dataTypeCode = dataTypes[i].code_value;
+                            }
+                        }
+
+                        $.ajax({
+                            type: 'POST',
+                            url: "/WBDataDict/InsertBusDict",
+                            data: { col_name: colName, show_name: showName, col_datatype: datatp, col_datatype_code: dataTypeCode, col_maxlen: maxLenVal, col_null: canBeNull, col_default: defaultVal, field_type: pubBusi, comments: comment, code: param.code },
+                            dataType: "JSON",
+                            success: function (data) {
+                                if (data.rst > 0) {
+                                    window.parent.hintWin(data.info);
+                                    window.parent.closeDealWin('pubdicFrm');
+                                    window.parent.updateTable();
+                                }
+                                else {
+                                    window.parent.alertWin(data.info);
+                                    window.parent.closeDealWin('pubdicFrm');
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+        var resetInfo = function () {
+            $("#colName").val('');
+            $("#showName").val('');
+            $("#data_type").val('');
+            $("#maxLenField").val('');
+            $("#defaultVal").val('');
+            $("#commentField").val('');
+            $("#data_type").val('-1');
+        }
+
+    </script>
+}
+
+@section script {
+    @*<script src="~/lib/bootstrap-select/bootstrap-select.min.js"></script>*@
+    <script src="~/lib/jquery-radiocheck/jquery-labelauty.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

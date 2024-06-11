@@ -1,0 +1,146 @@
+﻿
+@{
+    ViewData["Title"] = "档案利用统计";
+}
+
+@section head {
+    <script src="~/lib/echart/echarts.min.js"></script>
+    <link href="~/css/arch-button.css" rel="stylesheet" />
+}
+
+@section body {
+    <div style="height:100%;width:100%;">
+        <div style="padding:5px 5px 0 5px;">
+            <div class="panel panel-info" style="margin-bottom:0;">
+                <div id="scontainer" class="panel-body">
+                    <div id="mainChart" style="height:400px;"></div>
+                    <div id="aimChart" style="height:400px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            showStatistics();
+            aimStatistics();
+        });
+
+        var colorArray = ['#fc9d81', '#acbbf2', '#69cbd8', '#ffc8d3', '#839204', '#a26f01', '#9850f1', '#9f851d', '#ee0393', '#5bb85d', '#418bca'];
+
+        function showStatistics() {
+            var myChart = echarts.init(document.getElementById('mainChart'));
+            $.ajax({
+                type: 'post',
+                url: '/WLookUpSvc/CountGroupByYearNType',
+                dataType: "json",
+                success: function (data) {
+                    //alert(JSON.stringify(data)); return;
+                    var serieStr = '[';
+                    for (var i = 0; i < data.legends.length; i++) {//拼凑成series，字符串形式
+                        if (i == 0) {
+                            serieStr += '{name:"' + data.legends[i] + '",type:"bar",color:"' + colorArray[i] + '",data:[' + data.series[i] + ']}';
+                        }
+                        else {
+                            serieStr += ',{name:"' + data.legends[i] + '",type:"bar",color:"' + colorArray[i] + '",data:[' + data.series[i] + ']}';
+                        }
+                    }
+                    serieStr += ']';
+                    console.log(serieStr);
+
+                    var option = {
+                        title: {
+                            text: '年度查借档次数统计',
+                            textStyle: {
+                                fontSize: 16,
+                                color:'#ccc'
+                            }
+                        },
+                        tooltip: {},
+                        legend: {
+                            data: data.legends
+                        },
+                        xAxis: {
+                            data: data.years
+                        },
+                        yAxis: {},
+                        textStyle: {
+                            color: 'red'
+                        },
+                        series: eval('(' + serieStr + ')') // JSON字符串转JSON对象
+                    };
+                    myChart.setOption(option);//画统计图
+                    $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                    $("#h_loading").css("display", "none");
+                }
+            });
+        }
+
+        function aimStatistics() {
+            var myChart = echarts.init(document.getElementById('aimChart'));
+            $.ajax({
+                type: 'post',
+                url: '/WLookUpSvc/CountGroupByAiming',
+                dataType: "json",
+                success: function (data) {
+                    //alert(JSON.stringify(data)); return;
+                    var serieStr = '[';
+                    for (var i = 0; i < data.legends.length; i++) {//拼凑成series，字符串形式
+                        if (i == 0) {
+                            serieStr += '{name:"' + data.legends[i] + '",type:"bar",color:"' + colorArray[i] + '",data:[' + data.series[i] + ']}';
+                        }
+                        else {
+                            serieStr += ',{name:"' + data.legends[i] + '",type:"bar",color:"' + colorArray[i] + '",data:[' + data.series[i] + ']}';
+                        }
+                    }
+                    serieStr += ']';
+                    console.log(serieStr);
+
+                    var option = {
+                        title: {
+                            text: '年度按目的查借档数量统计',
+                            textStyle: {
+                                fontSize: 16,
+                                color:'#ccc'
+                            }
+                        },
+                        tooltip: {},
+                        legend: {
+                            data: data.legends
+                        },
+                        xAxis: {
+                            data: data.years
+                        },
+                        yAxis: {},
+                        textStyle: {
+                            color: 'red'
+                        },
+                        series: eval('(' + serieStr + ')') // JSON字符串转JSON对象
+                    };
+                    myChart.setOption(option);//画统计图
+                    $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                    $("#h_loading").css("display", "none");
+                }
+            });
+        }
+
+        //十六进制颜色随机
+        function color16() {
+            var r = Math.floor(Math.random() * 256);
+            var g = Math.floor(Math.random() * 256);
+            var b = Math.floor(Math.random() * 256);
+            var color = '#' + r.toString(16) + g.toString(16) + b.toString(16);
+            return color;
+        }
+
+    </script>
+}
+
+@section script {
+
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

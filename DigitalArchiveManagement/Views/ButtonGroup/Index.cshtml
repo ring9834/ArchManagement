@@ -1,0 +1,69 @@
+﻿
+@{
+    ViewData["Title"] = "Button Group";
+}
+
+@section head {
+
+}
+
+@section body {
+    <br />
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h3 class="panel-title">面板标题</h3>
+        </div>
+        <div class="panel-body">
+            <div class="btn-group">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-wrench"></i> 修改
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a href="#"><i class="fa fa-file-o"></i> 单条修改</a></li>
+                        <li><a href="#"><i class="fa fa-files-o"></i> 批量修改</a></li>
+                    </ul>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-eraser"></i> 删除
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a href="#"><i class="fa fa-file-o"></i> 单条删除</a></li>
+                        <li><a href="#"><i class="fa fa-files-o"></i> 批量删除</a></li>
+                    </ul>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-plus-circle"></i> 增加
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a href="#"><i class="fa fa-arrows-h"></i> 选择处后增加</a></li>
+                        <li><a href="#"><i class="fa fa-arrows"></i> 本页最后增加</a></li>
+                        <li><a href="#"><i class="fa fa-arrows-alt"></i> 所有记录最后增加</a></li>
+                        <li><a href="#"><i class="fa fa-caret-up"></i> 第一条处增加</a></li>
+                    </ul>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-search"></i> 查询
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a href="#"><i class="fa fa-briefcase"></i> 基本查询</a></li>
+                        <li><a href="#"><i class="fa fa-search"></i> 高级查询</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+@section script {
+
+}
+

@@ -1,0 +1,91 @@
+﻿
+@{
+    ViewData["Title"] = "增加角色";
+}
+@section head {
+
+}
+
+@section body {
+    <style>
+        .userTable {
+            width: 100%;
+            margin-top:5px;
+        }
+
+            .userTable td {
+                padding: 5px 0 12px 0;
+            }
+
+            .userTable select,
+            .userTable input {
+                width: 420px;
+                margin-right: 5px;
+            }
+    </style>
+
+    <div class="container-fluid">
+        <table class="userTable">
+            <tr>
+                <td>
+                    <label for="roleName" class="control-label">角色名</label>
+                </td>
+                <td>
+                    <input type="text" id="roleName" class="form-control" placeholder="请输入角色名称" />
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>
+                    <button class="btn btn-warning" onclick="saveUserInfo();"><i class="fa fa-save"></i> 保存</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        $(function () {
+            $("#h_loading_mask").css("display", "none");//关闭页面加载指示器
+            $("#h_loading").css("display", "none");
+        });
+
+        var saveUserInfo = function () {
+            if ($.trim($('#roleName').val()) == '') {
+                HM.alertWin('请填写角色名！');
+                return;
+            }
+
+            var roleName = $('#roleName').val();
+
+            $.ajax({
+                type: 'post',
+                url: '/WRole/AddRole',
+                dataType: "json",
+                data: { roleName: roleName},
+                success: function (data) {
+                    if (data.rst == '1') {
+                        parent.hintAddSucess();
+                        parent.closeDealWin('addroleFrm');
+                        parent.refreshTableData();
+                        return;
+                    }
+                    else if (data.rst == '-2') {//记录已存在，无法插入重复记录 
+                        parent.hintAlready();
+                        parent.closeDealWin('addroleFrm');
+                        return;
+                    }
+                    else {
+                        parent.hintAddFailer();
+                        parent.closeDealWin('addroleFrm');
+                    }
+                }
+            });
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

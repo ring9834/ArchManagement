@@ -1,0 +1,135 @@
+﻿
+@{
+    ViewData["Title"] = "增添机构信息";
+}
+@section head {
+    <link href="~/lib/jquery-radiocheck/jquery-labelauty.css" rel="stylesheet" />
+}
+
+@section body {
+    <style>
+        input.labelauty + label {
+            font: 12px "Microsoft Yahei";
+        }
+    </style>
+    <div class="container-fluid">
+        <div class="row" style="padding: 5px">
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <div class="input-group">
+                    <span class="input-group-addon">节点类型</span>
+                    <ul style="margin:0;list-style-type:none;">
+                        <li style="margin-top:8px;display:inline-block;"><input type="radio" name="depNodeRadio" data-labelauty="同级节点" value="0"></li>
+                        <li style="margin-top:8px;display:inline-block;"><input type="radio" name="depNodeRadio" data-labelauty="下级节点" value="1"></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-lg-6">
+                <div class="input-group">
+                    <span class="input-group-addon">机构名称</span>
+                    <input class="form-control" type="text" id="departName">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-lg-6">
+                <div class="input-group">
+                    <span class="input-group-addon">机构排序</span>
+                    <input class="form-control" type="text" id="departOrder">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6" style="margin-bottom:2px;text-align:center;">
+                <input type="button" class="btn btn-success" id="okbutton" onclick="addDepartment();" value="确定" />
+                <input type="button" class="btn btn-danger" onclick="addReset();" value="重置" />
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var param;//通过iframe父窗体的$("#mainfrm")[0].contentWindow.param = 传参到子页面来
+
+        $(function () {
+            $(':input').labelauty();//初始化按钮样式的radio
+            $("#h_loading_mask").css("display", "none");
+            $("#h_loading").css("display", "none");
+        });
+
+        var validateBeforeSummit = function () {
+
+            var isCheck = $('input[type=radio][name=depNodeRadio]:checked').val();
+            if (isCheck == undefined || isCheck == null) {
+                HM.alertWin("请选择“节点类型”，为同级节点或下级节点！");
+                return 0;
+            }
+            if (param.pid == 0 && isCheck == '0') {
+                HM.alertWin("根节点下只能添加儿子节点，不能添加同级节点！");
+                return 0;
+            }
+            if ($("#departName").val() == '') {
+                HM.alertWin("机构名称不能为空！");
+                return 0;
+            }
+            var order = $("#departOrder").val();
+            if (!(/(^[1-9]\d*$)/.test(order))) {
+                HM.alertWin("排序必须是正整数！");
+                return 0;
+            }
+        }
+
+        var addDepartment = function () {
+            var r = validateBeforeSummit();
+            if (r == 0) {//验证有误则返回
+                return;
+            }
+            var name = $("#departName").val();
+            var order = $("#departOrder").val();
+            var node_type = $('input[type=radio][name=depNodeRadio]:checked').val();
+            var parentid = 0;
+            if (node_type == '0') {
+                parentid = param.pid;
+            } else if (node_type == '1') {
+                parentid = param.id;
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: "/WDepartMent/AddDepartInfo",
+                data: { parent: parentid, departName: name, orderId: order },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst == '1') {
+                        parent.closeDealWin('adddepFrm');
+                        parent.refreshTable();
+                        parent.hintWin("机构信息添加成功！");
+                        return;
+                    }
+                    else if (data.rst == '-2') {//记录已存在，无法插入重复记录
+                        parent.closeDealWin('adddepFrm');
+                        parent.alertWint("已存在相同的机构信息，添加失败！");
+                        return;
+                    }
+                    else {
+                        parent.closeDealWin('adddepFrm');
+                        parent.alertWint("机构信息添加失败！");
+                    }
+                }
+            });
+        }
+
+        var addReset = function () {
+            $("#departName").val('');
+            $("#departOrder").val('');
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/jquery-radiocheck/jquery-labelauty.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

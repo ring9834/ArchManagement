@@ -1,0 +1,59 @@
+﻿.stadiv {
+    height: 150px;
+    float: left;
+    background-color: white;
+    margin: 10px;
+    padding: 8px 0 8px 0;
+    box-shadow: 0 0 5px lightgray;
+    -moz-box-shadow: 0 0 5px lightgray;
+    -webkit-box-shadow: 0 0 5px lightgray;
+    border-radius: 10px;
+}
+
+.stasubdiv {
+    position: relative;
+    top: 30%; /*偏移*/
+    height: 30px;
+    margin-top: -15px;
+    font-size: 35px;
+    color: white;
+    font-weight: bold;
+}
+
+.circleDot {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: orangered;
+    padding: 0 2px 2px 2px;
+    margin-left: 2px;
+    color: white;
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    font-size: 10px;
+    text-align: center;
+    float: left;
+}
+
+.dotoItem {
+    padding: 5px;
+    margin: 0;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    --float: left;
+    border-bottom: 1px dotted buttonface;
+    color: #337ab7;
+}
+
+.infoHintBlock {
+    height: 360px;
+    margin-top: 20px;
+    background-color: white;
+    border-radius: 8px;
+    border: 1px solid buttonface;
+    box-shadow: 0 0 5px lightgray;
+    -moz-box-shadow: 0 0 5px lightgray;
+    -webkit-box-shadow: 0 0 5px lightgray;
+}

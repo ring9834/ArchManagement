@@ -1,0 +1,146 @@
+﻿
+@{
+    ViewData["Title"] = "摄像头取利用者头像";
+}
+
+
+@section head {
+
+}
+
+@section body {
+    <style>
+        .borderstyle {
+            border: 1px solid #b6b6b6;
+            width: 320px;
+            height: 240px;
+        }
+
+        #canvas {
+            width: 320px;
+            height: 240px;
+            margin: 10px;
+        }
+    </style>
+    <div class="container-fluid">
+        <div>
+            <div style="float:left;">
+                <div id="webcam" style="margin:10px;width:320px; height:240px; border:1px solid #b6b6b6;"></div>
+                <div style="text-align:center;">
+                    <button id="play" class="btn btn-success">拍照</button>
+                </div>
+            </div>
+            <div style="float:left;">
+                <canvas id="canvas" class="borderstyle" width="320" height="240"></canvas>
+                <div style="text-align:center;">
+                    <button id="okbtn" class="btn btn-success">确定</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            $("#h_loading_mask").css("display", "none");
+            $("#h_loading").css("display", "none");
+
+            var w = 320, h = 240;
+            var pos = 0,
+                ctx = null,
+                saveCB;
+
+            var canvas = document.getElementById("canvas")
+            if (canvas.toDataURL) {// 针对 IE9 及以上：通过flash调用摄像头后，将图像直接输出到canvas画布中，再通过canvas中的方法 toDataURL()方法，生成图像的base64编码传到后台。 
+                ctx = canvas.getContext("2d");
+                var image = ctx.getImageData(0, 0, w, h);
+
+                saveCB = function (data) {
+                    var col = data.split(";");
+                    var img = image;
+
+                    for (var i = 0; i < 320; i++) {
+                        var tmp = parseInt(col[i]);
+                        img.data[pos + 0] = (tmp >> 16) & 0xff;
+                        img.data[pos + 1] = (tmp >> 8) & 0xff;
+                        img.data[pos + 2] = tmp & 0xff;
+                        img.data[pos + 3] = 0xff;
+                        pos += 4;
+                    }
+
+                    if (pos >= 4 * 320 * 240) {
+                        ctx.putImageData(img, 0, 0);
+                        var Imagedata = canvas.toDataURL().substring(22);  //上传给后台的图片数据
+                        var strDataURI = canvas.toDataURL("image/png"); 
+                        $('#webcam', parent.document).attr('src', strDataURI);//在父窗口img中显示图片
+                        saveToImage(Imagedata);//保存到后台
+                        pos = 0;
+                        
+                    }
+                };
+            } else {//针对 IE8 及以下：因为 IE8 无法用canvas.toDataURL() ，因此拍照后无法直接将图片进行显示。这时通过flash调用摄像头，将得到的像素点阵传到后台，让后台处理，生成图像的 base64 编码，再在前端进行显示。
+                var image = [];
+                saveCB = function (data) {
+                    image.push(data);
+                    pos += 4 * 320;
+                    if (pos >= 4 * 320 * 240) {
+                        $.post(URL, { briStr: image.join(';') }, function (data) {//URL,将图像像素点阵传到后台进行处理的controller/action
+                            console.log(data);
+                            //在页面显示base64图片处理
+
+                            pos = 0;
+                            image = [];
+                        });
+                    }
+                };
+            }
+
+            $("#webcam").webcam({
+                width: w,
+                height: h,
+                mode: "callback",
+                swffile: '@Url.Content("~/lib/jquery_webcam/jscam_canvas_only.swf")',
+                onSave: saveCB,
+                onCapture: function () {               //捕获图像
+                    webcam.save();
+                },
+                debug: function (type, string) {       //控制台信息
+                    //console.log(type + ": " + string);
+                },
+                onLoad: function () {                   //flash 加载完毕执行
+                    //console.log('加载完毕！')
+                }
+            });
+
+            $("#play").click(function () {
+                webcam.capture();
+            });
+
+            $("#okbtn").click(function () {
+                parent.closeCamFrame();
+            });
+        });
+
+        var saveToImage = function (imgdata) { 
+            $.ajax({
+                type: 'POST',
+                url: "/WLookUpSvc/Capture",
+                data: { imgData: imgdata },
+                dataType: "JSON",
+                success: function (data) {
+                    //HM.hintWin('成功！');
+                }
+            });
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/jquery_webcam/jquery.webcam.min.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

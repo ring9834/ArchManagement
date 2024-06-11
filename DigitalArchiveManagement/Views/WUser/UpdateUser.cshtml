@@ -1,0 +1,216 @@
+﻿@using System.Data;
+@{
+
+    ViewData["Title"] = "更新人员信息";
+    var userTable = ViewData["userinfo"] as DataTable;
+}
+@section head {
+
+}
+
+@section body {
+    <style>
+        .userTable {
+            width: 100%;
+        }
+
+            .userTable td {
+                padding: 5px 0 12px 0;
+            }
+
+            .userTable select,
+            .userTable input {
+                width: 420px;
+                margin-right: 5px;
+            }
+    </style>
+
+    <div class="container-fluid">
+        <div class="alert alert-warning" style="margin-top:8px;font-size:13px;">
+            <i class="fa fa-volume-up"></i><strong> 提醒!</strong> 1、本页面不能修改用户密码！2、修改密码方法：登录成功后，在首页右上角点击登录的用户名，在下拉菜单中点击“修改密码”。
+        </div>
+        <table class="userTable">
+            <tr>
+                <td>
+                    <label for="userName" class="control-label">用户名</label>
+                </td>
+                <td>
+                    <input type="text" id="userName" class="form-control" placeholder="请输入用户名称，登录所用(*必填项*)" />
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-1">
+                    <label for="userNick" class="control-label">昵称</label>
+                </td>
+                <td class="col-md-11">
+                    <input type="text" id="userNick" class="form-control" placeholder="选填项" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="workPlace" class="control-label">工作单位</label>
+                </td>
+                <td>
+                    <input type="text" id="workPlace" class="form-control" placeholder="选填项" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="userTel" class="control-label">电话</label>
+                </td>
+                <td>
+                    <input type="text" id="userTel" class="form-control" placeholder="选填项" />
+                </td>
+            </tr>
+            @*<tr>
+                <td>
+                    <label for="userPass" class="control-label">密码</label>
+                </td>
+                <td>
+                    <input type="text" id="userPass" class="form-control" placeholder="*必填项*" />
+                </td>
+            </tr>*@
+            <tr>
+                <td>
+                    <label for="userRole" class="control-label">所属角色</label>
+                </td>
+                <td>
+                    <select class="form-control" id="userRole"></select>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="userRole" class="control-label">所属部门</label>
+                </td>
+                <td>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <input type="hidden" id="depHidden" />
+                            <input type="text" id="departbelong" class="form-control" readonly />
+                            <span class="input-group-addon" onclick="pickDepart();">点我选择</span>
+                        </div>
+                    </div>
+
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>
+                    <button class="btn btn-warning" onclick="saveUserInfo();"><i class="fa fa-save"></i> 保存</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        $(function () {
+            getRoles();
+
+        });
+
+        var getRoles = function () {
+            $.ajax({
+                type: 'post',
+                url: '/WUser/GetRoles',
+                dataType: "json",
+                success: function (data) {
+                    var select = $('#userRole');
+                    select.append("<option value='-1'>--请选择--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                        select.append("<option value='" + data[i].unique_code + "'>" + data[i].role_name + "</option>");
+                    }
+                    getUserInfo();//初始化人员原有信息
+
+                    $("#h_loading_mask").css("display", "none");//关闭页面加载指示器
+                    $("#h_loading").css("display", "none");
+                }
+            });
+        }
+
+        var getUserInfo = function () {
+            $('#userName').val('@Html.Raw(userTable.Rows[0]["user_name"].ToString())');
+            $('#userNick').val('@Html.Raw(userTable.Rows[0]["nick_name"].ToString())');
+            $('#workPlace').val('@Html.Raw(userTable.Rows[0]["work_place"].ToString())');
+            $('#userTel').val('@Html.Raw(userTable.Rows[0]["tel"].ToString())');
+            $('#userRole').val('@Html.Raw(userTable.Rows[0]["role_id"].ToString())');
+            $('#depHidden').val('@Html.Raw(userTable.Rows[0]["user_depart"].ToString())');
+            $('#departbelong').val('@Html.Raw(ViewData["departinfo"])');
+        }
+
+        var saveUserInfo = function () {
+            if ($.trim($('#userName').val()) == '') {
+                HM.alertWin('请填写用户名！');
+                return;
+            }
+            //if ($.trim($('#userPass').val()) == '') {
+            //    HM.alertWin('请填写用户密码！');
+            //    return;
+            //}
+
+            var userTel = $.trim($('#userTel').val());
+            if (userTel != '') {
+                if (!(/^1[3456789]\d{9}$/.test(userTel))) {
+                    HM.alertWin('手机号码有误，请重填！');
+                    return;
+                }
+            }
+
+            if ($('#userRole').val() == '-1') {
+                HM.alertWin('请选择所属角色！');
+                return;
+            }
+            if ($.trim($('#departbelong').val()) == '') {
+                HM.alertWin('请选择所属部门！');
+                return;
+            }
+
+            var userName = $('#userName').val();
+            var userNick = $('#userNick').val();
+            var workPlace = $('#workPlace').val();
+            //var userTel = $('#userTel').val();
+            //var userPass = $('#userPass').val();
+            var userRole = $('#userRole').val();
+            var userDepart = $('#depHidden').val();
+
+            $.ajax({
+                type: 'post',
+                url: '/WUser/UpdateUser',
+                dataType: "json",
+                data: { userName: userName, userNick: userNick, workPlace: workPlace, userTel: userTel, userRole: userRole, userDepart: userDepart ,userId:@Html.Raw(userTable.Rows[0]["Unique_code"].ToString())},
+                success: function (data) {
+                    if (data.rst == '1') {
+                        parent.hintUpdateSucess();
+                        parent.closeDealWin('updateuserFrm');
+                        parent.refreshTableData();
+                        return;
+                    }
+                    else if (data.rst == '-2') {//相同的用户名已存在，无法修改 
+                        parent.hintAlreadyWhenModi();
+                        parent.closeDealWin('updateuserFrm');
+                        return;
+                    }
+                    else {
+                        parent.hintUpdateFailer();
+                        parent.closeDealWin('updateuserFrm');
+                        return;
+                    }
+                }
+            });
+        }
+
+        var pickDepart = function () {
+            var content = "<iframe id='picDepFrame' src='/WUser/PickDepartv" + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwin(content, 600, 280, '人员所属机构选择窗口');
+        }
+
+        var closeDealWin = function () {
+            pop.close('deal-win');
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

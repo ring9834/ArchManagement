@@ -1,0 +1,65 @@
+﻿
+@{
+    ViewData["Title"] = "配置密集架中的档案数据";
+}
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.min.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+    <link href="~/css/AmountStatistics.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="statisticsTabs" role="tabpanel">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" role="tablist">
+                <li id="step1" role="presentation" class="active"><a href="#section1" aria-controls="home" role="tab" data-toggle="tab"><i class="fa fa-hand-o-right"></i><span>第一步：选密集架位置</span></a></li>
+                <li id="step2" role="presentation"><a href="#section2" aria-controls="messages" role="tab" data-toggle="tab"><i class="fa fa-shopping-bag"></i><span>第二步：在所选位置填充档案数据</span></a></li>
+            </ul>
+            <!-- Tab panes -->
+            <div class="tab-content tabs">
+                <div role="tabpanel" class="tab-pane fade in active" id="section1" style="height:100%;">
+                    <iframe id="statisticGearFrm" src="/WVirStock/ViewStockForSelect" frameborder="0" style="border:0;height:100%;width:100%;padding:0;"></iframe>
+                </div>
+                <div role="tabpanel" class="tab-pane fade" id="section2" style="height:100%;">
+                    <iframe id="statisticPrvFrm" src="" frameborder="0" style="border:0;height:100%;width:100%;padding:0;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        $(function () {
+            $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+            $("#h_loading").css("display", "none");
+        });
+
+        function gotoStep1(data) {
+            $('#step1').attr('class', 'active');
+            $('#step2').removeClass('active');
+            $('#section1').addClass('active');
+            $('#section2').removeClass('active');
+        }
+
+        function gotoStep2(data) {
+            $('#step2').attr('class', 'active');
+            $('#step1').removeClass('active');
+            $('#section2').addClass('in active');
+            $('#section1').removeClass('in active');
+            $('#statisticPrvFrm').attr('src', '/WVirStock/FileOutView/' + data + '/'+ '@ViewData["userid"]');
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.min.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.min.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

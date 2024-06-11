@@ -1,0 +1,96 @@
+﻿
+@{
+    ViewData["Title"] = "目录接收";
+}
+
+@section head {
+    <link href="~/lib/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="panel panel-warning" style="margin-top:5px;">
+            <div class="panel-heading">
+                <h3 class="panel-title">档案目录文件上传（支持xls和xlsx格式）</h3>
+            </div>
+            <div class="panel-body">
+                <input type="file" name="xlsx_file" id="xlsx_file" class="file-loading" accept=".xls,.xlsx" />
+                <div style="width:70px;float:right">
+                    <button id="WrNextStep" class="btn btn-warning" onclick="redirectToCatalogMatch();">下一步</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var CommonParam;//从首页传过来的参数，所有tab页均用
+        var filePath = '';
+
+        $(function () {
+            var control = $("#xlsx_file");
+            var uploadrul = "/WRecvCatalog/UploadFile";
+            control.fileinput({
+                language: 'zh', //设置语言
+                uploadUrl: uploadrul, //上传的地址
+                allowedFileExtensions: ['xls', 'xlsx'],//接收的文件后缀
+                showUpload: true, //显示批量上传按钮
+                showCaption: false,//是否显示标题
+                browseClass: "btn btn-info", //按钮样式
+                dropZoneEnabled: true,//是否显示拖拽区域
+                //minImageWidth: 50, //图片的最小宽度
+                //minImageHeight: 50,//图片的最小高度
+                //maxImageWidth: 1000,//图片的最大宽度
+                //maxImageHeight: 1000,//图片的最大高度
+                //maxFileSize: 0,//单位为kb，如果为0表示不限制文件大小
+                //minFileCount: 0,
+                maxFileCount: 100,
+                enctype: 'multipart/form-data',
+                validateInitialCount: true,
+                //showPreview: false, //是否显示预览
+                previewFileIcon: "<i class='fa fa-newspaper-o' style='color:green;'></i>",
+                layoutTemplates: {
+                    //actionDelete: '', //去除上传预览的缩略图中的删除图标
+                    //actionUpload: '',//去除上传预览缩略图中的上传图片；
+                    actionZoom: ''   //去除上传预览缩略图中的查看详情预览的缩略图标。
+                },
+
+                msgFilesTooMany: "选择上传的文件数量({n}) 超过允许的最大数值{m}！",
+            }).on('fileuploaded', function (e, params) {
+
+                var fn = params.response.rst.fileName;
+                filePath = fn;
+                if (fn != '') {
+                    HM.confirmWin(fn, "接下来进行目录字段的匹配，点击“执行匹配”或取消后点击“下一步”继续！","执行匹配","confirm-win-match",catalogFieldMatch);
+                }
+            });
+
+            $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+            $("#h_loading").css("display", "none");
+        });
+
+        var catalogFieldMatch = function (fileName) {
+            window.location = "/WRecvCatalog/CatalogMatchView" + '@ViewData["url2"]' + "/" + fileName;//页面重定向
+        };
+
+        var redirectToCatalogMatch = function () {
+            //alert(filePath);
+            if (filePath != '') {
+                catalogFieldMatch(filePath);
+            }
+            else {
+                HM.alertWin("请先上传EXCEL目录文件后在继续！");
+            }
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-fileinput/js/fileinput.min.js"></script>
+    <script src="~/lib/bootstrap-fileinput/js/fileinput-zh.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

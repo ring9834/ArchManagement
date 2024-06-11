@@ -1,0 +1,442 @@
+﻿
+@{
+    ViewData["Title"] = "目录接收";
+}
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.min.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="alert alert-warning">
+            <i class="fa fa-volume-up"></i><strong> 提醒!</strong> 1、自动匹配，可以快速匹配左边两个表中名称相同的字段，名称不同的字段，可以在两个表格中分别选择后，点击“绑定”；2、点击最右边表格中的项然后点“解绑”按钮，可以撤销已被绑定的字段；3、执行匹配时如果遇到提示“有无用的空表头”信息，建议把excel表中所有有用的列的数据复制粘贴到一个新的excel表中然后再尝试匹配。
+        </div>
+        <div class="row">
+            <div id="toolbar_left" class="btn-group">
+                <h4><span class="label label-warning">来自EXCEL表格</span></h4>
+            </div>
+            <div id="toolbar_right" class="btn-group">
+                <h4><span class="label label-warning">来自数据库</span></h4>
+            </div>
+            <div id="toolbar_matched" class="btn-group">
+                <h4><span class="label label-warning">匹配完成的字段</span></h4>
+            </div>
+            <div id="div_left" class="col-md-3">
+                <table id="tb_left"></table>
+            </div>
+            <div id="div_right" class="col-md-3">
+                <table id="tb_right"></table>
+            </div>
+            <div id="div_btns" class="col-md-1">
+                <div style="height:calc(100vh - 10px);">
+                    <div class="btn-group-vertical" style="position: relative;top:48%;transform: translateY(-50%);">
+                        <button type="button" class="btn btn-info" onclick="autoMatch();">自动匹配</button>
+                        <button type="button" class="btn btn-info" onclick="bindSingle();">>>绑定</button>
+                        <button type="button" class="btn btn-info" onclick="unbindSingle();">解绑<<</button>
+                        <button type="button" class="btn btn-info" onclick="allRestore();">全部解绑</button>
+                        <button type="button" class="btn btn-warning" onclick="nextStep();">下一步</button>
+                    </div>
+                </div>
+
+            </div>
+            <div id="div_match" class="col-md-5">
+                <table id="tb_matched"></table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var m_oTable = null;
+
+        window.onload = function () {
+            m_oTable = new oTableInit();
+            m_oTable.initiateLeftTb();
+            m_oTable.initiateRightTb();
+            m_oTable.initiateMatchedTb();
+
+            $("#h_loading_mask").css("display", "none");//关闭加载提示
+            $("#h_loading").css("display", "none");
+        };
+
+        //当clickToSelect=true时，如果不阻止事件冒泡，则点击自定义CHECKBOX时会没有反应
+        var stopBubbleEvent = function () {
+            if (window.event) {//IE下阻止冒泡
+                event.cancelBubble = true;
+            } else {
+                event.stopPropagation();
+            }
+        }
+
+        var oTableInit = function () {
+            this.initiateLeftTb = function () {
+                //初始化左边表格
+                $('#tb_left').bootstrapTable('destroy');
+                $('#tb_left').bootstrapTable({
+                    url: '/WRecvCatalog/LoadDataToLeftTable/'+ '@ViewBag.table' +'/'+ '@ViewBag.user'+'/'+'@Html.Raw(ViewBag.xlsFile)',                      //请求后台的URL（*）
+                    method: 'POST',                      //请求方式（*）
+                    contentType: "application/x-www-form-urlencoded",
+                    toolbar: '#toolbar_left',
+                    silent: true, //静态刷新
+                    striped: true,                      //是否显示行间隔色
+                    cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                    sortable: true,                     //是否启用排序
+                    sortOrder: "asc",                   //排序方式
+                    search: false,                      //是否显示表格搜索
+                    strictSearch: true,
+                    showColumns: true,                  //是否显示所有的列（选择显示的列）
+                    minimumCountColumns: 2,             //最少允许的列数
+                    clickToSelect: true,                //是否启用点击选中行
+                    uniqueId: "id",                     //每一行的唯一标识，一般为主键列
+                    cardView: false,                    //是否显示详细视图
+                    detailView: false,                  //是否显示父子表
+                    showLoading: false,
+                    singleSelect: true,                //true只能单选，false为多选
+                    showFullscreen: true,
+                    columns: [
+                        {
+                            field: 'check', checkbox: true, formatter: function (value, row, index) {
+                                if (row.check == true) {
+                                    //设置选中
+                                    return { checked: true };
+                                }
+                            }
+                        }, {
+                            field: 'id',
+                            title: 'ID'
+                        }, {
+                            field: 'colName',
+                            title: 'Excel表格列名'
+                        },
+                    ],
+                    formatLoadingMessage: function () {
+                        return "请稍等，正在加载中···";
+                    },
+                    onPostBody: function () {
+                        //改变复选框样式
+                        $('#tb_left').find("input:checkbox").each(function (i) {
+                            var $check = $(this);
+                            if ($check.attr("id") && $check.next("label")) {
+                                return;
+                            }
+                            var name = $check.attr("name");
+                            var id = name + "a-" + i;
+                            var $label = $('<label for="' + id + '" onclick = stopBubbleEvent();></label>');
+                            $check.attr("id", id)
+                                .parent()
+                                .addClass("bella-checkbox")
+                                .children("span").remove();
+                            $check.parent().append($label);
+                        });
+                    },
+                    onLoadSuccess: function (data) {
+                        console.log(JSON.stringify(data));
+                        //表格加载完成之后
+                        if (data.rst == 0) {
+                            HM.alertWin(data.info);
+                        }
+                    }
+                });
+            };
+
+            this.initiateRightTb = function () {
+                //初始化右边表格
+                $('#tb_right').bootstrapTable('destroy');
+                $('#tb_right').bootstrapTable({
+                    url: "/WRecvCatalog/LoadDataToRightTable/"+ '@ViewBag.table' +'/'+ '@ViewBag.user'+'/'+'@Html.Raw(ViewBag.xlsFile)',                      //请求后台的URL（*）
+                    method: 'POST',                      //请求方式（*）
+                    contentType: "application/x-www-form-urlencoded",
+                    toolbar: '#toolbar_right',
+                    silent: true, //静态刷新
+                    toolbar: '#toolbar_right',              //工具按钮用哪个容器
+                    striped: true,                      //是否显示行间隔色
+                    cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                    sortable: true,                     //是否启用排序
+                    sortOrder: "asc",                   //排序方式
+                    search: false,                      //是否显示表格搜索
+                    strictSearch: true,
+                    showColumns: true,                  //是否显示所有的列（选择显示的列）
+                    minimumCountColumns: 2,             //最少允许的列数
+                    clickToSelect: true,                //是否启用点击选中行
+                    uniqueId: "unique_code",                     //每一行的唯一标识，一般为主键列
+                    cardView: false,                    //是否显示详细视图
+                    detailView: false,                  //是否显示父子表
+                    showLoading: false,
+                    singleSelect: true,                //true只能单选，false为多选
+                    showFullscreen: true,
+                    columns: [
+                        {
+                            field: 'check', checkbox: true, formatter: function (value, row, index) {
+                                if (row.check == true) {
+                                    //设置选中
+                                    return { checked: true };
+                                }
+                            }
+                        }, {
+                            field: 'show_name',
+                            title: '数据库表列显示名'
+                        }, {
+                            field: 'col_name',
+                            title: '数据库表列名'
+                        }
+                    ],
+                    formatLoadingMessage: function () {
+                        return "请稍等，正在加载中···";
+                    },
+                    onPostBody: function () {
+                        //改变复选框样式
+                        $('#tb_right').find("input:checkbox").each(function (i) {
+                            var $check = $(this);
+                            if ($check.attr("id") && $check.next("label")) {
+                                return;
+                            }
+                            var name = $check.attr("name");
+                            var id = name + "b-" + i;
+                            var $label = $('<label for="' + id + '" onclick=stopBubbleEvent();></label>');
+                            $check.attr("id", id)
+                                .parent()
+                                .addClass("bella-checkbox")
+                                .children("span").remove();
+                            $check.parent().append($label);
+                        });
+                    },
+                    onLoadSuccess: function (data) {
+                        //表格加载完成之后初始化放拖
+                    }
+                });
+            };
+
+             this.initiateMatchedTb = function () {
+                //初始化右边表格
+                 $('#tb_matched').bootstrapTable('destroy');
+                 $('#tb_matched').bootstrapTable({
+                     data: matchedData,
+                     silent: true, //静态刷新
+                    toolbar: '#toolbar_matched',              //工具按钮用哪个容器
+                    striped: true,                      //是否显示行间隔色
+                    cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                    sortable: true,                     //是否启用排序
+                    sortOrder: "asc",                   //排序方式
+                    search: false,                      //是否显示表格搜索
+                    strictSearch: true,
+                    showColumns: true,                  //是否显示所有的列（选择显示的列）
+                    minimumCountColumns: 2,             //最少允许的列数
+                    clickToSelect: true,                //是否启用点击选中行
+                    uniqueId: "id",                     //每一行的唯一标识，一般为主键列
+                    cardView: false,                    //是否显示详细视图
+                    detailView: false,                  //是否显示父子表
+                    showLoading: false,
+                    singleSelect: true,                //true只能单选，false为多选
+                    showFullscreen: true,
+                    columns: [
+                        {
+                            field: 'check', checkbox: true, formatter: function (value, row, index) {
+                                if (row.check == true) {
+                                    //设置选中
+                                    return { checked: true };
+                                }
+                            }
+                        }, {
+                            field: 'colName',
+                            title: 'Excel表格列名'
+                        }, {
+                            field: 'show_name',
+                            title: '数据库表列名'
+                        }
+                    ],
+                    formatLoadingMessage: function () {
+                        return "请稍等，正在加载中···";
+                    },
+                    onPostBody: function () {
+                        //改变复选框样式
+                        $('#tb_matched').find("input:checkbox").each(function (i) {
+                            var $check = $(this);
+                            if ($check.attr("id") && $check.next("label")) {
+                                return;
+                            }
+                            var name = $check.attr("name");
+                            var id = name + "b-" + i;
+                            var $label = $('<label for="' + id + '" onclick=stopBubbleEvent();></label>');
+                            $check.attr("id", id)
+                                .parent()
+                                .addClass("bella-checkbox")
+                                .children("span").remove();
+                            $check.parent().append($label);
+                        });
+                    },
+                    onLoadSuccess: function (data) {
+                        //表格加载完成之后初始化放拖
+                    }
+                });
+            };
+        };
+
+        var matchedData = [];
+        var autoMatch = function () {
+            HM.pageLoading();
+            var counter = 0;
+            //matchedData = [];//初始化，或清空其中的数据
+            var dataLeft = $('#tb_left').bootstrapTable('getData');
+            var dataRight = $('#tb_right').bootstrapTable('getData');
+            var dataMid = $('#tb_matched').bootstrapTable('getData');
+            counter = dataMid.length + 1;//如果匹配表中已经存在数据，则counter重新计算
+            for (var i = 0; i < dataLeft.length; i++) {
+                for (var j = 0; j < dataRight.length; j++) {
+                    if (dataLeft[i].colName == dataRight[j].show_name) {
+                        var d = {//JSON对象
+                            id: counter,
+                            idLeft: dataLeft[i].id,
+                            idRight: dataRight[j].unique_code,
+                            colName: dataLeft[i].colName,
+                            show_name: dataRight[j].show_name,
+                            col_name:dataRight[j].col_name,
+                        }
+                        matchedData.push(d);
+                        counter++;
+                    }
+                }
+            }
+            m_oTable.initiateMatchedTb();//加载匹配表格
+
+            //删除左右两个表格的已匹配记录
+            for (var i = 0; i < matchedData.length; i++) {
+                var idLeft = matchedData[i].idLeft;
+                var idRight = matchedData[i].idRight;
+                $('#tb_left').bootstrapTable('removeByUniqueId', idLeft);
+                $('#tb_right').bootstrapTable('removeByUniqueId', idRight);
+            }
+            HM.closePageLoading();
+        }
+
+        var allRestore = function () {
+            m_oTable.initiateLeftTb();
+            m_oTable.initiateRightTb();
+            matchedData = [];//初始化，或清空其中的数据
+            m_oTable.initiateMatchedTb();
+        }
+
+        var bindSingle = function () {
+            var dataLeft = $('#tb_left').bootstrapTable('getSelections');
+            var dataRight = $('#tb_right').bootstrapTable('getSelections');
+            if (dataLeft.length == 0 || dataRight.length == 0) {
+                HM.alertWin("请在“来自EXCEL表格”和“来自数据库”两表格中选择后继续！");
+                return;
+            }
+            var d = {
+                id: matchedData.length + 1,
+                idLeft: dataLeft[0].id,
+                idRight: dataRight[0].unique_code,
+                colName: dataLeft[0].colName,
+                show_name: dataRight[0].show_name,
+                col_name: dataRight[0].col_name,
+            }
+            matchedData.push(d);
+            m_oTable.initiateMatchedTb();//加载匹配表格
+
+            $('#tb_left').bootstrapTable('removeByUniqueId', dataLeft[0].id);
+            $('#tb_right').bootstrapTable('removeByUniqueId', dataRight[0].unique_code);
+        }
+
+        var unbindSingle = function () {
+            var dataMid = $('#tb_matched').bootstrapTable('getSelections');
+            if (dataMid.length == 0) {
+                HM.alertWin("请在“匹配完成的字段”表格中选择后继续！");
+                return;
+            }
+            var indexLeft = $('#tb_left').bootstrapTable('getData').length;
+            var indexRight = $('#tb_right').bootstrapTable('getData').length;
+            var toLeft = {
+                id: dataMid[0].idLeft,
+                colName: dataMid[0].colName
+             }
+            var toRight = {
+                unique_code:dataMid[0].idRight,
+                show_name: dataMid[0].show_name,
+                col_name:dataMid[0].col_name
+            }
+            $('#tb_left').bootstrapTable('insertRow', { index: indexLeft, row: toLeft });
+            $('#tb_right').bootstrapTable('insertRow', { index: indexRight, row: toRight });
+            $('#tb_matched').bootstrapTable('removeByUniqueId', dataMid[0].id);
+        }
+
+        var nextStep = function () {
+            if (matchedData.length == 0) {//Added on 20201115，cannoet be transferred to backend if not set to null
+                HM.alertWin('请匹配字段后继续！');
+                return;
+            }
+
+            var dataLeft = $('#tb_left').bootstrapTable('getData');
+            if (dataLeft.length > 0) {
+                HM.confirmWin('', '还有未匹配的字段，确认要开始目录导入吗？\r\n（一次最多能导入65536条记录，多出的部分将不被导入。）', "开始导入", 'confirm-win-catalogimp', importCatalog);
+                return;
+            }
+            importCatalog('');
+        }
+
+        var importCatalog = function (id) {
+            HM.pageLoading(); 
+            if (matchedData.length == 0) {//Added on 20201115，cannoet be transferred to backend if not set to null
+                matchedData = null; 
+            }
+            
+            $.ajax({
+                type: 'POST',
+                url: "/WRecvCatalog/ImpCatalogToTableVerified",
+                data: { tableName: '@ViewBag.table', fileName: '@Html.Raw(ViewBag.xlsFile)', matchList: matchedData, userid: '@ViewBag.user' },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst == 0) {
+                        pop.close('confirm-win-catalogimp');
+                        HM.closePageLoading();
+                        HM.alertWin(data.info);
+                        return;
+                    }
+                    if (data.rst == 2) {
+                        pop.close('confirm-win-catalogimp');
+                        HM.closePageLoading();
+                        HM.confirmWin('', data.info, "确定", 'confirm-win-imp', importCatalog2);
+                        return;
+                    }
+                    if (data.rst == 1) {
+                        pop.close('confirm-win-imp');
+                        pop.close('confirm-win-catalogimp');
+                        HM.hintWin(data.info);
+                        window.location = '/WRecvCatalog/ImpCataRecView/' + '@ViewBag.table' + '/' + '@ViewBag.user';
+                    }
+                }
+            });
+        }
+
+        //Html.Raw()防止viewbag中的中文参数乱码
+        var importCatalog2 = function (id) {
+            HM.pageLoading();console.log(matchedData);
+             $.ajax({
+                 type: 'POST',
+                 url: "/WRecvCatalog/ImpCatalogToTable",
+                 data: { tableName: '@ViewBag.table', fileName: '@Html.Raw(ViewBag.xlsFile)', matchList: matchedData, userid:'@ViewBag.user'},
+                 dataType: "JSON",
+                 success: function (data) {
+                     if (data.rst == 1) {
+                         pop.close('confirm-win-imp');
+                         HM.hintWin(data.info);
+                         window.location = '/WRecvCatalog/ImpCataRecView/' + '@ViewBag.table' + '/'+ '@ViewBag.user';
+                         return;
+                     }
+                 }
+             });
+            HM.closePageLoading();
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.min.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.min.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

@@ -1,0 +1,45 @@
+﻿
+@{
+    ViewData["Title"] = "Tab Control Test2";
+}
+<br />
+<br />
+<a href="#" class="btn btn-success" onclick="initialTabControl();">初始化tab控件</a>
+<a href="#" class="btn btn-danger" onclick="addTab1();">增加tab1</a>
+<a href="#" class="btn btn-default" onclick="addTab2();">增加tab2</a>
+<a href="#" class="btn btn-info" onclick="addTab3();">增加tab3</a>
+<a href="#" class="btn btn-primary" onclick="addTab4();">增加tab4</a>
+<br />
+<div id="tabStripWrapper" class="tabstrip-wrapper">
+    <div id="tabstripTop1" class="tabstrip-top-container"></div>
+    <div id="tabstripContent1" class="tabstrip-content-container"></div>
+</div>
+
+<script type="text/javascript">
+    var cc;
+    var initialTabControl = function () {
+        cc = new hTabControl("tabstripTop1", 'tabstripContent1');
+        cc.IsFirstTabClosible = true;//false时第一个tab不加关闭按钮
+    };
+
+    var addTab1 = function () {
+        if (cc != null)
+            cc.AddTab('a', '我的MVC', "/button/index");
+        //cc.AddTab('d', '百度', "http://www.baidu.com", true);//为true的，加载时默认首页
+    }
+
+    var addTab2 = function () {
+        if (cc != null)
+            cc.AddTab('b', '我的TABs1', "/tabs/index");
+    }
+
+    var addTab3 = function () {
+        if (cc != null)
+            cc.AddTab('c', '我的TABs2', "/tabs2/index");
+    }
+
+    var addTab4 = function () {
+        if (cc != null)
+            cc.AddTab('d', '腾讯首页-QQ', "http://www.qq.com");
+    }
+</script>

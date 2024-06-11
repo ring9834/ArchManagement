@@ -1,0 +1,114 @@
+﻿
+.statisticsTabs {
+    height:calc(100vh - 52px);
+    margin-top:7px;
+}
+
+.statisticsTabs a:hover, .statisticsTabs a:focus {
+    outline: none;
+    text-decoration: none;
+}
+
+.statisticsTabs .nav-tabs {
+    padding-left: 15px;
+    border-bottom: 3px solid #f0ad4e;
+}
+
+    .statisticsTabs .nav-tabs li a {
+        color: #fff;
+        padding: 10px 20px;
+        margin-right: 10px;
+        background: #f0ad4e;
+        --text-shadow: 1px 1px 2px #000;
+        border: none;
+        border-radius: 0;
+        opacity: 0.5;
+        position: relative;
+        transition: all 0.3s ease 0s;
+    }
+
+        .statisticsTabs .nav-tabs li a:hover {
+            background: #f0ad4e;
+            opacity: 0.8;
+        }
+
+    .statisticsTabs .nav-tabs li.active a {
+        opacity: 1;
+    }
+
+        .statisticsTabs .nav-tabs li.active a,
+        .statisticsTabs .nav-tabs li.active a:hover,
+        .statisticsTabs .nav-tabs li.active a:focus {
+            color: #fff;
+            background: #f0ad4e;
+            border: none;
+            border-radius: 0;
+        }
+
+    .statisticsTabs .nav-tabs li a:before,
+    .statisticsTabs .nav-tabs li a:after {
+        content: "";
+        border-top: 42px solid transparent;
+        position: absolute;
+        top: -2px;
+    }
+
+    .statisticsTabs .nav-tabs li a:before {
+        border-right: 15px solid #f0ad4e;
+        left: -15px;
+    }
+
+    .statisticsTabs .nav-tabs li a:after {
+        border-left: 15px solid #f0ad4e;
+        right: -15px;
+    }
+
+    .statisticsTabs .nav-tabs li a i,
+    .statisticsTabs .nav-tabs li.active a i {
+        display: inline-block;
+        padding-right: 5px;
+        font-size: 15px;
+        text-shadow: none;
+    }
+
+    .statisticsTabs .nav-tabs li a span {
+        display: inline-block;
+        font-size: 14px;
+        letter-spacing: -9px;
+        opacity: 0;
+        transition: all 0.3s ease 0s;
+    }
+
+    .statisticsTabs .nav-tabs li a:hover span,
+    .statisticsTabs .nav-tabs li.active a span {
+        letter-spacing: 1px;
+        opacity: 1;
+        transition: all 0.3s ease 0s;
+    }
+
+.statisticsTabs .tab-content {
+    padding: 8px 0 0 0;
+    background: #fff;
+    font-size: 16px;
+    color: #6c6c6c;
+    --line-height: 25px;
+    height:100%;
+}
+
+    .statisticsTabs .tab-content h3 {
+        font-size: 24px;
+        margin-top: 0;
+    }
+
+@media only screen and (max-width: 479px) {
+    .statisticsTabs .nav-tabs li {
+        width: 100%;
+        margin-bottom: 5px;
+        text-align: center;
+    }
+
+        .statisticsTabs .nav-tabs li a span {
+            letter-spacing: 1px;
+            opacity: 1;
+        }
+}

@@ -1,0 +1,286 @@
+﻿
+@{
+    ViewData["Title"] = "特定类型的统计模板";
+}
+
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+    <link href="~/css/arch-button.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div id="archCrudToolbar">
+            <button type="button" id="catalogAddBtn" class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="startFromScratch();"><i class="fa fa-flag"></i> 不使用模板开始新统计</button>
+            @*<button type="button" class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="modifySingle();"><i class="fa fa-pencil"></i> 修改</button>*@
+        </div>
+
+        <div class="specified-table">
+            <table id="templateGrid"></table>
+        </div>
+
+    </div>
+    <script>
+        var stcType;//从父页面接收 统计类型 参数
+
+        $(function () {
+            //hideBtnByLoggedUser();
+            stcType = parent.stcType;
+            loadTable();
+        });
+
+        var loadTable = function(){
+            var url = '/WStatistics/GetStcTemplates';
+            loadTableData(url, null);//初始加载数据
+        }
+
+        var loadTableData = function (url,paramlist) {
+            $('#templateGrid').bootstrapTable('destroy');
+            $table = $('#templateGrid').bootstrapTable({
+                url: url,
+                method: 'POST',                      //请求方式（*）
+                contentType: "application/x-www-form-urlencoded",
+                silent: true, //静态刷新
+                toolbar: '#archCrudToolbar',              //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                pagination: true,                   //是否显示分页（*）
+                sortable: true,                     //是否启用排序
+                sortOrder: "asc",                   //排序方式
+                sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+                pageNumber: 1,                      //初始化加载第一页，默认第一页,并记录
+                pageSize: 15,                     //每页的记录行数（*）
+                pageList: [15, 30, 50, 100],        //可供选择的每页的行数（*）
+                search: false,                      //是否显示表格搜索
+                strictSearch: true,
+                showColumns: true,                  //是否显示所有的列（选择显示的列）
+                showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                clickToSelect: true,                //是否启用点击选中行
+                //height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                uniqueId: "Unique_code",                     //每一行的唯一标识，一般为主键列
+                showToggle: true,                   //是否显示详细视图和列表视图的切换按钮
+                showExport: true,
+                cardView: false,                    //是否显示详细视图
+                detailView: false,                  //是否显示父子表
+                paginationLoop: false,
+                showLoading: false,
+                singleSelect: false,                //true只能单选，false为多选
+                exportDataType: "selected",        //导出checkbox选中的行数
+                showFullscreen: true,
+                useRowAttrFunc: true,
+                reorderableRows: true,
+                //得到查询的参数
+                queryParams: function (params) {
+                    //这里的键的名字和控制器的变量名必须一致，这边改动，控制器也需要改成一样的
+                    var temp = {
+                        stcType: stcType,
+                        pageSize: params.limit,                         //页面大小
+                        pageIndex: params.offset / params.limit   //页码
+                    };
+                    return temp;
+                },
+                columns: [
+                    {
+                        field: 'check', checkbox: true, formatter: function (value, row, index) {
+                            if (row.check == true) {
+                                return { checked: true };//设置选中
+                            }
+                        }
+                    },
+                    { field: 'template_name', title: '模板标题' },
+                    { field: 'code_name', title: '统计类型' },
+                    { field: 'created_date', title: '创建日期' },
+                    { field: 'operate', title: '操作模板', align: 'center', width: '250px', events: operateEvents, formatter: 'operateFormatter' }
+                ],
+                onLoadSuccess: function (data) {
+
+                    $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                    $("#h_loading").css("display", "none");
+                },
+                formatLoadingMessage: function () {
+                    return "请稍等，正在加载中···";
+                },
+                onPostBody: function () {
+                    //改变复选框样式
+                    $('#templateGrid').find("input:checkbox").each(function (i) {
+                        var $check = $(this);
+                        if ($check.attr("id") && $check.next("label")) {
+                            return;
+                        }
+                        var name = $check.attr("name");
+                        var id = name + "-" + i;
+                        var $label = $('<label for="' + id + '" onclick=stopButtonEvent();></label>');
+                        $check.attr("id", id)
+                            .parent()
+                            .addClass("bella-checkbox")
+                            .children("span").remove();
+                        $check.parent().append($label);
+                    });
+
+                    //动态设置checkbox的那个td的css,不让它触发table的specified-table table td:hover
+                    $("#templateGrid").find("tr").each(function () {
+                        var tdArr = $(this).children();
+                        tdArr.eq(0).css("overflow","hidden").css("white-space","nowrap");
+                    });
+                },
+            });
+        }
+
+        //当clickToSelect=true时，如果不阻止事件冒泡，则点击自定义CHECKBOX时会没有反应
+        function stopButtonEvent() {
+            if (window.event) {//IE下阻止冒泡
+                event.cancelBubble = true;
+            } else {
+                event.stopPropagation();
+            }
+        }
+
+        var startFromScratch = function () {
+            parent.$("#lione").attr('class', '');
+            parent.$("#litwo").attr('class', 'active');
+            parent.$("#Section1").attr('class', 'tab-pane fade pane-height');
+            parent.$("#Section2").attr('class', 'tab-pane fade pane-height active in');
+            parent.liclick('1');
+            parent.tempStatisticCondition = {//初始化全局参数
+                searchCondition: [],//JSON对象
+                statisticFields: [],
+                groupFields: [],
+                isNumStatistic: false,//是否数量类型的统计，默认：不是
+                isSum: false//统计后的数量字段，显示为总和，还是显示为去重后的数目。默认显示去重后的数目
+            }
+        }
+
+        var closeDealWin = function () {
+            pop.close('deal-win');
+        }
+
+        var popHintWin = function () {
+            HM.hintWin('模板添加成功！');
+        }
+
+        var popModifySuccessWin = function () {
+            HM.hintWin('批量修改成功！');
+        }
+
+        var refreshTableData = function () {
+            $('#templateGrid').bootstrapTable('refresh');
+        }
+
+        @*var modifySingle = function () {
+            var sl = $('#manageStoregrid').bootstrapTable('getSelections');
+            if (sl.length == 0 || sl.length > 1) {
+                HM.alertWin('请选择一条记录后再修改！');
+                return;
+            }
+            var selected = sl[0];
+            var content = "<iframe id='catalogmodifyFrame' src='/WManageStore/CatalogUpdateView/" + '@ViewData["table"]' + "/" + '@ViewData["userid"]' + "/" + JSON.stringify(selected) + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwin(content, 1000, 560, '目录修改窗口');
+        }*@
+
+        //查看原文
+        window.operateEvents = {
+            'click .RoleOfDel': function (e, value, row, index) {
+                deleteTeml(row);
+            },
+            'click .RoleOfPick': function (e, value, row, index) {
+                pickTeml(row);
+            },
+        };
+
+        // 格式化按钮
+        function operateFormatter(value, row, index) {
+            return [
+                '<button type="button" class="RoleOfPick btn btn-sm   btn-success" style="margin-right:15px;"><i class="glyphicon glyphicon-ok" ></i>&nbsp;使用模板</button>',
+                '<button type="button" class="RoleOfDel btn btn-sm  btn-danger" style="margin-right:15px;"><i class="glyphicon glyphicon-minus" ></i>&nbsp;删除</button>'
+            ].join('');
+        }
+
+        var deleteTeml = function (row) {
+            //alert(JSON.stringify(row)); return;
+            parent.confirmHint(row.unique_code, '确定要删除此模板吗？', '确认删除','delstctempl', deleteTemplate)
+        }
+
+        function deleteTemplate(id) {
+            $.ajax({
+                type: 'POST',
+                url: "/WStatistics/DeleteTempl",
+                data: { uniquecode: id },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        refreshTableData();
+                        parent.closeConfirmWin('delstctempl');
+                        parent.statisticHint('所选模板删除成功！');
+                        return;
+                    }
+                }
+            });
+        }
+
+        var pickTeml = function (row) {
+            parent.tempStatisticCondition.searchCondition = JSON.parse(row.search_condition);
+            parent.tempStatisticCondition.statisticFields = JSON.parse(row.statistic_fields);
+            parent.tempStatisticCondition.groupFields = JSON.parse(row.group_fields);
+            parent.tempStatisticCondition.isNumStatistic = row.is_numstc;
+            parent.tempStatisticCondition.isSum = row.is_sum;
+
+            parent.$("#lione").attr('class', '');
+            parent.$("#litwo").attr('class', 'active');
+            parent.$("#Section1").attr('class', 'tab-pane fade pane-height');
+            parent.$("#Section2").attr('class', 'tab-pane fade pane-height active in');
+            parent.liclick('1');
+        }
+
+        var hideBtnByLoggedUser = function() {
+            $.ajax({
+               type: 'POST',
+               url: "/WFunctionAccess/GetFuncAccessByUser",
+               data: { userName: '@ViewData["userid"]' },
+               dataType: "JSON",
+                success: function (data) {
+                    //alert(JSON.stringify(data));
+                    for (var i = 0; i < data.length; i++) {
+                        var func = data[i].func_symble;
+                        if (func == 'catalog_add') {
+                            var vbl = data[i].func_visible;
+                            if (vbl == false || vbl.toLowerCase() == 'false') {
+                                $('#catalogAddBtn').css('display','none');
+                            }
+                        }
+                        if (func == 'catalog_modi') {
+                            var vbl = data[i].func_visible;
+                            if (vbl == false || vbl.toLowerCase() == 'false') {
+                                $('#catalogModiBtn').css('display', 'none');
+                            }
+                        }
+                        if (func == 'catalog_del') {
+                            var vbl = data[i].func_visible;
+                            if (vbl == false || vbl.toLowerCase() == 'false') {
+                                $('#catalogDelBtn').css('display', 'none');
+                            }
+                        }
+                        if (func == 'yw_view') {
+                            var vbl = data[i].func_visible;
+                            if (vbl == false || vbl.toLowerCase() == 'false') {
+                                $('#manageStoregrid').bootstrapTable('hideColumn', 'operate');
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

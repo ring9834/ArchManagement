@@ -1,0 +1,291 @@
+﻿
+@{
+    ViewData["Title"] = "输入界面显示配置";
+}
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.min.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+    <link href="~/css/arch-button.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="alert alert-warning" style="margin-top:8px;font-size:13px;">
+            <i class="fa fa-volume-up"></i><strong> 提醒!</strong> 1、本页面列出了对应档案库所有的字段；2、如果不想让某字段在目录著录界面中显示，请在“显示的控件类型”下拉列表中选择第一项，即“-请选择...”；
+            3、只有在“显示的控件类型”下拉列表中选择了“下拉框”，“对应的辅助代码”的下拉列表才会解冻以允许选择；4、“显示顺序”应为大于等于0的正整数，数值越大，对应的控件在目录著录页面中显示越靠后。
+        </div>
+        <div id="toolbar_right" class="btn-group">
+            <button type="button" id="saveOrderBtn" class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="saveOrder();"><i class="glyphicon glyphicon-tasks"></i> 保存所有配置</button>
+        </div>
+        <table id="tb_right"></table>
+    </div>
+
+    <script>
+        var m_oTable = null;
+        $(function () {
+            getControls();
+            //getCodeHelps();
+            //m_oTable = new oTableInit();
+            //m_oTable.initiateRightTb();
+        });
+
+        var oTableInit = function () {
+             this.initiateRightTb = function () {
+                //初始化右边表格
+                $('#tb_right').bootstrapTable('destroy');
+                $('#tb_right').bootstrapTable({
+                    url: "/WConfigUIShow/GetFldsByCode/"+ '@ViewData["table"]',
+                    method: 'POST',                      //请求方式（*）
+                    contentType: "application/x-www-form-urlencoded",
+                    toolbar: '#toolbar_right',
+                    silent: true, //静态刷新
+                    toolbar: '#toolbar_right',              //工具按钮用哪个容器
+                    striped: true,                      //是否显示行间隔色
+                    cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                    sortable: true,                     //是否启用排序
+                    sortOrder: "asc",                   //排序方式
+                    search: false,                      //是否显示表格搜索
+                    strictSearch: true,
+                    showColumns: true,                  //是否显示所有的列（选择显示的列）
+                    minimumCountColumns: 2,             //最少允许的列数
+                    //clickToSelect: true,                //是否启用点击选中行
+                    uniqueId: "unique_code",                     //每一行的唯一标识，一般为主键列
+                    cardView: false,                    //是否显示详细视图
+                    detailView: false,                  //是否显示父子表
+                    showLoading: false,
+                    singleSelect: true,                //true只能单选，false为多选
+                    showFullscreen: true,
+                    columns: [
+                        {
+                            field: 'show_name', title: '字段显示名'
+                        }, {
+                            field: 'col_name',  title: '字段名'
+                        },
+                        {
+                            field: 'operate', title: '显示的控件类型', align: 'center', events: operateEvents, formatter: 'controlTypeFormatter'
+                        },
+                        {
+                            field: 'operate2', title: '对应的辅助代码', align: 'center', formatter: 'codeHelpFormatter'
+                        },
+                        {
+                            field: 'col_order', title: '显示顺序', align: 'center', width: '60px', formatter: 'colorderFormatter'
+                        },
+                        //{
+                        //    field: 'coluse', title: '字段可用？', align: 'center', width:'50px', formatter:'coluseFormatter'
+                        //},
+                        { field: 'operate3', title: '操作', align: 'center', width: '100px', events: operateEvents, formatter: 'operateFormatter' },
+                    ],
+                    formatLoadingMessage: function () {
+                        return "请稍等，正在加载中···";
+                    },
+                    onLoadSuccess: function (data) {
+                        initiateSelectVal();
+                        //表格加载完成之后初始化放拖
+                        $("#h_loading_mask").css("display", "none");//关闭加载提示
+                        $("#h_loading").css("display", "none");
+                    }
+                });
+            };
+        };
+
+        var conditonData;
+        var getControls = function () {
+            $.ajax({
+                type: 'POST',
+                url: "/WConfigUIShow/GetControlTypes",
+                dataType: "JSON",
+                success: function (data) {
+                    conditonData = data;
+
+                    getCodeHelps();
+                }
+            });
+        }
+
+        var codeHlpData;
+        var getCodeHelps = function () {
+            $.ajax({
+                type: 'POST',
+                url: "/WConfigUIShow/GetHlpCodes",
+                dataType: "JSON",
+                success: function (data) {
+                    codeHlpData = data;
+
+                    m_oTable = new oTableInit();//加载完基础数据再显示表格
+                    m_oTable.initiateRightTb();
+                }
+            });
+        }
+
+        function controlTypeFormatter(value, row, index) {
+            var strHtml = "<select class='ControlofChange form-control' id='control_" + index + "'>";
+            strHtml += "<option value='-1'>-请选择,否则对应控件将不显示于界面（如，目录著录）-</option>";
+            for (var i = 0; i < conditonData.length; i++) {
+                strHtml += "<option value='" + conditonData[i].unique_code + "'>" + conditonData[i].code_name + "</option>";//unique_code的u为什么大写的不行？有的页面上小写的不行？
+            }
+            strHtml += "</select>";
+            return strHtml;
+        }
+
+        function codeHelpFormatter(value, row, index) {
+            var strHtml = "<select class='CodeHlpofChange form-control' id='codehlp_" + index + "'>";
+            strHtml += "<option value='-1'>-请选择-</option>";
+            for (var i = 0; i < codeHlpData.length; i++) {
+                strHtml += "<option value='" + codeHlpData[i].unique_code + "'>" + codeHlpData[i].base_name + "</option>";
+            }
+            strHtml += "</select>";
+            return strHtml;
+        }
+
+        function coluseFormatter(value, row, index) {
+            strHtml = '<label class="bella-checkbox">';//利用css的before和after以及label的for属性，自定义CheckBox控件
+            strHtml += '<input type="checkbox" id="chk_' + index + '">';
+            strHtml += '<label id="coluse_' + index + '" for="chk_' + index + '" onclick="stopBubbleEvent();"></label>';
+            strHtml += '</label>';
+            return strHtml;
+        }
+
+        function colorderFormatter(value, row, index) {
+            return '<input type="text" class="form-control" id="order_' + index + '" value="0" />';
+        }
+
+        //当clickToSelect=true时，如果不阻止事件冒泡，则点击自定义CHECKBOX时会没有反应
+        var stopBubbleEvent = function () {
+            if (window.event) {//IE下阻止冒泡
+                event.cancelBubble = true;
+            } else {
+                event.stopPropagation();
+            }
+        }
+
+        //初始化select的change方法
+        window.operateEvents = {
+            'change .ControlofChange': function (e, value, row, index) {
+                controlChange(row, index);
+            },
+            'click .SaveSingle': function (e, value, row, index) {
+                saveSingle(row, index);
+            },
+        };
+
+        function controlChange(row, index) {
+            var ctl = $('#control_' + index).find("option:selected");
+            var v = ctl.text();
+            if (v != '下拉框') {
+                $('#codehlp_' + index).attr('disabled', 'disabled');
+                $('#codehlp_' + index).val('-1');
+            }
+            else {
+                $('#codehlp_' + index).removeAttr('disabled');
+            }
+        }
+
+        // 格式化按钮
+        function operateFormatter(value, row, index) {
+            return [
+                '<button type="button" class="SaveSingle btn btn-sm   btn-info" style="margin-right:15px;"><i class="fa fa-save" ></i>&nbsp;保存</button>'
+            ].join('');
+        }
+
+        function saveSingle(row, index) {
+            var ctl = $('#control_' + index).find("option:selected");
+            var hlp = $('#codehlp_' + index).find("option:selected");
+            var ctlVal = ctl.val();
+            if (ctlVal == '-1') {
+                HM.alertWin('请选择“显示的控件类型”后继续！');
+                return;
+            }
+            var hlpVal = '';
+            if (ctl.text() == '下拉框') {
+                if (hlp.val() == '-1') {
+                    HM.alertWin('请选择“对应的辅助代码”后继续！');
+                    return;
+                }
+                hlpVal = hlp.val();
+            }
+
+            var orderVal = $('#order_' + index).val();
+            if (!(/(^[0-9]\d*$)/.test(orderVal))) {
+                HM.alertWin("排序必须是大于等于0的整数！");
+                return;
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: "/WConfigUIShow/SaveShowCtrlType",
+                dataType: "JSON",
+                data: { table: '@ViewData["table"]', id: row.unique_code, showType: ctlVal, showValue: hlpVal, orderValue: orderVal },
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin('设置保存成功！！');
+                        return;
+                    }
+                }
+            });
+
+        }
+
+        //给控件绑定数据库中已有数据
+        function initiateSelectVal() {
+            var rows = $('#tb_right').bootstrapTable('getData');//行的数据
+            for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                var showType = row.col_show_type == '' || row.col_show_type == null ? '-1' : row.col_show_type;
+                $('#control_' + i).val(showType);
+                var showVal = row.col_show_value == '' || row.col_show_value == null ? '-1' : row.col_show_value;
+                $('#codehlp_' + i).val(showVal);
+                var order = row.col_order == '' || row.col_order == null ? '0' : row.col_order;
+                $('#order_' + i).val(order);
+
+                var ctl = $('#control_' + i).find("option:selected");
+                var v = ctl.text();
+                if (v != '下拉框') {
+                    $('#codehlp_' + i).attr('disabled', 'disabled');
+                    $('#codehlp_' + i).val('-1');
+                }
+                else {
+                    $('#codehlp_' + i).removeAttr('disabled');
+                }
+            }
+        }
+
+        var saveOrder = function () {
+            var items = [];
+            var rows = $('#tb_right').bootstrapTable('getData');
+            for (var i = 0; i < rows.length; i++) {
+                var d = {
+                    ID: rows[i].unique_code,
+                    ShowType: $('#control_' + i).val(),
+                    ShowValue: $('#codehlp_' + i).val(),
+                    Order: $('#order_' + i).val(),
+                };
+                items.push(d);
+            }
+            //alert(JSON.stringify(items));
+            $.ajax({
+                type: 'POST',
+                url: "/WConfigUIShow/SaveColOrders",
+                dataType: "JSON",
+                data: { table: '@ViewData["table"]', cols: items },//直接把JSON字符串传到后台
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin('保存成功（保存所有配置仅在批量修改排序时有效；其它配置需要单条保存）！');
+                        return;
+                    }
+                }
+            });
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.min.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.min.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

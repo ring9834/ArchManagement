@@ -1,0 +1,21 @@
+﻿
+@{
+    ViewData["Title"] = "Tab Control Test";
+}
+<br />
+<br />
+<a href="#" class="btn btn-success" onclick="createTabs();">Tabs</a>
+<br />
+<div id="TabStripDiv"></div>
+
+<script type="text/javascript">
+    var createTabs = function () {
+        var cc = new hTabControl("TabStripDiv", 'v', 4);//html中的div ID，TAB ID号，tab个数，宽度，高度
+        cc.AddTab('a', 'Iframe1wodedfdfdfd', "http://www.sina.com.cn");//为true的，加载时默认首页
+        cc.AddTab('b', 'Iframe2', "http://www.sohu.com");
+        cc.AddTab('c', '腾讯', "腾讯");
+        cc.AddTab('d', '百度', "http://www.baidu.com", true);
+    };
+
+
+</script>

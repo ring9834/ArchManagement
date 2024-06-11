@@ -1,0 +1,100 @@
+﻿
+@{
+    ViewData["Title"] = "增加统计模板";
+}
+@section head {
+
+}
+
+@section body {
+    <style>
+        .userTable {
+            margin-top:20px;
+            width: 100%;
+        }
+
+            .userTable td {
+                padding: 5px 0 12px 0;
+            }
+
+            .userTable select,
+            .userTable input {
+                width: 420px;
+                margin-right: 5px;
+            }
+    </style>
+
+    <div class="container-fluid">
+        <table class="userTable">
+            <tr>
+                <td>
+                    <label for="templName" class="control-label">模板名</label>
+                </td>
+                <td>
+                    <input type="text" id="templName" class="form-control" placeholder="请输入要添加的模板名称(*必填项*)" />
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>
+                    <button class="btn btn-info" onclick="saveTemplInfo();"><i class="fa fa-save"></i> 保存</button>
+                    <button class="btn btn-warning" onclick="clearTemplInfo();"><i class="fa fa-undo"></i> 重置</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        var sc;
+        var stcType;
+
+        $(function () {
+            sc = parent.parent.tempStatisticCondition;//访问父页面的父页面的(祖父)参数（传参）
+            stcType = parent.parent.stcType;//从父页面的父页面传过来的统计类型
+            $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+            $("#h_loading").css("display", "none");
+        });
+
+        var saveTemplInfo = function () {
+            if ($.trim($('#templName').val()) == '') {
+                //HM.alertWin('请填写统计模板名称！');
+                return;
+            }
+            var templName = $('#templName').val();
+
+            $.ajax({
+                type: 'post',
+                url: '/WStatistics/AddStcTemplData',
+                dataType: "json",
+                data: {
+                    templName: templName,
+                    searchCondition: sc.searchCondition, //搜索条件的数据 传递JSON字符串
+                    statisticFields: sc.statisticFields, //统计字段的数据
+                    groupFields: sc.groupFields, //分组字段的数据
+                    isNumStatistic: sc.isNumStatistic,
+                    isSum: sc.isSum,
+                    stcType: stcType
+                },
+                success: function (data) {
+                    if (data.rst > 0) {
+                        parent.popHintWin();//模板添加成功
+                        parent.closeDealWin();
+                        parent.refreshTableData();
+                        return;
+                    }
+                }
+            });
+        }
+
+        var clearTemplInfo = function () { 
+
+            $('#templName').val('');
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

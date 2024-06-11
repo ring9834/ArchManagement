@@ -1,0 +1,544 @@
+﻿
+@{
+    //ViewData["Title"] = "首页";
+    ViewData["Title"] = "高第综合档案管理系统-首页";
+}
+@section head {
+    <link href="~/css/firstPageSytle.css" rel="stylesheet" />
+    <link href="~/lib/collapse-nav/css/jquery.mCustomScrollbar.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-tooltip/bootstrap-tooltip-custom-class.css" rel="stylesheet" />
+    <link href="~/lib/jquey-sweet-dropdown/jquery.sweet-dropdown.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="outestdiv">
+        <div class="logodiv">
+            <div style="height:100%; width:80px;margin-left:20px;padding-top:10px;float:left;">
+                <img style="width:70px;height:70px;" src="~/images/enterprise_logo.png" />
+            </div>
+            <div style="height:100%;float:left;padding-top:8px;">
+                <img style="width:260px;height:83px;" src="~/images/enterprise_name.png" />
+            </div>
+        </div>
+        <div style="min-height:100px;float:left; padding-top:20px;">
+            <div class="singleMenuItem" style="float:left;">
+                <div href="#" hrl="/WStatisticsFirstP/Index" id="sglm1" ntl="0" onclick="liClick(this);" isdrpdwnmn="0">
+                    <img src="~/images/topicon/icon1.png" style="width:27px;height:32px;" /> <a href="#">系统首页</a> <span data-hover="dataReceive"></span>
+                </div>
+                <div href="#" hrl="/WPreArchive/Index" id="sglm2" ntl="1" sclk="1" onclick="liClick(this);" isdrpdwnmn="0">
+                    <img src="~/images/topicon/icon1.png" style="width:27px;height:32px;" /> <a href="#">预归档</a> <span data-hover="dataSearch"></span>
+                </div>
+                <div href="#" hrl="/WStableStcPrv/Index" id="sglm3" ntl="1" sclk="2" onclick="liClick(this);" isdrpdwnmn="0">
+                    <img src="~/images/topicon/icon3.png" style="width:30px;height:32px;" /> <a href="#">档案总库</a> <span data-hover="dataManage"></span>
+                </div>
+                <div href="#" hrl="/WFullContSearch/Index" id="sglm4" ntl="0" onclick="liClick(this);" isdrpdwnmn="0">
+                    <img src="~/images/topicon/icon2.png" style="width:30px;height:32px;" /> <a href="#">全文检索</a> <span data-hover="dataFullText"></span>
+                </div>
+            </div>
+            <nav class="navbar navbar-default navbar-mobile bootsnav" style="float:left;">
+                <div class="collapse navbar-collapse" id="navbar-menu">
+                    <ul class="nav navbar-nav">
+                        <li class="dropdown" id="drp4">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="datausing"><img src="~/images/topicon/icon4.png" style="width:32px;height:27px;" /> 档案利用 <span data-hover="datausing"></span></a>
+                            <ul class="dropdown-menu">
+                                <li id="L1" hrl="/WLookUpSvc/Index" ntl="0" onclick="liClick(this);"><a href="#">利用登记</a></li>
+                                @*<li id="L2" hrl="" ntl="0" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">登记查询</a></li>*@
+                                <li id="L3" hrl="/WLookUpSvc/StcPrvView" ntl="0" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">利用统计</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown" id="drp6">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dataConfig"><img src="~/images/topicon/icon6.png" style="width:30px;height:30px;" /> 配置管理 <span data-hover="dataConfig"></span></a>
+                            <ul class="dropdown-menu">
+                                <li id="gc1" hrl="/WArchTree/Index" ntl="0" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">档案类型库</a></li>
+                                <li id="gc2" hrl="/WBDataDict/Index" ntl="1" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">业务数据字典</a></li>
+                                <li id="gc3" hrl="/WDataDict/Index" ntl="0" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">公共数据字典</a></li>
+                                <li id="gc4" hrl="/WConfigShowList/Index" ntl="1" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">显示列表配置</a></li>
+                                <li id="gc5" hrl="/WConfigUIShow/Index" ntl="1" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">目录著录界面配置</a></li>
+                                <li id="gc6" hrl="/WConfigSearch/Index" ntl="1" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">条件检索配置</a></li>
+                                <li id="gc7" hrl="/WFullContSearch/IndexCreationConfView" ntl="0" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">全文检索配置</a></li>
+                                <li id="gc8" hrl="/WConfigSort/Index" ntl="1" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">排序配置</a></li>
+                                @*<li id="gc9" hrl="" ntl="1" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">显示分类配置</a></li>*@
+                                <li id="gc10" hrl="/WConfigArchNum/Index" ntl="1" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">档号配置</a></li>
+                                <li id="gc11" hrl="/WPreArchive/YearFdView" ntl="1" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">预归档字段配置</a></li>
+                                <li id="gc12" hrl="/WEncrypt/Index" ntl="0" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">加解密配置</a></li>
+                                <li id="gc13" hrl="/WWatermark/Index" ntl="0" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">水印配置</a></li>
+                                @*<li id="gc11" hrl="/WStatistics/CountStatistics" ntl="1" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">专家统计</a></li>*@
+                                <li class="dropdown">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">统计参数配置</a>
+                                    <ul class="dropdown-menu">
+                                        <li id="subgc1" hrl="/WStatisticsAmount/Index" ntl="0" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">档案数量统计配置</a></li>
+                                        <li id="subgc2" hrl="/WStatisticsType/Index" ntl="0" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">档案类型统计配置</a></li>
+                                        <li id="subgc3" hrl="/WStatisticsStockPrd/Index" ntl="0" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">档案保管期限统计配置</a></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">虚拟库房配置</a>
+                                    <ul class="dropdown-menu">
+                                        <li id="vir1" hrl="/WVirStock/ConfigIndex" ntl="0" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">虚拟库房基础配置</a></li>
+                                        <li id="vir2" hrl="/WVirStock/ConfigDataIndex" ntl="0" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">虚拟库房数据配置</a></li>
+                                        @*<li id="subgc2" hrl="/WVirStock/ViewStock" ntl="0" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">虚拟库房</a></li>*@
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="dropdown" id="drp7">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="sysConfig"><img src="~/images/topicon/icon7.png" style="width:30px;height:30px;" /> 系统管理 <span data-hover="sysConfig"></span></a>
+                            <ul class="dropdown-menu">
+                                <li id="rl1" hrl="/WDepartMent/Index" ntl="0" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">部门管理</a></li>
+                                <li id="rl2" hrl="/WRole/Index" ntl="0" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">角色管理</a></li>
+                                <li id="rl3" hrl="/WUser/Index" ntl="0" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">人员管理</a></li>
+                                <li id="rl5" hrl="/WMenuMng/Index" ntl="0" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">菜单权限管理</a></li>
+                                <li id="rl4" hrl="/WFuncMng/Index" ntl="0" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">功能权限管理</a></li>
+                                <li id="rl8" hrl="/WAuditingAccess/Index" ntl="0" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">审批权限管理</a></li>
+                                <li id="rl6" hrl="/WConfigCodeHlp/Index" ntl="0" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">辅助编码配置</a></li>
+                                <li id="rl7" hrl="/WOperateRecs/Index" ntl="0" onclick="liClick(this);" isdrpdwnmn="1"><a href="#">系统操作记录</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+        <div class="userlogindiv">
+            <div class="tlp subdiv" data-toggle="tooltip" data-placement="bottom" data-custom-class="tooltip-info" title="点击退出登录！">
+                <i class="glyphicon glyphicon-off" onclick="logout();"></i>
+            </div>
+
+            <div class="middiv"></div>
+            <div class="tlp userdiv" id="loggedUserDiv" title="" data-dropdown="#dropdown-standard"><i class="glyphicon glyphicon-user"></i><i style="font-size:10px;">@ViewData["UserNickName"]</i></div>
+            <div class="dropdown-menu-sweet dropdown-anchor-top-left dropdown-has-anchor" id="dropdown-standard">
+                <ul>
+                    <li><a href="#" onclick="modifyPwd();"><i class="fa fa-key"></i>修改密码</a></li>
+                </ul>
+            </div>
+
+            @*<div class="dropdown tlp userdiv" id="loggedUserDiv" title="">
+                    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                        <i style="font-size:10px;">@Html.Raw(ViewData["UserNickName"])</i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="#">Link 1</a>
+                        <a class="dropdown-item" href="#">Link 2</a>
+                        <a class="dropdown-item" href="#">Link 3</a>
+                    </div>
+                </div>*@
+        </div>
+    </div>
+    @*<div class="page-wrapper toggled" id="sidePageWrapper">*@
+    <div class="page-wrapper" id="sidePageWrapper">
+        <nav id="sidebar" class="sidebar-wrapper">
+            <div id="sidebarContent" class="sidebar-content">
+                <ul id="treeArchive" class="ztree"></ul>
+            </div>
+            <div class="sidebar-footer">
+
+            </div>
+        </nav>
+        <main class="page-content" style="background-image:url('/images/WFbackImage.jpg');background-size:cover;">
+            <div id="tabStripWrapper" class="tabstrip-wrapper">
+                <div id="tabstripTop" class="tabstrip-top-container">
+                    <div id="toggleCollapseBar" class="toggle-collapse-bar"><i id="toggleCollapseIcon" class="fa fa-outdent"></i></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <SCRIPT type="text/javascript">
+        var ComParamForAllPages = {};//所有依赖具体档案类型库节点的页面，均使用此参数，JS对象
+        ComParamForAllPages.user = {};//登录的用户包括id和用户名，接收JS对象
+        ComParamForAllPages.user.id = -1;
+        ComParamForAllPages.user.name = '';
+        ComParamForAllPages.menuInfo = {};//访问的页面URL，对象；包括url和menuid
+        ComParamForAllPages.menuInfo.url = '';
+        ComParamForAllPages.menuInfo.menuid = '';
+        ComParamForAllPages.menuInfo.title = '';//li的text
+        ComParamForAllPages.menuInfo.needtable = false;
+        ComParamForAllPages.menuInfo.stctype = '-1';//统计类型
+        ComParamForAllPages.table = '';//访问的数据库表名，默认为空
+        ComParamForAllPages.hasconent = false;//有无原文
+        ComParamForAllPages.cttype = -1;//原文类型
+        ComParamForAllPages.singleClick = '0';//预归档和资源总库menu被点击时用
+
+        var cc;
+        var initialTabControl = function () {
+            if (cc == null) {
+                cc = new hTabControl();
+                cc.IsFirstTabClosible = true;//false时第一个tab不加关闭按钮
+            }
+        };
+
+        //点击档案类型库树时触发，空节点不触发
+        function zTreeOnClick(event, treeId, treeNode) {
+            initialTabControl();
+            if (treeNode.node_type == true) {//非空节点时
+                ComParamForAllPages.table = treeNode.code;
+                ComParamForAllPages.hasconent = treeNode.has_content;
+                ComParamForAllPages.cttype = treeNode.content_type == undefined || treeNode.content_type == '' || treeNode.content_type == null ? -1 : treeNode.content_type;
+
+                var slck = ComParamForAllPages.singleClick;
+                if (slck == '1') {//预归档
+                    verifyIfBusDictConfigured();//提示进行数据库的初始化
+                    liClickPre('preArch', '/WManageStore/Index', '1', '预归档管理');
+                    url2 = addTableToUrlBackend(ComParamForAllPages.menuInfo.url, ComParamForAllPages.table, ComParamForAllPages.user.id, ComParamForAllPages.hasconent, ComParamForAllPages.cttype, ComParamForAllPages.menuInfo.stctype);
+                    cc.AddTab(ComParamForAllPages.menuInfo.menuid, ComParamForAllPages.menuInfo.title, url2, ComParamForAllPages.menuInfo.needtable, updateMenuInfo);
+                    ComParamForAllPages.singleClick = '0';//预归档菜单点击一次之后，释放其被点击状态
+                    return;
+                } else if (slck == '2') {//资源总库
+                    verifyIfBusDictConfigured();//提示进行数据库的初始化
+                    liClickPre('stableArch', '/WStableStore/Index', '1', '资源总库管理');
+                    url2 = addTableToUrlBackend(ComParamForAllPages.menuInfo.url, ComParamForAllPages.table, ComParamForAllPages.user.id, ComParamForAllPages.hasconent, ComParamForAllPages.cttype, ComParamForAllPages.menuInfo.stctype);
+                    cc.AddTab(ComParamForAllPages.menuInfo.menuid, ComParamForAllPages.menuInfo.title, url2, ComParamForAllPages.menuInfo.needtable, updateMenuInfo);
+                    ComParamForAllPages.singleClick = '0';//资源总库菜单点击一次之后，释放其被点击状态
+                    return;
+                }
+
+                if (ComParamForAllPages.menuInfo.url != '') {
+                    var tabId = ComParamForAllPages.menuInfo.menuid;
+                    var title = ComParamForAllPages.menuInfo.title;
+                    var url = ComParamForAllPages.menuInfo.url;
+                    var needtable = ComParamForAllPages.menuInfo.needtable;
+
+                    url2 = addTableToUrlBackend(url, ComParamForAllPages.table, ComParamForAllPages.user.id, ComParamForAllPages.hasconent, ComParamForAllPages.cttype, ComParamForAllPages.menuInfo.stctype);
+                    cc.AddTab(tabId, title, url2, needtable, updateMenuInfo);
+                } else {
+                    HM.alertWin("请选择菜单中的功能项后继续！");
+                }
+            } else {
+                ComParamForAllPages.table = '';
+            }
+        };
+
+        //点击菜单项时触发
+        function menuItemClick(mid, title, url, needtable) { //needtable bool类型，是否依赖特定的数据库表
+            initialTabControl();
+
+            var slck = ComParamForAllPages.singleClick;
+            if (slck == '1' || slck == '2')//1预归档，2资源总库
+            {
+                makeSpecTreeNodeSelected();//选定tree的节点中第一个叶节点
+                url2 = addTableToUrlBackend(url, ComParamForAllPages.table, ComParamForAllPages.user.id, ComParamForAllPages.hasconent, ComParamForAllPages.cttype, ComParamForAllPages.menuInfo.stctype);
+                cc.AddTab(mid, title, url2, needtable, updateMenuInfo);//添加tab
+                return;
+            }
+
+            if (needtable == true) {
+                if (ComParamForAllPages.table == '') {
+                    HM.alertWin("请选择档案类型库树中的档案类节点，然后继续！");
+                    return;
+                } else {
+                    verifyIfBusDictConfigured();//提示进行数据库的初始化
+                }
+            }
+            //alert('div is ready!');
+            url2 = addTableToUrlBackend(url, ComParamForAllPages.table, ComParamForAllPages.user.id, ComParamForAllPages.hasconent, ComParamForAllPages.cttype, ComParamForAllPages.menuInfo.stctype);
+            cc.AddTab(mid, title, url2, needtable, updateMenuInfo);//添加tab
+        }
+
+        var verifyIfBusDictConfigured = function () {
+            //提示进行数据库的初始化
+            $.ajax({
+                type: 'POST',
+                url: "/WBDataDict/VerifyIfBusDictConfigured",
+                data: { tableName: ComParamForAllPages.table },
+                dataType: "JSON",
+                success: function (data) {
+                    if (!data.rst) {
+                        HM.confirmWin(ComParamForAllPages.table, '此种档案类型库还未进行数据库数据结构的初始化，需要初始化后才能后续的操作。\r\n初始化工作包括：1、创建数据表；2、数据字段自动初始化。', "确认初始化", "initabb", initiateBusFunc);
+                        return;
+                    }
+                }
+            });
+        }
+
+        //初始化数据库表结构
+        function initiateBusFunc(table) {
+            $.ajax({
+                type: 'POST',
+                url: "/WBDataDict/InitiateBusDbTabStruct",
+                data: { tableName: table },
+                dataType: "JSON",
+                success: function (data) {
+                    pop.close("confirm-win_initabb");
+                    if (data.rst) {
+                        HM.hintWin(data.info);//成功
+                    } else {
+                        HM.alertWin(data.info);//失败
+                    }
+                }
+            });
+        }
+
+        //系统首页用
+        var liClickFirst = function () {
+            var mid = 'sglm1';
+            var url = '/WStatisticsFirstP/Index';
+            var ntl = '0';
+            var title = '系统首页';
+            var stcType = '-1';//统计类型
+            var needtable = ntl == '1' ? true : false;
+
+            ComParamForAllPages.menuInfo.url = url;
+            ComParamForAllPages.menuInfo.menuid = mid;
+            ComParamForAllPages.menuInfo.title = title;
+            ComParamForAllPages.menuInfo.needtable = needtable;
+            ComParamForAllPages.menuInfo.stctype = stcType;
+            menuItemClick(mid, title, url, needtable);
+        }
+
+        //预归档或资源总库用
+        var liClickPre = function (mid, url, ntl, title) {
+            var stcType = '-1';//统计类型
+            var needtable = ntl == '1' ? true : false;
+
+            ComParamForAllPages.menuInfo.url = url;
+            ComParamForAllPages.menuInfo.menuid = mid;
+            ComParamForAllPages.menuInfo.title = title;
+            ComParamForAllPages.menuInfo.needtable = needtable;
+            ComParamForAllPages.menuInfo.stctype = stcType;
+        }
+
+        //按钮点击时用
+        var liClick = function (self) {
+            var mid = $(self).attr("id");
+            var url = $(self).attr("hrl");
+            var ntl = $(self).attr("ntl");
+            var title = $(self).find('a').text();
+            var stcType = $(self).attr("stc");//统计类型
+            var needtable = ntl == '1' ? true : false;
+            var sclk = $(self).attr('sclk');
+            if (sclk == 'undefined' || sclk == null)
+                ComParamForAllPages.singleClick = '0';
+            else
+                ComParamForAllPages.singleClick = sclk;
+
+            if (needtable == true)//与数据表关联时，侧边栏出现，否则隐藏（added on 2020年3月17日）
+                $('#sidePageWrapper').attr('class', 'page-wrapper toggled');
+            else
+                $('#sidePageWrapper').attr('class', 'page-wrapper');
+
+            ComParamForAllPages.menuInfo.url = url;
+            ComParamForAllPages.menuInfo.menuid = mid;
+            ComParamForAllPages.menuInfo.title = title;
+            ComParamForAllPages.menuInfo.needtable = needtable;
+            ComParamForAllPages.menuInfo.stctype = stcType;
+            menuItemClick(mid, title, url, needtable);
+        }
+
+        //选定tree的节点中第一个叶节点
+        var makeSpecTreeNodeSelected = function () {
+            var selected = tree.getSelectedNodes(); //alert(selected.length);
+            if (selected.length == 0) {
+                var nodes = tree.transformToArray(tree.getNodes());
+                //alert(nodes.length);
+                for (var i = 0; i < nodes.length; i++) {
+                    var node = nodes[i];
+                    if (node.node_type == true) {
+                        tree.selectNode(node);
+                        ComParamForAllPages.table = node.code;
+                        ComParamForAllPages.hasconent = node.has_content;
+                        ComParamForAllPages.cttype = node.content_type == undefined || node.content_type == '' || node.content_type == null ? -1 : nodes.content_type;
+                        break;
+                    }
+                }
+            }
+        }
+
+        //当tab发生变化时，更新当前所指的功能项（菜单中对应的功能项）
+        function updateMenuInfo(tabId, title, url, needtable) {
+            ComParamForAllPages.menuInfo.menuid = tabId;
+            ComParamForAllPages.menuInfo.title = title;
+            ComParamForAllPages.menuInfo.url = url;
+            ComParamForAllPages.menuInfo.needtable = needtable;
+        }
+
+        //通过URL向各tab页面传参
+        var addTableToUrlBackend = function (url, table, userid, hasconent, contenttype, stctype) {
+            var t = table;
+            if (table == '') {
+                t = 'notable';//使用notable进行URL占位
+            }
+            return url + '/' + t + '/' + userid + '/' + hasconent + '/' + contenttype + '/' + stctype + '?t=' + new Date().getTime();
+        }
+
+        var tree;
+        $(function () {
+            var logged = '@Html.Raw(ViewData["LoggedUser"])';
+            if (logged == null || logged == '') {//判断用户是否登录，未登录就转向登录界面
+                window.location.href = '/WLogin/Index';
+            }
+            ComParamForAllPages.user.id = logged;
+
+            tree = $.fn.zTree.init($("#treeArchive"), setting);
+            menuVisible();//根据登录用户的角色设置各菜单项是否可见
+            getStatisticTypes();//加载菜单中的统计类型
+            loggedUserTooltip();//登录用户的tootip
+            $('.tlp').tooltip();
+        });
+
+        //$(function (){})如果有多个，则按照从前往后的顺序执行
+        $(function () {
+            $("#toggleCollapseBar").click(function () {
+                $(".page-wrapper").toggleClass("toggled");
+                $("#toggleCollapseIcon").toggleClass("fa fa-outdent fa fa-indent")
+            });
+
+            if (! /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                $(".sidebar-content").mCustomScrollbar({
+                    axis: "yx",
+                    autoHideScrollbar: true,
+                    scrollInertia: 300
+                });
+                $(".sidebar-content").addClass("desktop");
+            }
+
+            $("#tabstripTop").append("<div id='tabstripTopWrapper' class='tabstrip-top-wrapper'><div id='tabstripLeftForward' class='tabstrip-left-forward-hide'><i class='fa fa-angle-left'></i></div><div id='tabbarsWrapper' class='tabbars-wrapper'><div id='tabbarsWrapper_scroll' class='tabbars-wrapper-scroll'></div><div id='dynamicHintBar' class='dynamic-hint-bar'></div></div><div id='tabstripRightForward' class='tabstrip-right-forward-hide'><i class='fa fa-angle-right'></i></div></div>");
+            $("#tabstripTop").parent().append("<div id='tabstripContent' class='tabstrip-content-container'></div> \r\n");
+            $("#dynamicHintBar").css("display", "none");
+
+            liClickFirst();//显示首页统计
+        });
+
+        window.onload = function () {
+        }
+
+        var setting = {
+            view: {
+                selectedMulti: false,
+                addDiyDom: addDiyDom
+            },
+            async: {
+                enable: true,
+                url: "/WArchTree/GetArchTypesByRole/" + '@Html.Raw(ViewData["LoggedUser"])'
+            },
+            data: {
+                simpleData: {
+                    enable: true,
+                    idKey: "unique_code",
+                    pIdKey: "super_id",
+                }
+            },
+            edit: {
+                enable: false
+            },
+            callback: {
+                onClick: zTreeOnClick,
+                onAsyncSuccess: zTreeOnAsyncSuccess
+            }
+        };
+
+        function addDiyDom(treeId, treeNode) {
+            var spaceWidth = 10;
+            var switchObj = $("#" + treeNode.tId + "_switch"),
+                icoObj = $("#" + treeNode.tId + "_ico");
+                spanObj = $("#" + treeNode.tId + "_span");
+            switchObj.remove();
+            //icoObj.before(switchObj);
+            var switchHtml = switchObj.prop("outerHTML");
+            var insertedHtml = "<span style='float:right;width:30px;height:100%;text-align:left;'>" + switchHtml +"</span>";
+            spanObj.after(insertedHtml);
+
+            if (treeNode.level >= 1) {//前边缩进 20201210
+                var spaceStr = "<span style='display: inline-block;width:" + (spaceWidth * treeNode.level) + "px'></span>";
+                icoObj.before(spaceStr);
+            }
+
+            if (treeNode.node_type == false) {//空节点
+                spanObj.css('font-size','19px');
+            }
+        }
+
+        function zTreeOnAsyncSuccess(event, treeId, treeNode, msg) {
+            //var treeObj = $.fn.zTree.getZTreeObj("treeArchive");
+            tree.expandAll(true);
+
+            $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+            $("#h_loading").css("display", "none");
+
+            //var node = tree.getNodeByTId("1");
+            //console.log(node);
+            //tree.hideNode(node);
+
+        }
+
+        function logout() {
+            window.location.href = '/WLogin/Index';
+        }
+
+        //根据用户角色设置菜单项的可见性
+        function menuVisible() {
+            $.ajax({
+                type: 'POST',
+                url: "/WMenuMng/GetNavMenusByUser",
+                dataType: "JSON",
+                data: { userName:'@ViewData["LoggedUser"]'},
+                success: function (data) {
+                    for (var i = 0; i < data.length; i++) {
+                        var liobj = $('#' + data[i].li_id);
+                        if (liobj.length > 0) {
+                            var dpl = data[i].li_visible == true || data[i].li_visible.toLowerCase() == 'true' ? 'block' : 'none';
+                            //alert(data[i].li_visible + '  '  +data[i].li_id + '   ' + dpl);
+                            liobj.css('display', dpl);
+                        }
+                    }
+                }
+            });
+        }
+
+        var loggedUserTooltip = function () {
+            var loggedShow = '';
+            if ($.trim('@ViewData["UserNickName"]') != '') {
+                loggedShow = '当前登录用户：' + '@Html.Raw(ViewData["UserNickName"])';
+            }
+            else {
+                loggedShow = '当前登录用户：' + '@Html.Raw(ViewData["LoggedUser"])';
+            }
+            //$('#loggedUserDiv').attr('title', loggedShow);
+        }
+
+        var getStatisticTypes = function () {
+            $.ajax({
+                type: 'POST',
+                url: "/WStatistics/GetStcTypes",
+                dataType: "JSON",
+                success: function (data) {
+                    var ul = $('#stcul');
+                    for (var i = 0; i < data.length; i++) {
+                        var li = '<li id="st' + i + '" hrl="/WStatistics/CountStatistics" ntl="1" stc="' + data[i].unique_code + '" onclick="liClick(this);"><a href="#">' + data[i].code_name + '</a></li>';
+                        ul.append(li);
+                    }
+                }
+            });
+        }
+
+        //var refreshTree = function () {
+        //    tree = $.fn.zTree.init($("#treeArchive"), setting);
+        //}
+
+        var modifyPwd = function () {
+            var content = "<iframe id='modifyPwdFrame' src='/WUser/ModiPssView/0/" + '@Html.Raw(ViewData["LoggedUser"])' +"/" + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 600, 310,'修改密码','modipwdwin');
+        }
+
+        function hintModiSuccess() {
+            HM.hintWin('修改密码成功！');
+            closeDealWin('modipwdwin');
+        }
+
+        var closeDealWin = function (winid) {
+            pop.close('deal-win-' + winid);
+        }
+    </SCRIPT>
+
+}
+@section script {
+
+    <script src="~/lib/tab-control/Html-Elements-Resize.js"></script>
+    <script src="~/lib/outlook-treeview/script/jquery.ztree.all.min.js"></script>
+    <script src="~/lib/outlook-treeview/script/jquery.ztree.exhide.min.js"></script>
+    <script src="~/lib/boots-menu/script/bootsnav.js"></script>
+    <script src="~/js/firstPageJs.js"></script>
+    <script src="~/lib/collapse-nav/js/jquery.mCustomScrollbar.concat.min.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+    <script src="~/lib/bootstrap-tooltip/bootstrap-tooltip-custom-class.js"></script>
+    <script src="~/lib/jquey-sweet-dropdown/jquery.sweet-dropdown.js"></script>
+}

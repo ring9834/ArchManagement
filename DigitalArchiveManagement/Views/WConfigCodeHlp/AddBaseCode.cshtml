@@ -1,0 +1,104 @@
+﻿
+@{
+    ViewData["Title"] = "增添辅助代码基类信息";
+}
+@section head {
+
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="row" style="padding: 5px">
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <div class="input-group">
+                    <span class="input-group-addon">辅助代码基类名</span>
+                    <input class="form-control" type="text" id="baseName">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-lg-6">
+                <div class="input-group">
+                    <span class="input-group-addon">辅助代码基类值</span>
+                    <input class="form-control" type="text" id="baseCode">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-lg-6">
+                <div class="input-group">
+                    <span class="input-group-addon">说明</span>
+                    <input class="form-control" type="text" id="baseComment">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6" style="margin-bottom:2px;text-align:center;">
+                <input type="button" class="btn btn-success" id="okbutton" onclick="addBaseCodeInfo();" value="确定" />
+                <input type="button" class="btn btn-danger" onclick="resetInfo();" value="重置" />
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var param;//通过iframe父窗体的$("#mainfrm")[0].contentWindow.param = 传参到子页面来
+
+        $(function () {
+            $("#h_loading_mask").css("display", "none");
+            $("#h_loading").css("display", "none");
+        });
+
+        var validateBeforeSummit = function () {
+            if ($.trim($("#baseName").val()) == '') {
+                HM.alertWin("基类名称不能为空！");
+                return 0;
+            }
+            if ($.trim($("#baseCode").val()) == '') {
+                HM.alertWin("基类值不能为空！");
+                return 0;
+            }
+        }
+
+        var addBaseCodeInfo = function () { 
+            var r = validateBeforeSummit();
+            if (r == 0) {//验证有误则返回
+                return;
+            }
+            var baseName = $("#baseName").val();
+            var baseCode = $("#baseCode").val();
+            var baseComment = $("#baseComment").val();
+
+            $.ajax({
+                type: 'POST',
+                url: "/WConfigCodeHlp/AddBaseCode",
+                data: { baseName: baseName, baseCode: baseCode, baseComment: baseComment},
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst == '1') {
+                        parent.refreshTable();
+                        parent.hintWin("基类信息添加成功！");
+                        parent.closeDealWin('addbaseFrm');
+                        return;
+                    }
+                    else if (data.rst == '-2') {//记录已存在，无法插入重复记录 
+                        parent.hintAlready();
+                        parent.closeDealWin('addbaseFrm');
+                    }
+                }
+            });
+        }
+
+        var resetInfo = function () {
+            $("#baseName").val('');
+            $("#baseCode").val('');
+            $("#baseComment").val('');
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

@@ -1,0 +1,145 @@
+﻿
+@{
+    ViewData["Title"] = "Modal Window";
+}
+
+@section head {
+
+}
+
+@section body {
+    <button type="button" class="btn btn-success" onclick="popupWin1();">Iframe窗口</button>
+    <button type="button" class="btn btn-danger" onclick="popupWin2();">Confirm窗口</button>
+    <button type="button" class="btn btn-danger" onclick="popupWin3();">Alert窗口</button>
+    <button type="button" class="btn btn-danger" onclick="popupWin4();">自定义窗口1</button>
+    <button type="button" class="btn btn-danger" onclick="closeIframeWin();" id="closeButton">关闭Iframe窗口</button>
+
+    <script>
+        var popupWin1 = function () {
+            pop.iframe({
+                buttonSpcl: "min|max|close",
+                anim: "fadeIn-zoom",
+                //width: 800,
+                //height: 500,
+                sizeAdapt: true,
+                id: "random-59290",
+                place: 5,
+                drag: true,
+                dragSize: true,
+                index: true,
+                toClose: false,
+                mask: true,
+                class: false,
+                src: ":/ValidateForm/Index"
+            });
+        }
+
+        var closeIframeWin = function () { 
+            pop.close("random-59290");
+        }
+
+        var popupWin2 = function () {
+            pop.confirm({
+                title: "可喜可贺~！",
+                sizeAdapt: false,
+                content: "恭喜您，您成功的运行了一次pop.confirm()。",
+                button: [["success", "演示效果，点击提示 你好！",
+                    function () {
+                        alert("你好！")
+                    }], ["default", "取消，点击关闭",
+                    function (e) {
+                        pop.close(e)
+                    }]],
+                buttonSpcl: "",
+                anim: "fadeIn-zoom",
+                width: 450,
+                height: 180,
+                id: "random-59725",
+                place: 5,
+                drag: true,
+                index: true,
+                toClose: true,
+                mask: false,
+                class: false
+            });
+        }
+
+        var popupWin3 = function () {
+            pop.alert({
+                title: "可喜可贺~！",
+                content: "恭喜您，您成功的运行了一次pop.alert()。",
+                button: ["success", "演示效果，点击提示 你好！",
+                    function () {
+                        alert("你好！")
+                    }],
+                buttonSpcl: "",
+                sizeAdapt: false,
+                anim: "fadeIn-zoom",
+                width: 450,
+                height: 200,
+                id: "random-05937",
+                place: 5,
+                drag: true,
+                index: true,
+                toClose: true,
+                mask: false,
+                class: false
+            });
+        }
+
+
+        var popupWin4 = function () {
+            pop.custom({
+                title: "<i class='fa fa-info-circle' style='color:#5bb7e7;font-size:15px;padding:15px 0 0 10px;'> 消息提示</i>",
+                content: "<table style='height:100%;width:calc(100% - 20px);margin:0 10px 0px 10px;'><tr><td style='width:58px;'><i class='fa fa-exclamation-circle' style='color:#5bb7e7;font-size:58px; float:left;'></i></td><td style='height:100%;vertical-align:middle;'><span style='font-size:17px;'>表单中输入有误!</span></td></tr></table> ",
+                box: "body",
+                sizeAdapt: false,
+                button: ["info", "我知道了"],
+                buttonSpcl: "min|max|close",
+                anim: "roll",
+                width: 500,
+                height: 200,
+                id: "random-60926",
+                place: 5,
+                drag: false,
+                dragSize: false,
+                index: false,
+                toClose: true,
+                mask: true,
+                class: false
+            });
+        }
+
+        var closeWin1 = function () {
+            pop.close("random-65432");
+        }
+
+        var v = function () {
+            $("#regForm").validate({
+                rules: {
+                    name: {
+                        required: true,
+                        minlength: 5
+                    },
+                    age: {
+                        required: true,
+                        digits: true
+                    },
+                    optradio: {
+                        required: true
+
+                    }
+                }
+
+            });
+        };
+    </script>
+}
+
+@section script {
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.extend.js"></script>
+    <script src="~/lib/jquery-validation/dist/messages_zh.js"></script>
+    <script src="~/lib/popper/tooltip.js"></script>
+}

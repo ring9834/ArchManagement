@@ -1,0 +1,29 @@
+﻿
+@{
+    ViewData["Title"] = "PDF原文位置发生改变";
+}
+@section head {
+
+}
+
+@section body {
+
+    <script>
+        $(function () {
+            $("#h_loading_mask").css("display", "none");//关闭页面加载指示器
+            $("#h_loading").css("display", "none");
+            HM.confirmWin('','原文位置已经发生改变，可以重新挂接原文后继续！','关闭窗口','closewin',closeWin);
+            //window.close();
+        });
+
+        var closeWin = function () {
+            pop.close('confirm-win_closewin')
+            window.close()
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

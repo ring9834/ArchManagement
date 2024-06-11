@@ -1,0 +1,95 @@
+﻿
+@{
+    ViewData["Title"] = "设置各表的年度字段";
+}
+
+@section head {
+    <link href="~/css/arch-button.css" rel="stylesheet" />
+}
+
+@section body {
+    <div style="height:100%;width:100%;padding:8px;">
+        <div class="panel panel-info" style="margin-top:8px;">
+            <div class="panel-body">
+                <div class="input-group">
+                    <select class="form-control" id="yearField"></select>
+                    <span class="input-group-btn">
+                        <button class="btn btn-warning" onclick="saveYearField();">
+                            <i class="fa fa-save"></i> 保存
+                        </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        $(function () {
+            getYearFieldOptions();
+        });
+
+        var getYearFieldOptions = function () {
+            $.ajax({
+                type: 'post',
+                url: '/WPreArchive/GetFieldsByTableName',
+                dataType: "json",
+                data: {id:'@ViewData["table"]'},
+                success: function (data) {
+                    fieldsData = data;
+                    var select = $('#yearField');
+                    select.append("<option value='-1'>--请选择\"年度\"字段--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                        select.append("<option value='" + data[i].col_name + "'>" + data[i].show_name + "</option>");
+                    }
+                    $("#h_loading_mask").css("display", "none");//关闭页面加载指示器
+                    $("#h_loading").css("display", "none");
+
+                    initiateCtls();//初始化控件数据
+                }
+            });
+        }
+
+        var saveYearField = function () {
+            if ($('#yearField').find("option:selected").val() == '-1') {
+                HM.alertWin('还未选择字段，保存失败！');
+                return;
+            }
+            $.ajax({
+                type: 'post',
+                url: '/WPreArchive/SaveYearFld',
+                dataType: "json",
+                data: { fld: $('#yearField').find("option:selected").val(),table:'@ViewData["table"]'},
+                success: function (data) {
+                    if (data.rst > 0) {
+                      HM.hintWin('年度字段配置成功！');
+                    }
+                }
+            });
+        }
+
+        var initiateCtls = function () {
+            $.ajax({
+                type: 'post',
+                url: '/WPreArchive/GetYearFldInfo',
+                dataType: "json",
+                data: {table:'@ViewData["table"]'},
+                success: function (data) {
+                    if (data.rst > 0) {
+                        $("#yearField").val(data.field);
+                    }
+                }
+            });
+        }
+
+    </script>
+}
+
+@section script {
+
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

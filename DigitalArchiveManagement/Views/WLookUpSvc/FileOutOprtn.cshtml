@@ -1,0 +1,313 @@
+﻿
+@{
+    ViewData["Title"] = "查阅调档";
+}
+
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+    <link href="~/css/arch-button.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div id="archCrudToolbar">
+            <button type="button" class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="selectTable('p');"><i class="fa fa-search"></i> 基本搜索</button>
+            <button type="button" class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="selectTable('s');"><i class="fa fa-search"></i> 高级搜索</button>
+            <button type="button" class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="ElecContentSearch();"><i class="fa fa-search"></i> 全文搜索</button>
+            <button type="button" id="catalogAddBtn" class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="viewCart();">
+                <i class="fa fa-shopping-cart"></i> 已调档查看
+                <span></span>
+            </button>
+        </div>
+
+        <div class="specified-table">
+            <table id="fileOutGrid"></table>
+        </div>
+
+    </div>
+    <script>
+        var whereConditon = '';//基本搜索、高级搜索和本页初始加载 的搜索条件记录在此
+        var sqlParams = null;//whereConditon对应的sqlparameter[]
+        var searchMode = 0;//0 表示初始检索，1表示基本检索，2表示高级检索
+
+        $(function () {
+            loadTable();
+
+            $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+            $("#h_loading").css("display", "none");
+        });
+
+        var loadTable = function(){
+            var url = '/WLookUpSvc/ShowInitialSearchRecs';
+            loadTableData(url, null);//初始加载数据
+        }
+
+        var tableName = '';
+        var fieldsStr = '';
+        var colFieldStr = '';
+
+        var loadTableData = function (url, paramlist) {
+            var flds = '';
+            if (colFieldStr == '') {
+                flds = '[' + colFieldStr + "{ field: 'operate', title: '看原文', align: 'center', events: operateEvents, formatter: 'operateFormatter1' }";
+                flds += ",{ field: 'operate2', title: '入调档车', align: 'center', events: operateEvents, formatter: 'operateFormatter2' }]";
+            }
+            else {
+                flds = '[' + colFieldStr + ",{ field: 'operate', title: '看原文', align: 'center', events: operateEvents, formatter: 'operateFormatter1' }";
+                flds += ",{ field: 'operate2', title: '入调档车', align: 'center', events: operateEvents, formatter: 'operateFormatter2' }]";
+            }
+            //alert(JSON.stringify(eval('(' + flds + ')')));
+            //console.log(flds);
+
+            $('#fileOutGrid').bootstrapTable('destroy');
+            $table = $('#fileOutGrid').bootstrapTable({
+                url: url,
+                method: 'POST',                      //请求方式（*）
+                contentType: "application/x-www-form-urlencoded",
+                silent: true, //静态刷新
+                toolbar: '#archCrudToolbar',              //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                pagination: true,                   //是否显示分页（*）
+                sortable: true,                     //是否启用排序
+                sortOrder: "asc",                   //排序方式
+                sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+                pageNumber: 1,                      //初始化加载第一页，默认第一页,并记录
+                pageSize: 15,                     //每页的记录行数（*）
+                pageList: [15, 30, 50, 100],        //可供选择的每页的行数（*）
+                search: false,                      //是否显示表格搜索
+                strictSearch: true,
+                showColumns: true,                  //是否显示所有的列（选择显示的列）
+                showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                clickToSelect: true,                //是否启用点击选中行
+                //height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                uniqueId: "Unique_code",                     //每一行的唯一标识，一般为主键列
+                showToggle: true,                   //是否显示详细视图和列表视图的切换按钮
+                showExport: true,
+                cardView: false,                    //是否显示详细视图
+                detailView: false,                  //是否显示父子表
+                paginationLoop: false,
+                showLoading: false,
+                singleSelect: false,                //true只能单选，false为多选
+                exportDataType: "selected",        //导出checkbox选中的行数
+                showFullscreen: true,
+                useRowAttrFunc: true,
+                reorderableRows: true,
+                //得到查询的参数
+                queryParams: function (params) {
+                    //这里的键的名字和控制器的变量名必须一致，这边改动，控制器也需要改成一样的
+                    var temp = {
+                        pageSize: params.limit,                         //页面大小
+                        pageIndex: params.offset / params.limit,   //页码
+                        tableName: tableName,
+                        fieldsStr: fieldsStr,
+                        pList: paramlist//从搜索条件窗口传过来的动态参数，对应后台的List<>
+                    };
+                    return temp;
+                },
+                columns:eval('(' + flds + ')'),//modified on 2020年3月19日，以JS对象的形式
+                onLoadSuccess: function (data) {
+                    whereConditon = data.conditon;//记录返回的查询条件
+                    sqlParams = data.pms;//记录查询参数
+                    searchMode = data.searchmode;//searchMode = 0 表示初始检索，1表示基本检索，2表示高级检索
+
+                    $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                    $("#h_loading").css("display", "none");
+                },
+                formatLoadingMessage: function () {
+                    return "请稍等，正在加载中···";
+                },
+                onPostBody: function () {
+                    //改变复选框样式
+                    $('#fileOutGrid').find("input:checkbox").each(function (i) {
+                        var $check = $(this);
+                        if ($check.attr("id") && $check.next("label")) {
+                            return;
+                        }
+                        var name = $check.attr("name");
+                        var id = name + "-" + i;
+                        var $label = $('<label for="' + id + '" onclick=stopButtonEvent();></label>');
+                        $check.attr("id", id)
+                            .parent()
+                            .addClass("bella-checkbox")
+                            .children("span").remove();
+                        $check.parent().append($label);
+                    });
+
+                    //动态设置checkbox的那个td的css,不让它触发table的specified-table table td:hover
+                    $("#fileOutGrid").find("tr").each(function () {
+                        var tdArr = $(this).children();
+                        tdArr.eq(0).css("overflow","hidden").css("white-space","nowrap");
+                    });
+                },
+            });
+        }
+
+        //当clickToSelect=true时，如果不阻止事件冒泡，则点击自定义CHECKBOX时会没有反应
+        function stopButtonEvent() {
+            if (window.event) {//IE下阻止冒泡
+                event.cancelBubble = true;
+            } else {
+                event.stopPropagation();
+            }
+        }
+
+        var selectTable = function(t){
+            var content = "<iframe id='selectTableFrame' src='/WLookUpSvc/TableView/"+ t +"' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinPickTb(content, 830,460,'选择在某档案库中搜索');
+        }
+
+        function closeSlctTableFrm() {
+            pop.close('deal-win-pt');
+        }
+
+        var primSearch = function () {
+            var content = "<iframe id='primSearchFrame' src='/WLookUpSvc/CreateSearchControls/" + tableName + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwin(content, 830,360,'搜索条件窗口-基本搜索');
+        }
+
+        var primParamList;
+        var searchByCustomCondition = function () {
+            var url = '/WLookUpSvc/GetSearchResultByCon'; //alert(colFieldStr);
+            loadTableData(url, primParamList);//加载根据条件查询到的数据
+            pop.close('deal-win');
+        }
+
+        var highLevelSearch = function () {
+            var content = "<iframe id='superSearchFrame' src='/WLookUpSvc/SuperSearchView/"+ tableName +"' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwin(content, 980,560,'搜索条件窗口-高级搜索');
+        }
+
+        var ElecContentSearch = function () {
+            var content = "<iframe id='elecSearchFrame' src='/WLookUpSvc/ElecSearchView/"+ '@ViewData["requestId"]' +"' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 1200,560,'全文搜索-在数字原文中搜索','elec');
+        }
+
+        var closeElecContentWin = function () {//关闭全文检索窗口
+            pop.close('deal-win-elec');
+        }
+
+        var superParamList;
+        var superSearchByCustomCondition = function () {
+            var url = '/WLookUpSvc/GetSuperSearchResultByCon';
+            loadTableData(url, superParamList);//加载根据条件查询到的数据-高级
+            pop.close('deal-win');
+        }
+
+        //查看原文
+        window.operateEvents = {
+            'click .RoleOfView': function (e, value, row, index) {
+                viewYw(row);
+            },
+            'click .RoleOfIntoCart': function (e, value, row, index) {
+                intoShoppingCart(row);
+            }
+        };
+
+        // 格式化按钮
+        function operateFormatter1(value, row, index) {
+            if ((row.yw == null || row.yw == 'undefined' || row.yw == '') &&
+                (row.yw_xml == null || row.yw_xml == 'undefined' || row.yw_xml == '')) {
+                return [
+                    '<button type="button" class="RoleOfView btn btn-sm  btn-default" style="margin-right:15px;"><i class="glyphicon glyphicon-file" ></i>&nbsp;原文</button>'
+                ].join('');
+            }
+            else {
+                return [
+                    '<button type="button" class="RoleOfView btn btn-sm  btn-info" style="margin-right:15px;"><i class="glyphicon glyphicon-file" ></i>&nbsp;原文</button>'
+                ].join('');
+            }
+        }
+
+        function operateFormatter2(value, row, index) {
+            return [
+                '<button type="button" class="RoleOfIntoCart btn btn-sm  btn-success" style="margin-right:15px;"><i class="fa fa-shopping-cart" ></i>&nbsp;加入</button>'
+            ].join('');
+        }
+
+        function viewYw(row) {
+            $.ajax({
+                type: 'POST',
+                url: "/WPdfView/IfYwExists",
+                data: { table: tableName, userid: '@ViewData["userid"]', uniquecode: row.unique_code },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst == 0) {
+                        HM.alertWin(data.info);
+                        return;
+                    }
+                    else {
+                        var ulr = '/WPdfView/Index/' + tableName + '/' + '@ViewData["userid"]' + '/' + row.unique_code;
+                        //var ulr = '/WPdfView/Index1/' + escape(data.ywpath);
+                        //top.location.href = ulr;
+                        window.open(ulr,'_blank');
+                    }
+                }
+            });
+        }
+
+        function intoShoppingCart(row) {
+            var sm = 'p';
+            if (searchMode == 2)
+                sm = 's';
+
+            $.ajax({
+                type: 'POST',
+                url: "/WLookUpSvc/IntoShoppingCartPs",
+                data: { searchMode: sm, table: tableName, requestId:'@ViewData["requestId"]', catalogId:row.unique_code },
+                dataType: "JSON",
+                success: function (data) {
+                    console.log(data.rst);
+                    if (data.rst > 0) {
+                        HM.hintWin('加入调档车成功！');
+                    }
+                    else if (data.rst == -2) {
+                        HM.alertWin('条目不能重复添加，入调档车失败！');
+                    }
+                }
+            });
+        }
+
+        function viewCart() {
+            var content = "<iframe id='viewCartFrame' src='/WLookUpSvc/ViewCartView/"+ @ViewData["requestId"] +"/" + '@ViewData["userid"]' + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwin(content, 1200, 560, '查看调档车窗口');
+        }
+
+        var exportData = function () {
+            HM.confirmWin('', '当前界面中所有页数据都将保存到EXCEL中（一次最多65536条）并下载。\r\n 可通过基本搜索或高级搜索精确查找后，再导出EXCEL。', '确认导出', 'okexport', exportDataExc);
+        }
+
+        // 对Date的扩展，将 Date 转化为指定格式的String
+        // 月(M)、日(d)、小时(h)、分(m)、秒(s)、季度(q) 可以用 1-2 个占位符，
+        // 年(y)可以用 1-4 个占位符，毫秒(S)只能用 1 个占位符(是 1-3 位的数字)
+        Date.prototype.Format = function (fmt) { //author: meizz
+            var o = {
+                "M+": this.getMonth() + 1, //月份
+                "d+": this.getDate(), //日
+                "H+": this.getHours(), //小时
+                "m+": this.getMinutes(), //分
+                "s+": this.getSeconds(), //秒
+                "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+                "S": this.getMilliseconds() //毫秒
+            };
+            if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            for (var k in o)
+                if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+            return fmt;
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

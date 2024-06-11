@@ -1,0 +1,113 @@
+﻿@{
+
+    ViewData["Title"] = "修改密码信息";
+}
+@section head {
+
+}
+
+@section body {
+    <style>
+        .pwdTable {
+            width: 100%;
+        }
+
+            .pwdTable td {
+                padding: 5px 0 12px 0;
+            }
+
+            .pwdTable select,
+            .pwdTable input {
+                width: 420px;
+                margin-right: 5px;
+            }
+    </style>
+
+    <div class="container-fluid">
+        <table class="pwdTable">
+            <tr>
+                <td colspan="2" id="titleTd" style="text-align:center;font-size:18px;font-weight:bold;"></td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="oldPwd" class="control-label">旧密码</label>
+                </td>
+                <td>
+                    <input type="password" id="oldPwd" class="form-control" placeholder="请输入原有的密码" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="newPwd" class="control-label">新的密码</label>
+                </td>
+                <td>
+                    <input type="password" id="newPwd" class="form-control" placeholder="请输入新密码" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="newPwdAgain" class="control-label">重复新的密码</label>
+                </td>
+                <td>
+                    <input type="password" id="newPwdAgain" class="form-control" placeholder="请再次输入新密码" />
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>
+                    <button class="btn btn-warning" onclick="savePwd();"><i class="fa fa-save"></i> 保存</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        var passwordType = '';
+        $(function () {
+            $("#h_loading_mask").css("display", "none");//关闭页面加载指示器
+            $("#h_loading").css("display", "none");
+        });
+
+        var savePwd = function () {
+            if ($.trim($('#oldPwd').val()) == '') {
+                HM.alertWin('请输入原有密码！');
+                return;
+            }
+            if ($.trim($('#newPwd').val()) == '') {
+                HM.alertWin('请输入新密码！');
+                return;
+            }
+            if ($.trim($('#newPwdAgain').val()) == '') {
+                HM.alertWin('请再次输入新密码！');
+                return;
+            }
+            if ($.trim($('#newPwd').val()) != $.trim($('#newPwdAgain').val())) {
+                HM.alertWin('两次新密码不匹配！');
+                return;
+            }
+
+            var oldPwd = $('#oldPwd').val();
+            var newPwd = $('#newPwdAgain').val();
+            $.ajax({
+                type: 'post',
+                url: '/WUser/UpdatePssd',
+                dataType: "json",
+                data: { userId: '@ViewData["userid"]', pssd: newPwd, oldpssd: oldPwd},
+                success: function (data) {
+                    if (data.rst == 1) {
+                        parent.hintModiSuccess();
+                    }
+                    if (data.rst == -1) {
+                        HM.alertWin('输入的原有密码不正确！');
+                    }
+                }
+            });
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

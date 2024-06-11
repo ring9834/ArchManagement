@@ -1,0 +1,289 @@
+﻿
+@{
+    ViewData["Title"] = "库房基础配置";
+}
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+    <link href="~/css/arch-button.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="alert alert-warning" style="margin:8px 0 0 0;font-size:13px;">
+            <i class="fa fa-volume-up"></i><strong> 提醒!</strong> 1、表格第一层为库房信息；2、第二层表格均为密集架（档案柜）信息；3、欲删除某库房或密集架信息，请先确认密集架中是否存放档案数据;4、档案总库设有虚拟库房入口。
+        </div>
+        <div id="codeToolbar">
+            <button type="button" class="btn btn-archbutton" onclick="addStock();" style="border-color:#99D1FF;"><i class="fa fa-plus"></i>&nbsp;增加库房</button>
+        </div>
+        <table id="baseCodeTable"></table>
+    </div>
+    <script type="text/javascript">
+        var $table;
+        $(function () {
+            loadBaseTable();
+        });
+
+        var loadBaseTable = function () {
+            $('#baseCodeTable').bootstrapTable('destroy');
+            $table = $('#baseCodeTable').bootstrapTable({
+                url: '/WVirStock/GetStocks',                      //请求后台的URL（*）
+                method: 'POST',                      //请求方式（*）
+                contentType: "application/x-www-form-urlencoded",
+                silent: true, //静态刷新
+                toolbar: '#codeToolbar',              //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                search: false,                      //是否显示表格搜索
+                //strictSearch: true,
+                showColumns: false,                  //是否显示所有的列（选择显示的列）
+                showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                //clickToSelect: true,                //是否启用点击选中行
+                //height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                uniqueId: "unique_code",                     //每一行的唯一标识，一般为主键列
+                showToggle: false,                   //是否显示详细视图和列表视图的切换按钮
+                showExport: false,
+                cardView: false,                    //是否显示详细视图
+                detailView: true,                  //是否显示父子表
+                showLoading: false,
+                //singleSelect: true,                //true只能单选，false为多选
+                exportDataType: "selected",        //导出checkbox选中的行数
+                showFullscreen: true,
+                columns: [
+                    { field: 'base_name', title: '库房名' },
+                    { field: 'code_key', title: '库房代码（字母或与数字组合）' },
+                    { field: 'cmt', title: '说明' },
+                    { field: 'operate', title: '库房信息操作', align: 'center', width: '320px', events: operateEvents, formatter: 'operateFormatter' },
+                ],
+                formatLoadingMessage: function () {
+                    return "请稍等，正在加载中···";
+                },
+                onLoadSuccess: function (data) {
+                    //alert(JSON.stringify(data));
+                    $("#h_loading_mask").css("display", "none");//关闭页面加载指示器
+                    $("#h_loading").css("display", "none");
+                },
+                onPreBody: function () {
+                },
+                //注册加载子表的事件。注意三个参数！
+                onExpandRow: function (index, row, $detail) {
+                    loadSubTable(index, row, $detail);
+                }
+            });
+        }
+
+        var loadSubTable = function (index, row, $detail) {
+            var parentid = row.unique_code;
+            var cur_table = $detail.html('<table id="subTable"></table>').find('table');
+            //$(cur_table).bootstrapTable('destroy');
+            $(cur_table).bootstrapTable({
+                url: '/WVirStock/GetDenseFrms',                      //请求后台的URL（*）
+                method: 'POST',                      //请求方式（*）
+                contentType: "application/x-www-form-urlencoded",
+                queryParams: { stockId: parentid },
+                //ajaxOptions: { baseCodeId: parentid },
+                silent: true, //静态刷新
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                search: false,                      //是否显示表格搜索
+                showColumns: false,                  //是否显示所有的列（选择显示的列）
+                showRefresh: false,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                uniqueId: "unique_code",                     //每一行的唯一标识，一般为主键列
+                showToggle: false,                   //是否显示详细视图和列表视图的切换按钮
+                showExport: false,
+                cardView: false,                    //是否显示详细视图
+                detailView: false,                  //是否显示父子表
+                showLoading: false,
+                showFullscreen: false,
+                columns: [
+                    { field: 'code_name', title: '密集架（档案柜）名' },
+                    { field: 'code_value', title: '密集架（档案柜）代码（字母或与数字组合）' },
+                    { field: 'tire_count', title: '密集架（档案柜）层数' },
+                    { field: 'sqare_count', title: '密集架（档案柜）每层格子数' },
+                    { field: 'order_id', title: '排序' },
+                    { field: 'suboperate', title: '密集架（档案柜）信息操作', align: 'center', width: '280px', events: operateEvents, formatter: 'subOperateFormatter' },
+                ],
+                formatLoadingMessage: function () {
+                    return "请稍等，正在加载中···";
+                },
+                onLoadSuccess: function (data) {
+                    //alert(JSON.stringify(data));
+                    $("#h_loading_mask").css("display", "none");//关闭页面加载指示器
+                    $("#h_loading").css("display", "none");
+                },
+                onPreBody: function () {
+                },
+                //注册加载子表的事件。注意三个参数！无限级嵌套
+                //onExpandRow: function (index, row, $detail) {
+                //    loadSubTable(index, row, $detail);
+                //}
+            });
+        }
+
+        // 格式化父表按钮
+        function operateFormatter(value, row, index) {
+            return [
+                '<button type="button" class="RoleOfedit btn btn-sm   btn-info" style="margin-right:15px;"><i class="fa fa-pencil-square-o" ></i>&nbsp;修改</button>',
+                '<button type="button" class="RoleOfdelete btn btn-sm   btn-info" style="margin-right:15px;"><i class="fa fa-trash-o" ></i>&nbsp;删除</button>',
+                '<button type="button" class="RoleOfadd btn btn-sm  btn-warning" style="margin-right:15px;"><i class="fa fa-plus" ></i>&nbsp;增加密集架</button>'
+            ].join('');
+        }
+
+        // 格式化子表按钮
+        function subOperateFormatter(value, row, index) {
+            return [
+                '<button type="button" class="RoleOfSubEditCode btn btn-sm   btn-success" style="margin-right:15px;"><i class="fa fa-pencil-square-o" ></i>&nbsp;修改</button>',
+                '<button type="button" class="RoleOfSubDelCode btn btn-sm   btn-danger" style="margin-right:15px;"><i class="fa fa-trash-o" ></i>&nbsp;删除</button>',
+                '<button type="button" class="RoleOfTier btn btn-sm   btn-defualt" style="margin-right:15px;"><i class="fa fa-building-o" ></i>&nbsp;层格设置</button>'
+            ].join('');
+        }
+
+        //初始化操作按钮的方法
+        window.operateEvents = {
+            'click .RoleOfadd': function (e, value, row, index) {
+                addDenseFrm(row);
+            },
+            'click .RoleOfdelete': function (e, value, row, index) {
+                delStock(row);
+            },
+            'click .RoleOfedit': function (e, value, row, index) {
+                updateStock(row, index);
+            },
+            'click .RoleOfSubDelCode': function (e, value, row, index) {
+                delDenseFrm(row);
+            },
+            'click .RoleOfSubEditCode': function (e, value, row, index) {
+                updateDenseFrm(row, index);
+            },
+            'click .RoleOfTier': function (e, value, row, index) {
+                dealTireInfo(row, index);
+            }
+        };
+
+        function addStock() {
+            var content = "<iframe id='baseCodeFrame' src='/WVirStock/AddStockV' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 600, 300, '增添库房信息窗口','addstockFrm');
+        }
+
+        function addDenseFrm(row, index) {
+            var content = "<iframe id='subCodeFrame' src='/WVirStock/AddDenseFrmV/" + row.unique_code + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 600, 300, '增添密集架信息窗口','adddenseFrm');
+        }
+
+        function updateStock(row, index) {
+            var content = "<iframe id='baseCodeFrame' src='/WVirStock/ModiStockV/" + row.unique_code + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 600, 300, '修改库房信息窗口','modistockFrm');
+        }
+
+        function updateDenseFrm(row, index) {
+            var content = "<iframe id='subCodeFrame' src='/WVirStock/ModiDenseFrmV/" + row.unique_code + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 600, 300, '修改密集架（档案柜）信息窗口','modidenseFrm');
+        }
+
+        function dealTireInfo(row, index) {
+            var content = "<iframe id='tireFrame' src='/WVirStock/DealTireV/"+ row.unique_code +"/"+ row.tire_count +"/"+ row.sqare_count +"' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 600, 300, '密集架（档案柜）数量设置窗口','dealtireFrm');
+        }
+
+        function delStock(row) {
+            verifyIfHasChilds(row,
+                function () {
+                    HM.alertWin("此库房下还有密集架信息，不能被删除！");
+                },
+                function () {
+                    HM.confirmWin(row.unique_code, "此库房信息将被删除！确定吗？", '确认删除', 'basecode', delSelectedBaseCode);
+                });
+        }
+
+        var refreshTable = function () {
+            $('#baseCodeTable').bootstrapTable("refresh");
+        }
+
+        var refreshSubTable = function () {
+            $('#subTable').bootstrapTable("refresh");
+        }
+
+        var closeDealWin = function (winid) {
+            pop.close('deal-win-' + winid);
+        }
+
+        var hintWin = function (t) {
+            HM.hintWin(t);
+        }
+
+        var popAlertWin = function (t) {
+            HM.alertWin(t);
+        }
+
+        function delSelectedBaseCode(id) {
+            $.ajax({
+                type: 'POST',
+                url: "/WVirStock/DeleteStock",
+                data: { stockId: id },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin("库房信息删除成功！");
+                        refreshTable();
+                    }
+                    if (data.rst == -5) {
+                        HM.alertWin("密集架中有档案数据，故库房信息不能删除！");
+                    }
+                    pop.close('confirm-win_basecode');
+                }
+            });
+        }
+
+        var delDenseFrm = function (row) {
+            HM.confirmWin(row.unique_code, "此密集架（档案柜）信息将被删除！确定吗？", '确认删除', 'subcode', delSelectedDenseFrm);
+        }
+
+        function delSelectedDenseFrm(id) {
+            $.ajax({
+                type: 'POST',
+                url: "/WVirStock/DeleteDenseFrm",
+                data: { denseFrmId: id },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin("删除密集架(档案柜)信息删除成功！");                        
+                        refreshTable();
+                    }
+                    if (data.rst == -5) {
+                        HM.alertWin("密集架中有档案数据，故密集架信息不能删除！");
+                    }
+                    pop.close('confirm-win_subcode');
+                }
+            });
+        }
+
+        function verifyIfHasChilds(row, funNo, funcYes) {
+            $.ajax({
+                type: 'POST',
+                url: "/WVirStock/GetDenseFrms",
+                data: { stockId: row.unique_code },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.length > 0) {
+                        funNo();
+                    }
+                    else {
+                        funcYes();
+                    }
+                }
+            });
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+

@@ -1,0 +1,200 @@
+﻿@using System.Web
+@using Microsoft.AspNetCore.Http.Extensions
+@{
+    ViewData["Title"] = "全文搜索";
+}
+
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="panel panel-info" style="margin-top:8px;">
+            <div class="panel-heading">
+                <h3 class="panel-title">全文检索</h3>
+            </div>
+            <div class="panel-body">
+                <div class="input-group">
+                    <input class="form-control" type="text" id="searchKeyword" placeholder="请输入您要搜索的关键词...">
+                    <span class="input-group-btn">
+                        <button class="btn btn-warning" onclick="loadIndexSearchRec();">
+                            <i class="fa fa-search"></i> 开始检索
+                        </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div id="toolbar_index" class="btn-group">
+            @*<h4><span class="label label-default">全文检索结果</span></h4>*@
+            <button class="btn btn-default" id="toolBtn" style="display:none;"><i class="fa fa-address-card-o"></i> 全文检索结果</button>
+        </div>
+        <table id="fullIndexSearchTable"></table>
+    </div>
+    <script>
+        $(function () {
+            $("#h_loading_mask").css("display", "none");//关闭页面加载指示器
+            $("#h_loading").css("display", "none");
+        });
+
+        var loadIndexSearchRec = function () {
+            var v = $("#searchKeyword").val();
+            if ($.trim(v) == '') {
+                HM.alertWin('请输入所要查询的关键词后继续！');
+                return;
+            }
+
+            $('#fullIndexSearchTable').bootstrapTable('destroy');
+            var $table = $('#fullIndexSearchTable').bootstrapTable({
+                url: '/WFullContSearch/FullContSearchByKeyword',                      //请求后台的URL（*）
+                method: 'POST',                      //请求方式（*）
+                contentType: "application/x-www-form-urlencoded",
+                silent: true, //静态刷新
+                toolbar: '#toolbar_index',              //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                sortable: true,                     //是否启用排序
+                //sortOrder: "asc",                   //排序方式
+                pagination: true,                   //是否显示分页（*）
+                sidePagination: "client",           //分页方式：client客户端分页，server服务端分页（*）
+                pageNumber: 1,                      //初始化加载第一页，默认第一页,并记录
+                pageSize: 10,                     //每页的记录行数（*）
+                pageList: [10, 20, 50, 100],        //可供选择的每页的行数（*）
+                paginationLoop: false,
+                search: false,                      //是否显示表格搜索
+                strictSearch: true,
+                showColumns: true,                  //是否显示所有的列（选择显示的列）
+                showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                clickToSelect: true,                //是否启用点击选中行
+                //height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                uniqueId: "Unique_code",                     //每一行的唯一标识，一般为主键列
+                showToggle: true,                   //是否显示详细视图和列表视图的切换按钮
+                showExport: true,
+                cardView: false,                    //是否显示详细视图
+                detailView: false,                  //是否显示父子表
+                showLoading: false,
+                singleSelect: false,                //true只能单选，false为多选
+                exportDataType: "selected",        //导出checkbox选中的行数
+                showFullscreen: true,
+                queryParams: function (params) {
+                    var temp = {
+                        keyWords: v,
+                        //pageSize: params.limit,                         //页面大小
+                        //pageIndex: params.offset / params.limit   //页码
+                    };
+                    return temp;
+                },
+                columns: [
+                    { field: 'id', title: '档号' },
+                    //{ field: 'title', title: '标题' },
+                    { field: 'content', title: '内容简要' },
+                    { field: 'operate', title: '数字原文', align: 'center', events: operateEvents, formatter: 'operateFormatter' },
+                ],
+                formatLoadingMessage: function () {
+                    return "请稍等，正在加载中。。。";
+                },
+                onLoadSuccess: function (data) {
+                    hideColByLoggedUser();
+                },
+                responseHandler: function (data) {
+                    return data.rows;
+                }
+            });
+
+            //$('#fullIndexSearchTable').bootstrapTable('options').toolbar = '#toolbar_index';
+            $("#toolBtn").css("display", "block");
+        }
+
+        //查看原文
+        window.operateEvents = {
+            'click .RoleOfView': function (e, value, row, index) {
+                viewYw(row);
+            }
+        };
+
+
+        // 格式化按钮
+        function operateFormatter(value, row, index) {
+            return [
+                '<button type="button" class="RoleOfView btn btn-sm  btn-info" style="margin-right:15px;"><i class="glyphicon glyphicon-file" ></i>&nbsp;原文</button>'
+            ].join('');
+        }
+
+        function viewYw(row) {
+
+            //var r = '/WFullContSearch/GetHighlightedPdf/' + encode(row.imageurl) + '/' + $("#searchKeyword").val();
+            //window.open(r, '_blank');
+
+            //var r = '/WFullContSearch/GetHighlightedPdf/' + encode(row.imageurl) + '/' + $("#searchKeyword").val();
+            //var newWin = window.open('_blank');
+            //newWin.lo = r;
+
+            var url = "@Context.Request.Scheme://@Context.Request.Host/WFullContSearch/GetHighlightedPdf";
+            var encodedStr = encode(row.imageurl);
+            var keyword = $("#searchKeyword").val();
+            openPostWindow(url,encodedStr,keyword);
+        }
+
+        function openPostWindow(url,param1, param2) {
+           var newWin = window.open('', '_blank');
+           //设置样式为隐藏，打开新标签再跳转页面前，如果有可现实的表单选项，用户会看到表单内容数据
+           var formStr = '<form method="POST" action="'+ url+'">' +
+                 '<input type="hidden" name="id" value="' + param1 + '" />' +
+                 '<input type="hidden" name="userid" value="' + param2 + '" />' +
+                 '</form>';
+             newWin.document.body.innerHTML = formStr;
+             newWin.document.forms[0].submit();
+           return newWin;
+        }
+
+        function encode(str) {
+            // 对字符串进行编码
+            var encode = encodeURI(str);
+            // 对编码的字符串转化base64
+            var base64 = btoa(encode);
+            return base64;
+        }
+        // base64转字符串
+        function decode(base64) {
+            // 对base64转编码
+            var decode = atob(base64);
+            // 编码转字符串
+            var str = decodeURI(decode);
+            return str;
+        }
+
+        var hideColByLoggedUser = function() {
+            $.ajax({
+               type: 'POST',
+               url: "/WFunctionAccess/GetFuncAccessByUser",
+               data: { userName: '@ViewData["userid"]' },
+               dataType: "JSON",
+                success: function (data) {
+                    //alert(JSON.stringify(data));
+                    for (var i = 0; i < data.length; i++) {
+                        var func = data[i].func_symble;
+                        if (func == 'yw_view') {
+                            var vbl = data[i].func_visible;
+                            if (vbl == false || vbl.toLowerCase() == 'false') {
+                                $('#fullIndexSearchTable').bootstrapTable('hideColumn', 'operate');
+                            }
+                            break;
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

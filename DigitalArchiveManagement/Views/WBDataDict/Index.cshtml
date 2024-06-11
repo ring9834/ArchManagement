@@ -1,0 +1,225 @@
+﻿
+@{
+    ViewData["Title"] = "档案业务数据字典";
+}
+
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div id="archCrudToolbar">
+            <button type="button" class="btn btn-info" onclick="add(0);"><i class="fa fa-plus"></i>&nbsp;增加记录</button>
+        </div>
+
+        <table id="pubDataDictgrid"></table>
+    </div>
+    <script>
+        var CommonParam;//从首页传过来的参数，所有tab页均用
+
+        var $table;//记录页面bootstrap-table全局变量$table，方便应用
+        dataType = [];
+
+        window.onload = function () {
+            $('#pubDataDictgrid').bootstrapTable('destroy');
+            $table = $('#pubDataDictgrid').bootstrapTable({
+                url: '/WBDataDict/LoadBusDictionary',                      //请求后台的URL（*）
+                method: 'POST',                      //请求方式（*）
+                contentType: "application/x-www-form-urlencoded",
+                silent: true, //静态刷新
+                toolbar: '#archCrudToolbar',              //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                search: false,                      //是否显示表格搜索
+                //strictSearch: true,
+                showColumns: true,                  //是否显示所有的列（选择显示的列）
+                showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                //clickToSelect: true,                //是否启用点击选中行
+                //height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                uniqueId: "unique_code",                     //每一行的唯一标识，一般为主键列
+                //showToggle: true,                   //是否显示详细视图和列表视图的切换按钮
+                showExport: true,
+                cardView: false,                    //是否显示详细视图
+                detailView: false,                  //是否显示父子表
+                showLoading: false,
+                //singleSelect: true,                //true只能单选，false为多选
+                exportDataType: "selected",        //导出checkbox选中的行数
+                showFullscreen: true,
+                queryParams: queryParams,
+                columns: [
+                    { field: 'unique_code', title: 'ID' },
+                    { field: 'col_name', title: '列名' },
+                    { field: 'show_name', title: '显示名' },
+                    { field: 'col_datatype', title: '数据类型', formatter: 'dataTypeFormatter' },
+                    { field: 'col_maxlen', title: '最大长度' },
+                    { field: 'col_null', title: '内容是否可为空', formatter: 'canBeNullFormatter' },
+                    { field: 'field_type', title: '字段类型', formatter: 'fieldTypeFormatter' },
+                    { field: 'comments', title: '备注' },
+                    { field: 'operate', title: '操作', align: 'center', width: '250px', events: operateEvents, formatter: 'operateFormatter' },
+                ],
+                formatLoadingMessage: function () {
+                    return "请稍等，正在加载中···";
+                },
+                onLoadSuccess: function (data) {
+                    //alert(JSON.stringify(data));
+                    $("#h_loading_mask").css("display", "none");//关闭页面加载指示器
+                    $("#h_loading").css("display", "none");
+                },
+                onPreBody: function () {
+                    getDataTypes();
+                }
+            });
+        };
+
+        //设置查询参数
+        function queryParams(params) {
+            var param = {
+                tableName: '@ViewData["table"]'//数据库表名
+            }
+            return param;
+        }
+
+        // 格式化按钮
+        function operateFormatter(value, row, index) {
+            return [
+                '<button type="button" class="RoleOfadd btn btn-sm  btn-info" style="margin-right:15px;"><i class="fa fa-plus" ></i>&nbsp;新增</button>',
+                '<button type="button" class="RoleOfedit btn btn-sm   btn-info" style="margin-right:15px;"><i class="fa fa-pencil-square-o" ></i>&nbsp;修改</button>',
+                '<button type="button" class="RoleOfdelete btn btn-sm   btn-danger" style="margin-right:15px;"><i class="fa fa-trash-o" ></i>&nbsp;删除</button>'
+            ].join('');
+
+        }
+
+        //初始化操作按钮的方法
+        window.operateEvents = {
+            'click .RoleOfadd': function (e, value, row, index) {
+                add(row);
+            },
+            'click .RoleOfdelete': function (e, value, row, index) {
+                del(row);
+            },
+            'click .RoleOfedit': function (e, value, row, index) {
+                update(row, index);
+            }
+        };
+
+        function getDataTypes() {
+            if (dataType.length == 0) {
+                $.getJSON("/WDataDict/GetDataTypes", function (result) {
+                    dataType = result;
+                });
+            }
+        }
+
+        function canBeNullFormatter(value, row, index) {
+            if (value === true) {
+                return '<span class="label label-success">可为空</span>';
+            } else {
+                return '<span class="label label-default">不可为空</span>';
+            }
+        }
+
+        function fieldTypeFormatter(value, row, index) {
+            if (value === false) {
+                return '<span class="label label-danger">业务字段</span>';
+            } else {
+                return '<span class="label label-default">管理字段</span>';
+            }
+        }
+
+        function dataTypeFormatter(value, row, index) {
+            if (dataType.length > 0) {
+                if (value == null || value == '-1' || value == '') {
+                    return '<span class="label label-default">无数据类型</span>';
+                }
+                else {
+                    for (var i = 0; i < dataType.length; i++) {
+                        if (dataType[i].unique_code == value) {
+                            return '<span class="label label-warning">' + dataType[i].code_name + '</span>';
+                        }
+                    }
+                    return '<span class="label label-default">无数据类型</span>';
+                }
+            }
+        }
+
+        function updateTable() {
+            $('#pubDataDictgrid').bootstrapTable("refresh");
+        }
+
+        var closeDealWin = function (winid) {
+            pop.close('deal-win-' + winid);
+        }
+
+        var closeConfirmWin = function () {
+            pop.close("confirm-win2");
+        }
+
+        var hintWin = function (t) {
+            HM.hintWin(t);
+        }
+
+        var alertWin = function (t) {
+            HM.alertWin(t);
+        }
+
+        function add(row) {
+            var content = "<iframe id='pubDictFrame' src='/WBDataDict/AddBusDictView' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 900,560,'操作窗口','pubdicFrm');
+            var frame = document.getElementById("pubDictFrame");
+            frame.onload = function () {//等待iframe中的页面加载完毕，再执行子页面中的函数
+                var p = {};
+                p.code = '@ViewData["table"]';
+                var fwin = frame.contentWindow;
+                fwin.param = p;
+            };
+        }
+
+        function update(row, index) {
+            var content = "<iframe id='pubDictUpFrame' src='/WBDataDict/UpdateBusDictView' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 900,560,'修改窗口','updateFrm');
+            var frame = document.getElementById("pubDictUpFrame");
+            frame.onload = function () {//等待iframe中的页面加载完毕，再执行子页面中的函数
+                var p = {};
+                p.id = row.unique_code;
+                p.code = '@ViewData["table"]';
+                var fwin = frame.contentWindow;
+                fwin.param = p;
+                fwin.updateInit(row, index);//调用iframe中子页面中的函数
+            };
+        }
+
+        function del(row) {
+            HM.confirmDelWin(row, "所选记录将被删除！确定吗？", delSelectedRec);
+        }
+
+        function delSelectedRec(row) {
+            $.ajax({
+                type: 'POST',
+                url: "/WBDataDict/DeleteBusDict",
+                data: { unique_code: row.unique_code, tableName: '@ViewData["table"]', colName: row.col_name },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin("所选记录删除成功！");
+                        pop.close("confirm-win");
+                        updateTable();
+                    }
+                }
+            });
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

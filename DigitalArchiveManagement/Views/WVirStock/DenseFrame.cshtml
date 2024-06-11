@@ -1,0 +1,141 @@
+﻿
+@{
+    ViewData["Title"] = "密集架";
+}
+
+@section head {
+    <link href="~/css/multi-column-select.css" rel="stylesheet" />
+    <link href="~/lib/jquery-image-viewer/viewer.css" rel="stylesheet" />
+    <link href="~/lib/jquery-tooltip/tipso.min.css" rel="stylesheet" />
+    <link href="~/lib/jquery-tooltip/animate.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid" id="allContainer">
+
+    </div>
+
+
+    <script type="text/javascript">
+        $(function () {
+            getAllSquare();
+        })
+
+        var getAllSquare = function () {
+            $.ajax({
+                type: 'POST',
+                url: "/WVirStock/GetDenseWithFrmData",
+                data: { stockId: '@ViewData["stockId"]' },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.length == 0) {
+                        HM.alertWin('目前还未配置密集架（0个密集架），请添加密集架再继续！');
+                        return;
+                    }
+                    var container = $('#allContainer');
+                    for (var i = 0; i < data.length; i++) {
+                        var html = '<div class="container-fluid"> \r\n';
+                        html += '<div id="selectcontrol_'+ i +'"> \r\n';
+                        html += '<select> \r\n';
+                        var dti = data[i];
+                        var denseFrmId = dti.unique_code;
+                        for (var m = 1; m <= dti.tire_count; m++) {//在密集架中增加档案格
+                            for (var n = 1; n <= dti.sqare_count; n++) {
+                                 html += '<option value="'+ denseFrmId + '_' + m + '_' + n +'" data-tipso="">档案格'+ m + '_' + n +'</option>';
+                            }
+                        }
+                        html += '</select> \r\n';
+                        html += '</div> \r\n';
+                        html += '<div class="clear"></div> \r\n';
+                        html += '</div> \r\n';
+                        container.append(html);
+
+                        $('#selectcontrol_' + i).MultiColumnSelect({
+                            menuclass: 'mcs',
+                            openmenuClass: 'mcs-open',
+                            openmenuText: dti.code_name,
+                            containerClass: 'mcs-container',
+                            itemClass: 'mcs-item',
+                            duration: 200,
+                            onOpen: function () {
+                                // some action
+                            },
+                            onClose: function () {
+                                // some action
+                            },
+                            onItemSelect: function () {
+                                // some action
+                                //var content = "<iframe id='catalogmodifyFrame' style='border:0;width:100%;height:100%;'></iframe>";
+                                //HM.dealwin(content, 1000, 500, '档案位置：' + $(this).attr('data'));
+                                //console.log(window.parent.document);
+
+                                var locData = $(this).attr('data');
+                                //var str = locData.split('_');
+                                //var hint = '所选存放位置：库房id=' + str[0] + ' 密集架id=' + str[1] + ' 第' + str[2] + '层第' + str[3] + '列';
+                                //HM.confirmWin(locData, hint + '，确认选择吗？', '确认选择', 'okselect', confirmSelect);
+                                viewSquareData(locData);
+                            }
+                        });
+
+                        var itemWidth = 100 / dti.sqare_count;
+                        $('#selectcontrol_' + i + ' .mcs-container a').css('width', itemWidth + '%');//每层档案柜们屏幕的宽度，且自适应屏幕宽度大小
+
+                        for (var m = 1; m <= dti.tire_count; m++) {//在密集架中增加档案格
+                            for (var n = 1; n <= dti.sqare_count; n++) {
+                                var wrapperId = denseFrmId + '_'+ m + '_' + n;
+                                var ttl = '';
+                                for (var k = 0; k < dti.frameData.length; k++) {
+                                    var frmel = dti.frameData[k];
+                                    if (frmel.denseFrmInfo == wrapperId) {
+                                        ttl = frmel.archInfo; console.log(ttl);
+                                        break;
+                                    }
+                                }
+
+                                $(".mcs-item").each(function (i) {
+                                    //console.log($(this).attr('data')+' | '+wrapperId); 
+                                    if($(this).attr('data') == wrapperId) {
+                                        $(this).attr('id', wrapperId);
+                                        $(this).attr('data-tipso', ttl);
+                                        console.log('abc');
+                                        return false;//跳出循环
+                                    }
+                                })
+                                $('#' + wrapperId).tipso({
+                                    animationIn: 'fadeInDown',
+                                    animationOut: 'fadeOutUp',
+                                    speed: '100',
+                                    delay: 0,
+                                    useTitle: false,
+                                    background: '#c8181e'
+                                });
+                            }
+                        }
+
+                        $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                        $("#h_loading").css("display", "none");
+                    }
+                }
+            });
+        }
+
+        var confirmSelect = function (data) {
+            parent.parent.gotoStep2(data);
+            pop.close('confirm-win_okselect');
+        }
+
+        function viewSquareData(data) {
+            var content = "<iframe id='viewDataFrame' src='/WVirStock/ViewSquareDataV2/"+ data+ "/" + '@ViewData["userid"]' + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwin(content, 1200, 560, '查看档案格内数据窗口');
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/js/Multi-Column-Select.min.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+    <script src="~/lib/jquery-image-viewer/viewer.min.js"></script>
+    <script src="~/lib/jquery-tooltip/tipso.min.js"></script>
+}
+

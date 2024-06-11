@@ -1,0 +1,408 @@
+﻿
+@{
+    ViewData["Title"] = "档案类型库设置";
+}
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-table/css/jquery.treegrid.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="alert alert-warning" style="margin-top:8px;font-size:13px;">
+            <i class="fa fa-volume-up"></i><strong> 提醒!</strong> 1、根节点不可删除；2、空节点（即，分类节点）下可以再添加空节点，也可以添加档案节点；3、档案节点（即，非空节点）下不能再添加其他节点；4、档案节点可以设置有无原文；5、如果节点有原文，则必须选择原文类型；6、删除父节点，子节点及其对应的数据库表格都将删除，所以请慎重；7、权限分配：只有被分配权限的角色，登录后首页左边的档案类型树中才会显示已分配权限的档案类型库。
+        </div>
+        <table id="archtypetable"></table>
+    </div>
+    <script type="text/javascript">
+        var CommonParam;//从首页传过来的参数，所有tab页均用
+
+        var $table;
+        yws = [];
+
+        $(function () {
+            getYwTypes();
+            $table = $('#archtypetable');
+            $table.bootstrapTable({
+                url: '/WArchTree/GetArchTypes',
+                idField: 'unique_code',
+                parentIdField: 'super_id', //指定父id列
+                treeShowField: 'name',//在哪一列展开树形
+                //dataType: 'json',
+                pagination: false,
+                columns: [
+                    {
+                        field: 'check', checkbox: true, formatter: function (value, row, index) {
+                            if (row.check == true) {
+                                return { checked: true };//设置选中
+                            }
+                        }
+                    },
+                    { field: 'name', title: '档案类型名' },
+                    { field: 'code', title: '档案类型值' },
+                    { field: 'node_type', title: '是否非空节点', formatter: 'isOrNotFormatter' },
+                    { field: 'order_id', title: '排序' },
+                    { field: 'has_content', title: '是否有原文', formatter: 'isOrNotFormatter' },
+                    { field: 'content_type', title: '原文类型', formatter: 'ywFormatter' },
+                    { field: 'yw_path', title: '原文路径' },
+                    { field: 'check_inout', title: '允许入库审核?', formatter: 'checkFormatter' },
+                    { field: 'operate', title: '操作', align: 'center', width: '600px', events: operateEvents, formatter: 'operateFormatter' },
+                    //{ field: 'operate2', title: '配置原文路径', align: 'center', events: operateEvents, formatter: 'ywPathFormatter' },
+                ],
+                onPreBody: function () {
+                    //getYwTypes();
+                },
+
+                // bootstrap-table-treegrid.js 插件配置 -- start
+
+                //加载后台数据库时用onLoadSuccess；加载JSON数据文件时，用onResetView
+                onLoadSuccess: function (data) {
+                    $table.treegrid({
+                        //initialState: 'collapsed',
+                        treeColumn: 1,
+                        expandAll: true,  //是否全部展开
+                        expanderExpandedClass: 'glyphicon glyphicon-minus',
+                        expanderCollapsedClass: 'glyphicon glyphicon-plus',
+                        onChange: function () {
+                            $table.bootstrapTable('resetWidth');
+                        }
+                    });
+                    //$table.treegrid('getRootNodes').treegrid('expand');
+                    //getYwTypes();
+
+                    $("#h_loading_mask").css("display", "none");
+                    $("#h_loading").css("display", "none");
+                },
+                onResetView: function (data) {
+                    $table.treegrid({
+                        treeColumn: 1,
+                    });
+                },
+                onPostBody: function () {
+                    //改变复选框样式
+                    $table.find("input:checkbox").each(function (i) {
+                        var $check = $(this);
+                        if ($check.attr("id") && $check.next("label")) {
+                            return;
+                        }
+                        var name = $check.attr("name");
+                        var id = name + "-" + i;
+                        var $label = $('<label for="' + id + '"></label>');
+                        $check.attr("id", id)
+                            .parent()
+                            .addClass("bella-checkbox")
+                            .children("span").remove();
+                        $check.parent().append($label);
+                    });
+                }
+            });
+        });
+
+        // 格式化按钮
+        function operateFormatter(value, row, index) {
+            return [
+                '<button type="button" class="RoleOfadd btn btn-sm  btn-info" style="margin-right:15px;"><i class="fa fa-plus" ></i>&nbsp;新增</button>',
+                '<button type="button" class="RoleOfedit btn btn-sm   btn-info" style="margin-right:15px;"><i class="fa fa-pencil-square-o" ></i>&nbsp;修改</button>',
+                '<button type="button" class="RoleOfdelete btn btn-sm   btn-info" style="margin-right:15px;"><i class="fa fa-trash-o" ></i>&nbsp;删除</button>',
+                '<button type="button" class="RoleOfPath btn btn-sm  btn-warning" style="margin-right:15px;"><i class="fa fa-paint-brush" ></i>&nbsp;配置原文路径</button>',
+                '<button type="button" class="RoleOfAccess btn btn-sm   btn-warning" style="margin-right:15px;"><i class="fa fa-key" ></i>&nbsp;权限分配</button>'
+            ].join('');
+        }
+
+        // 格式化原文配置按钮
+        function ywPathFormatter(value, row, index) {
+            return [
+                '<button type="button" class="RoleOfPath btn btn-sm  btn-warning" style="margin-right:15px;"><i class="fa fa-paint-brush" ></i>&nbsp;配置原文路径</button>',
+            ].join('');
+        }
+
+        function isOrNotFormatter(value, row, index) {
+            if (value === true) {
+                return '<span class="label label-success">是</span>';
+            } else {
+                return '<span class="label label-default">否</span>';
+            }
+        }
+
+        function checkFormatter(value, row, index) {
+            if (value === true) {
+                return '<span class="label label-success">允许</span>';
+            } else {
+                return '<span class="label label-default">不允许</span>';
+            }
+        }
+
+        function ywFormatter(value, row, index) {
+            if (yws.length > 0) {
+                if (value == null || value == '-1' || value == '') {
+                    return '<span class="label label-default">无原文</span>';
+                }
+                else {
+                    for (var i = 0; i < yws.length; i++) {
+                        if (yws[i].unique_code == value) {
+                            return '<span class="label label-success">' + yws[i].code_name + '</span>';
+                        }
+                    }
+                    return '<span class="label label-default">未匹配</span>';
+                }
+            }
+        }
+
+        //got yw types
+        function getYwTypes() {
+            if (yws.length == 0) {
+                $.getJSON("/WArchTree/GetYwTypes", function (result) {
+                    yws = result;
+                });
+            }
+        }
+
+        // 格式化类型
+        function typeFormatter(value, row, index) {
+            if (value === 'menu') { return '菜单'; }
+            if (value === 'button') { return '按钮'; }
+            if (value === 'api') { return '接口'; }
+            return '-';
+        }
+
+        //初始化操作按钮的方法
+        window.operateEvents = {
+            'click .RoleOfadd': function (e, value, row, index) {
+                add(row, index);
+            },
+            'click .RoleOfdelete': function (e, value, row, index) {
+                del(row);
+            },
+            'click .RoleOfedit': function (e, value, row, index) {
+                update(row, index);
+            },
+            'click .RoleOfPath': function (e, value, row, index) {
+                ywpathConfig(row, index);
+            },
+            'click .RoleOfAccess': function (e, value, row, index) {
+                roleAccess(row, index);
+            }
+        };
+
+        /**
+         * 选中父项时，同时选中子项
+         *  datas 所有的数据
+         *  row 当前数据
+         *  id id 字段名
+         *  pid 父id字段名
+         */
+        function selectChilds(datas, row, id, pid, checked) {
+            for (var i in datas) {
+                if (datas[i][pid] == row[id]) {
+                    datas[i].check = checked;
+                    selectChilds(datas, datas[i], id, pid, checked);
+                };
+            }
+        }
+
+        function selectParentChecked(datas, row, id, pid) {
+            for (var i in datas) {
+                if (datas[i][id] == row[pid]) {
+                    datas[i].check = true;
+                    selectParentChecked(datas, datas[i], id, pid);
+                };
+            }
+        }
+
+        function refreshTable() {
+            $('#archtypetable').bootstrapTable("refresh");
+        }
+
+        function updateTable() {
+            $('#archtypetable').bootstrapTable("refresh");
+        }
+
+        function test() {
+            var selRows = $table.bootstrapTable("getSelections");
+            if (selRows.length == 0) {
+                alert("请至少选择一行");
+                return;
+            }
+
+            var postData = "";
+            $.each(selRows, function (i) {
+                postData += this.id;
+                if (i < selRows.length - 1) {
+                    postData += "， ";
+                }
+            });
+            alert("你选中行的 id 为：" + postData);
+
+        }
+
+        function add(row, index) {
+            var content = "<iframe id='archTypeFrame' src='/WArchTree/AddArchTypeView' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 900, 600, '操作窗口','addArchFrm');
+            var frame = document.getElementById("archTypeFrame");
+            frame.onload = function () {//等待iframe中的页面加载完毕，再执行子页面中的函数
+                var p = {};//向子页面传值
+                p.pid = row.super_id;
+                p.id = row.unique_code;
+                p.index = index;
+                var fwin = frame.contentWindow;
+                fwin.param = p;
+                fwin.enableNodeTypeRadio(row.super_id, row.node_type);//调用iframe中子页面中的函数
+            };
+        }
+
+        function update(row, index) {
+            if (row.super_id > 0) {
+                var content = "<iframe id='archTypeUFrame' src='/WArchTree/UpdateArchTypeView' style='border:0;width:100%;height:100%;'></iframe>";
+                HM.dealwinWithId(content, 900, 485, '修改窗口','updateArchFrm');
+                var frame = document.getElementById("archTypeUFrame");
+                frame.onload = function () {//等待iframe中的页面加载完毕，再执行子页面中的函数
+                    var p = {};
+                    p.unique_code = row.unique_code;
+                    var fwin = frame.contentWindow;
+                    fwin.param = p;
+                    fwin.rowData = row;
+                    //fwin.updateInit(row, index);//调用iframe中子页面中的函数
+                };
+            }
+            else {
+                HM.alertWin("根节点不能被修改！");
+            }
+        }
+
+        function del(row) {
+            var ifRoot = verifyIfRoot(row);
+            if (!ifRoot) {
+                HM.alertWin("根节点不能删除！若想修改根节点信息，请联系系统管理员！");
+                return;
+            }
+
+            var flag = verifyIfHasChilds(row);
+            if (flag) {//
+                HM.alertWin("此节点还有子节点，不能被删除！");
+                return;
+            }
+            HM.confirmDelTreeWin(row.unique_code, "与此节点有关的数据和表都将被删除！确定吗？", row.code, delSelectedNode);
+        }
+
+        function ywpathConfig(row, index) {
+            if (row.has_content == 'false' || row.has_content == false) {
+                HM.alertWin("此档案类型库未配置有原文，故无法配置原文路径！");
+                return;
+            }
+
+            var content = "<iframe id='pickPathFrame' src='/WArchTree/PickPathView' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 960, 560, '选择原文路径窗口','pichpathFrm');
+            var frame = document.getElementById("pickPathFrame");
+            frame.onload = function () {//等待iframe中的页面加载完毕，再执行子页面中的函数
+                var p = {};
+                p.unique_code = row.unique_code;
+                p.path = row.yw_path;
+                var fwin = frame.contentWindow;
+                fwin.param = p;//向子页面传参
+            }
+        }
+
+        var closeDealWin = function (winid) {
+            pop.close('deal-win-' + winid);
+        }
+
+        var closeConfirmWin = function () {
+            pop.close("confirm-win2");
+        }
+
+        var hintAlready = function () {
+            HM.alertWin('已存在相同的档案类型值，或同父级内存在相同的档案类型名，添加失败！');
+        }
+
+        var hintWin = function (t) {
+            HM.hintWin(t);
+        }
+
+        var popAlertWin = function (t) {
+            HM.alertWin(t);
+        }
+
+        function delSelectedNode(id, table) {
+            $.ajax({
+                type: 'POST',
+                url: "/WArchTree/DeleteArchType",
+                data: { unique_code: id, table: table },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin("节点及有关数据、表删除成功！");
+                        closeConfirmWin();
+                        updateTable();
+                    }
+                }
+            });
+        }
+
+        function verifyIfHasChilds(row) {
+            var datas = $('#archtypetable').bootstrapTable('getData');
+            for (var i in datas) {
+                if (datas[i]["super_id"] == row["unique_code"]) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function verifyIfRoot(row) {
+            var datas = $('#archtypetable').bootstrapTable('getData');
+            for (var i in datas) {
+                if (datas[i]["unique_code"] == row["super_id"]) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        var roleAccess = function (row, index) {
+            var flag = verifyIfRoot(row);
+            if (!flag) {
+                HM.alertWin('根节点不能分配权限！');
+                return;
+            }
+            if (row.node_type == false || row.node_type == '0') {
+                HM.alertWin('只有档案节点（非空节点）才能分配权限，分类节点（空节点）不能分配权限！');
+                return;
+            }
+            var content = "<iframe id='roleFrame' src='/WArchTree/SelectRoleV/" + row.unique_code + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 680, 400, '选择角色窗口(分配权限)','slcRoleFrm');
+        }
+
+        //子页面调用
+        var asignRoles = function (roles, treeNodeId) {
+            var ids = [];
+            ids.push(treeNodeId);
+            $.ajax({
+                type: 'POST',
+                url: "/WArchTree/AsignRoles",
+                data: { ids: ids, roles: roles },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin('权限分配成功！');
+                        closeDealWin('slcRoleFrm');
+                        $('#archtypetable').bootstrapTable('refresh');
+                    }
+                }
+            });
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-treegrid.js"></script>
+    <script src="~/lib/bootstrap-table/js/jquery.treegrid.js"></script>
+    <script src="~/lib/bootstrap-table/js/jquery.treegrid.bootstrap3.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+

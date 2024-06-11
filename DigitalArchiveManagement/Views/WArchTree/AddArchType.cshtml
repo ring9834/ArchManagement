@@ -1,0 +1,311 @@
+﻿
+@{
+    ViewData["Title"] = "增加档案类型库";
+}
+@section head {
+    @*<link href="~/lib/bootstrap-select/bootstrap-select.min.css" rel="stylesheet" />*@
+    <link href="~/lib/jquery-radiocheck/jquery-labelauty.css" rel="stylesheet" />
+}
+
+@section body {
+    <style>
+        input.labelauty + label {
+            font: 12px "Microsoft Yahei";
+        }
+    </style>
+
+    <form class="" role="form">
+        <div class="container-fluid">
+            <div class="row" style="padding: 5px">
+            </div>
+            <div class="row">
+                <div class="form-group col-md-12">
+                    <div class="input-group">
+                        <span class="input-group-addon">选节点类型</span>
+                        <ul style="margin:0;list-style-type:none;">
+                            <li style="margin-top:8px;display:inline-block;"><input type="radio" name="achNodeTypeRadio" data-labelauty="同级节点" value="0"></li>
+                            <li style="margin-top:8px;display:inline-block;"><input type="radio" name="achNodeTypeRadio" data-labelauty="下级节点" value="1"></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <!--前缀-->
+                <div class="form-group col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-addon">档案类型名</span>
+                        <input class="form-control" type="text" id="archTypeName">
+                    </div>
+                </div>
+                <div class="form-group col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-addon">档案类型值</span>
+                        <input class="form-control" type="text" id="archTypeValue" onpaste="return false;" oncontextmenu="return false" placeholder="仅允许输入字母,不允许汉字、数字和特殊字符！">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-addon">是否空节点</span>
+                        <ul style="margin:0;list-style-type:none;">
+                            <li style="margin-top:8px;display:inline-block;"><input type="radio" name="achNodeRadio" data-labelauty="分类节点" value="0"></li>
+                            <li style="margin-top:8px;display:inline-block;"><input type="radio" name="achNodeRadio" data-labelauty="档案节点" value="1"></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="form-group col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-addon">是否有原文</span>
+                        <ul style="margin:0;list-style-type:none;">
+                            <li style="margin-top:8px;display:inline-block;"><input type="radio" name="achYWRadio" data-labelauty="其无原文" value="0"></li>
+                            <li style="margin-top:8px;display:inline-block;"><input type="radio" name="achYWRadio" data-labelauty="其有原文" value="1"></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="row" id="checkinoutDiv">
+                <div class="form-group col-md-12">
+                    <div class="input-group">
+                        <span class="input-group-addon">允许审核否</span>
+                        <ul style="margin:0;list-style-type:none;">
+                            <li style="margin-top:8px;display:inline-block;"><input type="radio" name="achCheckRadio" data-labelauty="不允审核" value="0"></li>
+                            <li style="margin-top:8px;display:inline-block;"><input type="radio" name="achCheckRadio" data-labelauty="允许审核" value="1"></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="row" id="ywtypeDiv">
+                <div class="form-group col-md-12">
+                    <div class="input-group">
+                        <span class="input-group-addon">原文类型</span>
+                        <select id="yw_type" name="ywtypes" class="form-control" title="请选择" data-width="150px" style=""></select>
+                        @*<select id="yw_type" name="ywtypes" class="selectpicker" title="请选择" data-width="150px" style=""></select>*@
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-12">
+                    <div class="input-group">
+                        <span class="input-group-addon">排序</span>
+                        <input class="form-control" type="text" id="archTypeOrder">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-12" style="margin-bottom:2px;">
+                    <input type="button" class="btn btn-success" id="okbutton" onclick="addArchType();" value="确定" />
+                    <input type="button" class="btn btn-danger" onclick="resetInfo();" value="重置" />
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <script>
+        var param;//通过iframe父窗体的$("#mainfrm")[0].contentWindow.param = 传参到子页面来
+
+        $(function () {
+            $.ajax({
+                type: 'get',
+                url: '/WArchTree/GetYwTypes',
+                dataType: "json",
+                success: function (data) {
+                    $("#yw_type").append("<option value='-1'>-请选择-</option>");
+                    //拼接下拉框
+                    for (var i = 0; i < data.length; i++) {
+                        $("#yw_type").append("<option value='" + data[i].unique_code + "'>" + data[i].code_name + "</option>");
+                    }
+                    ////这一步不要忘记 不然下拉框没有数据
+                    //$("#yw_type").selectpicker("refresh");
+
+                    $("#h_loading_mask").css("display", "none");
+                    $("#h_loading").css("display", "none");
+                }
+            });
+
+            $(':input').labelauty();//初始化按钮样式的radio
+
+            $('input[type=radio][name=achYWRadio]').change(function () {
+                if (this.value == '0') {
+                    $("#ywtypeDiv").css("display", "none");//隐藏
+
+                }
+                else if (this.value == '1') {
+                    $("#ywtypeDiv").css("display", "block");//显示
+
+                }
+            });
+
+
+            $('input[type=radio][name=achNodeRadio]').change(function () {
+                var objAchYWRadio = $('input[type=radio][name=achYWRadio]');
+                var objCheckRadio = $('input[type=radio][name=achCheckRadio]');
+                console.log(this.value);
+                if (this.value == '0') {
+                    objAchYWRadio.eq(0).attr("checked", "checked");
+                    objAchYWRadio.eq(1).attr("disabled", "disabled");//禁用 
+                    objAchYWRadio.eq(1).removeAttr("checked");                                       
+                    $("#ywtypeDiv").css("display", "none");//隐藏
+                    objCheckRadio.eq(0).attr("disabled", "disabled");//禁用
+                    objCheckRadio.eq(1).attr("disabled", "disabled");//禁用
+                    objCheckRadio.eq(0).removeAttr("checked");
+                    objCheckRadio.eq(1).removeAttr("checked");
+                }
+                else if (this.value == '1') {
+                    objAchYWRadio.eq(1).removeAttr("disabled");
+                    objAchYWRadio.eq(0).removeAttr("disabled");
+                    objCheckRadio.eq(1).removeAttr("disabled");
+                    objCheckRadio.eq(0).removeAttr("disabled");
+                    objCheckRadio.eq(1).attr("checked", "checked");
+                }
+            });
+
+            $("#archTypeValue").onlyNumAlpha();//列名只限于输入字母
+        });
+
+        var enableNodeTypeRadio = function (s, t) {
+            if (s > 0) {//非根节点
+                if (t == false) {
+                    $('input[type=radio][name=achNodeTypeRadio]').eq(1).removeAttr("disabled");
+                    $('input[type=radio][name=achNodeTypeRadio]').eq(0).removeAttr("disabled");
+                    $('input[type=radio][name=achNodeTypeRadio]').eq(0).attr("checked", "checked");
+                }
+                else if (t == true) {
+                    $('input[type=radio][name=achNodeTypeRadio]').eq(1).attr("disabled", "disabled");//禁用
+                    $('input[type=radio][name=achNodeTypeRadio]').eq(0).removeAttr("disabled");
+                    $('input[type=radio][name=achNodeTypeRadio]').eq(0).attr("checked", "checked");
+                }
+            } else { //根节点
+                $('input[type=radio][name=achNodeTypeRadio]').eq(0).attr("disabled", "disabled");//禁用
+                $('input[type=radio][name=achNodeTypeRadio]').eq(1).removeAttr("disabled");
+                $('input[type=radio][name=achNodeTypeRadio]').eq(1).attr("checked", "checked");
+            }
+        }
+
+        var validateBeforeSummit = function () {
+            if ($("#archTypeName").val() == '') {
+                HM.alertWin("档案类型名不能为空！");
+                return 0;
+            }
+            if ($("#archTypeValue").val() == '') {
+                HM.alertWin("档案类型值不能为空！");
+                return 0;
+            }
+            var isCheck = $('input[type=radio][name=achNodeRadio]:checked').val();
+            if (isCheck == undefined || isCheck == null) {
+                HM.alertWin("请选择“是否空节点”！");
+                return 0;
+            }
+
+            var ywChecked = $('input[type=radio][name=achYWRadio]:checked').val();//debugged on 20201106
+            if (ywChecked == '1') {
+                if ($("#yw_type").val() == '-1') {
+                    HM.alertWin("请选择原文类型！");
+                    return 0;
+                }
+            }
+
+            var order = $("#archTypeOrder").val();
+            if (!(/(^[1-9]\d*$)/.test(order))) {
+                HM.alertWin("排序必须是正整数！");
+                return 0;
+            }
+        }
+
+        function addArchType() {
+            var r = validateBeforeSummit();
+            if (r == 0) {//验证有误则返回
+                return;
+            }
+
+            var name = $("#archTypeName").val();
+            var code = $("#archTypeValue").val();
+            var super_id;
+            var order_id = $("#archTypeOrder").val();
+            var node_type = $('input[type=radio][name=achNodeRadio]:checked').val();
+
+            var check_inout = $('input[type=radio][name=achCheckRadio]:checked').val();
+            var check_inout_disabled = $('input[type=radio][name=achCheckRadio]').eq(1).attr('disabled');
+            if (check_inout_disabled == 'disabled')
+                check_inout = '0';
+
+            var has_content = $('input[type=radio][name=achYWRadio]:checked').val();
+            var content_type;
+            if (has_content == 0) {
+                content_type = '-1';
+            }
+            else {
+                content_type = $("#yw_type").val();
+                var hascontent_disabled = $('input[type=radio][name=achYWRadio]').eq(1).attr('disabled');
+                if (hascontent_disabled == 'disabled')
+                    content_type = '-1';
+            }
+
+            var ntype = $('input[type=radio][name=achNodeTypeRadio]:checked').val();
+            if (ntype == 0) {
+                super_id = param.pid;
+            }
+            else {
+                super_id = param.id;
+            }
+
+
+            $.ajax({
+                type: 'POST',
+                url: "/WArchTree/AddArchType",
+                data: { name: name, code: code, super_id: super_id, order_id: order_id, content_type: content_type, has_content: has_content, node_type: node_type, check_inout: check_inout },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst == '1') {
+                        window.parent.hintWin("节点增加成功！");
+                        window.parent.closeDealWin('addArchFrm');
+                        window.parent.updateTable();
+                        //window.top.refreshTree();//added on 20201107
+                        return;
+                    }
+                    else if (data.rst == '-2') {
+                        parent.closeDealWin('addArchFrm');
+                        parent.hintAlready();
+                    }
+                    else {
+                        parent.closeDealWin('addArchFrm');
+                        parent.popAlertWin('添加失败！');
+                    }
+                }
+            });
+        }
+
+        // 限制只能输入字母
+        $.fn.onlyNumAlpha = function () {
+            $(this).keypress(function (event) {
+                var eventObj = event || e;
+                var keyCode = eventObj.keyCode || eventObj.which;
+                if ((keyCode >= 65 && keyCode <= 90) || (keyCode >= 97 && keyCode <= 122))
+                    return true;
+                else
+                    return false;
+            });
+            $(this).keyup(function () {
+                var regExp = /[a-zA-Z]$/;//20201210
+                if (!regExp.test($(this).val())) {
+                    $(this).val("");
+                }
+            });
+        }
+
+        var resetInfo = function () {
+            $("#archTypeName").val('');
+            $("#archTypeValue").val(''); 
+            $("#yw_type").val('-1');console.log($("#yw_type").val());
+            $("#archTypeOrder").val('');
+        }
+
+    </script>
+}
+
+@section script {
+    @*<script src="~/lib/bootstrap-select/bootstrap-select.min.js"></script>*@
+    <script src="~/lib/jquery-radiocheck/jquery-labelauty.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

@@ -1,0 +1,159 @@
+﻿@{
+
+    ViewData["Title"] = "";
+}
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-table/css/jquery.treegrid.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+}
+
+@section body {
+
+    <div class="container-fluid">
+        <table id="departmentTable"></table>
+    </div>
+
+    <script>
+        $(function () {
+            $table = $('#departmentTable');
+            $table.bootstrapTable({
+                url: '/WDepartMent/GetDepartments',
+                idField: 'unique_code',
+                parentIdField: 'parent_id', //指定父id列
+                treeShowField: 'name',//在哪一列展开树形
+                //dataType: 'json',
+                pagination: false,
+                singleSelect: true,
+                clickToSelect: true,
+                columns: [
+                    {
+                        field: 'check', checkbox: true, formatter: function (value, row, index) {
+                            if (row.check == true) {
+                                return { checked: true };//设置选中
+                            }
+                        }
+                    },
+                    { field: 'name', title: '机构名' },
+                    { field: 'operate', title: '确认选择', align: 'center', width: '50px', events: operateEvents, formatter: 'operateFormatter' }
+                ],
+                onPreBody: function () {
+                },
+
+                //加载后台数据库时用onLoadSuccess；加载JSON数据文件时，用onResetView
+                onLoadSuccess: function (data) {
+                    $table.treegrid({
+                        //initialState: 'collapsed',
+                        treeColumn: 1,
+                        expandAll: true,  //是否全部展开
+                        expanderExpandedClass: 'glyphicon glyphicon-minus',
+                        expanderCollapsedClass: 'glyphicon glyphicon-plus',
+                        onChange: function () {
+                            $table.bootstrapTable('resetWidth');
+                        }
+                    });
+                    //$table.treegrid('getRootNodes').treegrid('expand');
+                    //getYwTypes();
+
+                    $("#h_loading_mask").css("display", "none");
+                    $("#h_loading").css("display", "none");
+                },
+                onResetView: function (data) {
+                    $table.treegrid({
+                        treeColumn: 1,
+                    });
+                },
+                onPostBody: function () {
+                    //改变复选框样式
+                    $('#departmentTable').find("input:checkbox").each(function (i) {
+                        var $check = $(this);
+                        if ($check.attr("id") && $check.next("label")) {
+                            return;
+                        }
+                        var name = $check.attr("name");
+                        var id = name + "-" + i;
+                        var $label = $('<label for="' + id + '" onclick=stopButtonEvent();></label>');
+                        $check.attr("id", id)
+                            .parent()
+                            .addClass("bella-checkbox")
+                            .children("span").remove();
+                        $check.parent().append($label);
+                    });
+                },
+                onCheck: function (row) {
+                    var datas = $table.bootstrapTable('getData');
+                    //取得所有上层节点的name并前后连接在一起组成一个字符串（跟节点除外）
+                    nm = '';
+                    c = 0;
+                    selectParentChecked(datas, row, "unique_code", "parent_id")
+                    $("#departbelong", parent.document).val(nm);
+                    $("#depHidden", parent.document).val(row.unique_code);//所属部门id
+                    //alert(nm);
+                }
+            });
+
+        });
+
+        var nm = '';
+        var c = 0;
+        function selectParentChecked(datas, row, id, pid) {
+            for (var i in datas) {
+                if (datas[i][id] == row[pid]) {
+                    if (c == 0) {
+                        nm = row.name;
+                    }
+                    else {
+                        nm = row.name + '-' + nm;
+                    }
+                    c++;
+                    selectParentChecked(datas, datas[i], id, pid);
+                };
+            }
+        }
+
+        //当clickToSelect=true时，如果不阻止事件冒泡，则点击自定义CHECKBOX时会没有反应
+        function stopButtonEvent() {
+            if (window.event) {//IE下阻止冒泡
+                event.cancelBubble = true;
+            } else {
+                event.stopPropagation();
+            }
+        }
+
+        window.operateEvents = {
+            'click .RoleOfPick': function (e, value, row, index) {
+                pick(row, index);
+            }
+        };
+
+        // 格式化按钮
+        function operateFormatter(value, row, index) {
+            if (row.parent_id != 0) {
+                return [
+                    '<button type="button" class="RoleOfPick btn btn-sm  btn-info" style="margin-right:15px;"><i class="fa fa-hand-peace-o" ></i>&nbsp;确认</button>'
+                ].join('');
+            }
+        }
+
+        function pick(row, index) {
+            if (nm == '') {
+                HM.alertWin('请先选择再确认！');
+                return;
+            }
+            parent.closeDealWin();
+        }
+
+
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-treegrid.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/bootstrap-table/js/jquery.treegrid.js"></script>
+    <script src="~/lib/bootstrap-table/js/jquery.treegrid.bootstrap3.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

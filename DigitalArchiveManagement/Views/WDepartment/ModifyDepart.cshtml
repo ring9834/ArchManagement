@@ -1,0 +1,105 @@
+﻿
+@{
+    ViewData["Title"] = "修改机构信息";
+}
+@section head {
+    <link href="~/lib/jquery-radiocheck/jquery-labelauty.css" rel="stylesheet" />
+}
+
+@section body {
+    <style>
+        input.labelauty + label {
+            font: 12px "Microsoft Yahei";
+        }
+    </style>
+    <div class="container-fluid">
+        <div class="row" style="padding: 5px">
+        </div>
+        <div class="row">
+            <div class="form-group col-lg-6">
+                <div class="input-group">
+                    <span class="input-group-addon">机构名称</span>
+                    <input class="form-control" type="text" id="departName">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-lg-6">
+                <div class="input-group">
+                    <span class="input-group-addon">机构排序</span>
+                    <input class="form-control" type="text" id="departOrder">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6" style="margin-bottom:2px;text-align:center;">
+                <input type="button" class="btn btn-success" id="okbutton" onclick="addDepartment();" value="确定" />
+                <input type="button" class="btn btn-danger" onclick="addReset();" value="重置" />
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var param;//通过iframe父窗体的$("#mainfrm")[0].contentWindow.param = 传参到子页面来
+
+        $(function () {
+            $(':input').labelauty();//初始化按钮样式的radio
+            $('#departName').val('@Html.Raw(ViewData["name"])');
+            $('#departOrder').val('@Html.Raw(ViewData["order"])');
+
+            $("#h_loading_mask").css("display", "none");
+            $("#h_loading").css("display", "none");
+        });
+
+        var validateBeforeSummit = function () {
+
+            if ($("#departName").val() == '') {
+                HM.alertWin("机构名称不能为空！");
+                return 0;
+            }
+            var order = $("#departOrder").val();
+            if (!(/(^[1-9]\d*$)/.test(order))) {
+                HM.alertWin("排序必须是正整数！");
+                return 0;
+            }
+        }
+
+        var addDepartment = function () { 
+            var r = validateBeforeSummit();
+            if (r == 0) {//验证有误则返回
+                return;
+            }
+            var name = $("#departName").val();
+            var order = $("#departOrder").val();
+            $.ajax({
+                type: 'POST',
+                url: "/WDepartMent/ModiDepartInfo",
+                data: { parent: param.pid, departName: name, orderId: order, unique_code: param.id},
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst == '1') {
+                        parent.closeDealWin('updateDepFrm');
+                        parent.refreshTable();
+                        parent.hintWin("机构信息修改成功！");
+                        return;
+                    }
+                    if (data.rst == '-2') {
+                        parent.closeDealWin('updateDepFrm');
+                        parent.alertWint('同父节点下同名部门信息已存在，修改失败！');
+                    }
+                }
+            });
+        }
+
+        var addReset = function () {
+            $("#departName").val('');
+            $("#departOrder").val('');
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/jquery-radiocheck/jquery-labelauty.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

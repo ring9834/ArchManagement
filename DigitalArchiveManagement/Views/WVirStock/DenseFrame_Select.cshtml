@@ -1,0 +1,146 @@
+﻿
+@{
+    ViewData["Title"] = "在密集架中选择档案的存放位置";
+}
+
+@section head {
+
+    <link href="~/css/multi-column-select.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid" id="allContainer">
+        @*<div class="container-fluid">
+                <div id="selectcontrol">
+                    <select name="car">
+                        <option value="方格1">方格1</option>
+                        <option value="方格2">方格2</option>
+                        <option value="方格3">方格3</option>
+                        <option value="方格4">方格4</option>
+                        <option value="方格5">方格5</option>
+                        <option value="方格6">方格6</option>
+                        <option value="方格7">方格7</option>
+                        <option value="方格8">方格8</option>
+                        <option value="方格9">方格9</option>
+                        <option value="方格10">方格10</option>
+                        <option value="方格11">方格11</option>
+                        <option value="方格12">方格12</option>
+                        <option value="方格13">方格13</option>
+                        <option value="方格14">方格14</option>
+                        <option value="方格15">方格15</option>
+                        <option value="方格16">方格16</option>
+                        <option value="方格17">方格17</option>
+                        <option value="方格18">方格18</option>
+                        <option value="方格19">方格19</option>
+                        <option value="方格20">方格20</option>
+                        <option value="方格21">方格21</option>
+                        <option value="方格22">方格22</option>
+                        <option value="方格23">方格34</option>
+                        <option value="方格24">方格24</option>
+                        <option value="方格25">方格25</option>
+                        <option value="方格26">方格26</option>
+                        <option value="方格27">方格27</option>
+                        <option value="方格28">方格28</option>
+                        <option value="方格29">方格29</option>
+                        <option value="方格30">方格30</option>
+                        <option value="方格31">方格31</option>
+                        <option value="方格32">方格32</option>
+                        <option value="方格33">方格33</option>
+                        <option value="方格34">方格34</option>
+                        <option value="方格35">方格35</option>
+                        <option value="方格36">方格36</option>
+                        <option value="方格37">方格37</option>
+                        <option value="方格38">方格38</option>
+                        <option value="方格39">方格39</option>
+                        <option value="方格40">方格40</option>
+                    </select>
+                </div>
+                <div class="clear"></div>
+            </div>*@
+
+
+    </div>
+
+
+    <script type="text/javascript">
+        $(function () {
+            getAllSquare();
+        })
+
+        var getAllSquare = function () {
+            $.ajax({
+                type: 'POST',
+                url: "/WVirStock/GetDenseFrms",
+                data: { stockId: '@ViewData["stockId"]' },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.length == 0) {
+                        HM.alertWin('目前还未配置密集架（0个密集架），请添加密集架再继续！');
+                        return;
+                    }
+                    var container = $('#allContainer');
+                    for (var i = 0; i < data.length; i++) {
+                        var html = '<div class="container-fluid"> \r\n';
+                        html += '<div id="selectcontrol_'+ i +'"> \r\n';
+                        html += '<select> \r\n';
+                        var denseFrmId = data[i].unique_code;
+                        for (var m = 1; m <= data[i].tire_count; m++) {//在密集架中增加档案格
+                            for (var n = 1; n <= data[i].sqare_count; n++) {
+                                 html += '<option value="'+ '@ViewData["stockId"]' + '_'+ denseFrmId + '_' + m + '_' + n +'">档案格'+ m + '_' + n +'</option>';
+                            }
+                        }
+                        html += '</select> \r\n';
+                        html += '</div> \r\n';
+                        html += '<div class="clear"></div> \r\n';
+                        html += '</div> \r\n';
+                        container.append(html);
+
+                        $('#selectcontrol_' + i).MultiColumnSelect({
+                            menuclass: 'mcs',
+                            openmenuClass: 'mcs-open',
+                            openmenuText: data[i].code_name,
+                            containerClass: 'mcs-container',
+                            itemClass: 'mcs-item',
+                            duration: 200,
+                            onOpen: function () {
+                                // some action
+                            },
+                            onClose: function () {
+                                // some action
+                            },
+                            onItemSelect: function () {
+                                // some action
+                                //var content = "<iframe id='catalogmodifyFrame' style='border:0;width:100%;height:100%;'></iframe>";
+                                //HM.dealwin(content, 1000, 500, '档案位置：' + $(this).attr('data'));
+                                //console.log(window.parent.document);
+
+                                var locData = $(this).attr('data');
+                                var str = locData.split('_');
+                                var hint = '所选存放位置：库房id=' + str[0] + ' 密集架id=' + str[1] + ' 第' + str[2] + '层第' + str[3] + '列';
+                                HM.confirmWin(locData, hint + '，确认选择吗？', '确认选择', 'okselect', confirmSelect);                                
+                            }
+                        });
+
+                        var itemWidth = 100 / data[i].sqare_count;
+                        $('#selectcontrol_' + i + ' .mcs-container a').css('width',  itemWidth + '%');//每层档案柜们屏幕的宽度，且自适应屏幕宽度大小
+
+                        $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                        $("#h_loading").css("display", "none");
+                    }
+                }
+            });
+        }
+
+        var confirmSelect = function (data) {
+            parent.parent.gotoStep2(data);
+            pop.close('confirm-win_okselect');
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/js/Multi-Column-Select.min.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+

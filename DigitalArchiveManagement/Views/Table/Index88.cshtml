@@ -1,0 +1,285 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-table/css/bootstrap-table-reorder-rows.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="panel panel-success">
+        <div class="panel-heading">
+            <h3 class="panel-title">模块一</h3>
+        </div>
+        <div class="panel-body">
+
+            <div id="archCrudToolbar">
+                <div class="form-inline" role="form">
+                    <div class="btn-group">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
+                                <i class="fa fa-wrench"></i> 修改
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a href="#"><i class="fa fa-file-o"></i> 单条修改</a></li>
+                                <li><a href="#"><i class="fa fa-files-o"></i> 批量修改</a></li>
+                            </ul>
+                        </div>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
+                                <i class="fa fa-eraser"></i> 删除
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a href="#"><i class="fa fa-file-o"></i> 单条删除</a></li>
+                                <li><a href="#"><i class="fa fa-files-o"></i> 批量删除</a></li>
+                            </ul>
+                        </div>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
+                                <i class="fa fa-plus-circle"></i> 增加
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a href="#"><i class="fa fa-arrows-h"></i> 选择处后增加</a></li>
+                                <li><a href="#"><i class="fa fa-arrows"></i> 本页最后增加</a></li>
+                                <li><a href="#"><i class="fa fa-arrows-alt"></i> 所有记录最后增加</a></li>
+                                <li><a href="#"><i class="fa fa-caret-up"></i> 第一条处增加</a></li>
+                            </ul>
+                        </div>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
+                                <i class="fa fa-search"></i> 查询
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a href="#"><i class="fa fa-briefcase"></i> 基本查询</a></li>
+                                <li><a href="#"><i class="fa fa-search"></i> 高级查询</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-group-addon" id="basic-addon1">姓名</span>
+                        <input type="text" class="form-control w60" placeholder="请填写用户姓名" aria-describedby="basic-addon1" id="search_UserName">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon" id="basic-addon1">ID</span>
+                        <input type="text" class="form-control w60" placeholder="请填写用户ID" aria-describedby="basic-addon1" id="search_UserId">
+                    </div>
+                    <button type="button" class="btn btn-success" onclick="tableSearch()">搜索</button>
+                    <button type="button" class="btn btn-success" onclick="InitMainTable()">初始化数据表格</button>
+                </div>
+            </div>
+            <table id="grid"></table>
+        </div>
+    </div>
+
+    <script>
+        var $table;
+        //初始化bootstrap-table的内容
+        var queryUrl = '/Table/GetUsersWithPage?rnd=' + Math.random(); 
+        $(function () {
+            //记录页面bootstrap-table全局变量$table，方便应用
+            $('#grid').bootstrapTable('destroy');
+            $table = $('#grid').bootstrapTable({
+                url: queryUrl,                      //请求后台的URL（*）
+                method: 'POST',                      //请求方式（*）
+                contentType: "application/x-www-form-urlencoded",
+                silent: true, //静态刷新
+                toolbar: '#archCrudToolbar',              //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                pagination: true,                   //是否显示分页（*）
+                sortable: true,                     //是否启用排序
+                sortOrder: "asc",                   //排序方式
+                sidePagination: "server",           //分页方式：client客户端分页，server服务端分页（*）
+                pageNumber: 1,                      //初始化加载第一页，默认第一页,并记录
+                pageSize: 10,                     //每页的记录行数（*）
+                pageList: [10, 25, 50, 100],        //可供选择的每页的行数（*）
+                search: false,                      //是否显示表格搜索
+                strictSearch: true,
+                showColumns: true,                  //是否显示所有的列（选择显示的列）
+                showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                clickToSelect: true,                //是否启用点击选中行
+                //height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                uniqueId: "ID",                     //每一行的唯一标识，一般为主键列
+                showToggle: true,                   //是否显示详细视图和列表视图的切换按钮
+                showExport: true,
+                cardView: false,                    //是否显示详细视图
+                detailView: false,                  //是否显示父子表
+                paginationLoop: false,
+                showLoading: false,
+                singleSelect: false,                //true只能单选，false为多选
+                exportDataType: "selected",        //导出checkbox选中的行数
+                showFullscreen: true,
+                useRowAttrFunc: true,
+                reorderableRows: true,
+                //得到查询的参数
+                queryParams: function (params) {
+                    //这里的键的名字和控制器的变量名必须一致，这边改动，控制器也需要改成一样的
+                    var temp = {
+                        pageSize: params.limit,                         //页面大小
+                        pageIndex: params.offset / params.limit,   //页码
+                        //sort: params.sort,      //排序列名
+                        //sortOrder: params.order, //排位命令（desc，asc）
+                        userName: $("#search_UserName").val(),
+                        userId: $("#search_UserId").val()
+                    };
+                    return temp;
+                },
+                columns: [
+                    {
+                        field: 'check', checkbox: true, formatter: function (value, row, index) {
+                            if (row.check == true) {
+                                // console.log(row.serverName);
+                                //设置选中
+                                return { checked: true };
+                            }
+                        }
+                    }, {
+                        field: 'ID',
+                        title: 'ID'
+                    }, {
+                        field: 'UserName',
+                        title: '用户名'
+                    }, {
+                        field: 'Sex',
+                        title: '性别'
+                    }, {
+                        field: 'Age',
+                        title: '年龄'
+                    },
+                    { field: 'ID', title: '操作', width: 120, align: 'center', valign: 'middle', formatter: actionFormatter },
+                ],
+                onLoadSuccess: function () {
+                    $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                    $("#h_loading").css("display", "none");
+                },
+                onLoadError: function () {
+                    //showTips("数据加载失败！");
+                },
+                onDblClickRow: function (row, $element) {
+                    var id = row.id;
+                    EditViewById(id, 'view');
+                },
+                formatLoadingMessage: function () {
+                    return "请稍等，正在加载中···";
+                },
+                onPostBody: function () {
+                    //改变复选框样式
+                    $('#grid').find("input:checkbox").each(function (i) {
+                        var $check = $(this);
+                        if ($check.attr("id") && $check.next("label")) {
+                            return;
+                        }
+                        var name = $check.attr("name");
+                        var id = name + "-" + i;
+                        var $label = $('<label for="' + id + '" onclick=stopButtonEvent();></label>');
+                        $check.attr("id", id)
+                            .parent()
+                            .addClass("bella-checkbox")
+                            .children("span").remove();
+                        $check.parent().append($label);
+                    });
+                },
+                //当选中行，拖拽时的哪行数据，并且可以获取这行数据的上一行数据和下一行数据
+                onReorderRowsDrag: function (table, row) {
+                    return false;
+                },
+                //拖拽完成后的这条数据，并且可以获取这行数据的上一行数据和下一行数据
+                onReorderRowsDrop: function (table, row) {
+                    return false;
+                },
+                //当拖拽结束后，整个表格的数据
+                onReorderRow: function (newData) {
+                    return false;
+                }
+            });
+        });
+
+        //当clickToSelect=true时，如果不阻止事件冒泡，则点击自定义CHECKBOX时会没有反应
+        function stopButtonEvent() {
+            if (window.event) {//IE下阻止冒泡
+                event.cancelBubble = true;
+            } else {
+                event.stopPropagation();
+            }
+        }
+
+        //操作栏的格式化
+        function actionFormatter(value, row, index) {
+            var id = row.id;
+            var result = "";
+            result += "<a href='javascript:;' class='btn btn-xs btn-info' onclick=\"ViewById('" + id + "', view='view')\" title='查看' style='margin-right:2px;'><span class='glyphicon glyphicon-search'></span></a>";
+            result += "<a href='javascript:;' class='btn btn-xs btn-primary' onclick=\"EditViewById('" + id + "')\" title='编辑' style='margin-right:2px;'><span class='glyphicon glyphicon-pencil'></span></a>";
+            result += "<a href='javascript:;' class='btn btn-xs btn-danger' onclick=\"DeleteByIds('" + id + "')\" title='删除' style='margin-right:2px;'><span class='glyphicon glyphicon-remove'></span></a>";
+
+            return result;
+        }
+
+        function ViewById(id, view) {
+            alert("view 方法 , id = " + id);
+        }
+        function DeleteByIds(id) {
+            alert("del 方法 , id = " + id);
+        }
+        function EditViewById(id) {
+            alert("update 方法 , id = " + id);
+        }
+
+        function tableSearch() {
+            //$('#tb_departments').bootstrapTable('refresh');
+            $('#grid').bootstrapTable('selectPage', 1);
+        }
+
+        //自定义函数处理queryParams的批量增加 一个扩展函数来处理表单的条件（参考博客http://www.cnblogs.com/zcsj/p/6635677.html的介绍）
+        $.fn.serializeJsonObject = function () {
+            var json = {};
+            var form = this.serializeArray();
+            $.each(form, function () {
+                if (json[this.name]) {
+                    if (!json[this.name].push) {
+                        json[this.name] = [json[this.name]];
+                    }
+                    json[this.name].push();
+                } else {
+                    json[this.name] = this.value || '';
+                }
+            });
+            return json;
+        }
+
+
+        function queryParams(params) {
+            //这里的键的名字和控制器的变量名必须一致，这边改动，控制器也需要改成一样的
+            var temp = $("#ffSearch").serializeJsonObject();   //ffSearch为form的ID
+            temp["pageSize"] = params.limit;                        //页面大小
+            temp["pageIndex"] = (params.offset / params.limit) + 1;  //页码
+            temp["sort"] = params.sort;                         //排序列名
+            temp["sortOrder"] = params.order;                   //排位命令（desc，asc）
+
+            //特殊格式的条件处理
+            temp["Age"] = $("#Age").val() + "~" + $("#Age2").val();
+            temp["BirthDate"] = $("#BirthDate").val() + "~" + $("#BirthDate2").val();
+
+            return temp;
+        }
+
+    </script>
+
+}
+
+@section script {
+
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/bootstrap-table/js/jquery.tablednd.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-reorder-rows.js"></script>
+}
+

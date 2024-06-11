@@ -1,0 +1,371 @@
+﻿
+@{
+    ViewData["Title"] = "在虚拟库房中选择档案的存放位置";
+}
+
+@section head {
+    <link href="~/css/virstockslidr.css" rel="stylesheet" />
+
+}
+
+@section body {
+    <div class="cd-intro-block">
+        <div class="content-wrapper">
+            <a href="#0" class='cd-btn' data-action="show-projects">进入库房选取位置</a>
+        </div>
+    </div>
+
+    <div class="cd-projects-wrapper">
+        <ul class="cd-slider" id="sliderList">
+
+            @*<li class="current">
+            <a href="#0">
+                <img src="~/images/mjjia1.jpg" alt="project image" />
+                <div class="project-info">
+                    <h2>档案库房1</h2>
+                    <p>革命历史档案、知情档案...</p>
+                </div>
+            </a>
+        </li>
+
+        <li>
+            <a href="#0">
+                <img src="~/images/mjjia2.jpg" alt="project image" />
+                <div class="project-info">
+                    <h2>档案库房2</h2>
+                    <p>教学档案、学籍档案...</p>
+                </div>
+            </a>
+        </li>
+
+        <li>
+            <a href="#0">
+                <img src="~/images/mjjia3.jpg" alt="project image" />
+                <div class="project-info">
+                    <h2>档案库房3</h2>
+                    <p>婚姻档案、人事档案...</p>
+                </div>
+            </a>
+        </li>
+
+        <li>
+            <a href="#0">
+                <img src="~/images/mjjia4.jpg" alt="project image" />
+                <div class="project-info">
+                    <h2>档案库房4</h2>
+                    <p>房产档案、建筑档案...</p>
+                </div>
+            </a>
+        </li>
+
+        <li>
+            <a href="#0">
+                <img src="~/images/mjjia5.jpg" alt="project image" />
+                <div class="project-info">
+                    <h2>档案库房5</h2>
+                    <p>会计档案、行政审批档案...</p>
+                </div>
+            </a>
+        </li>
+
+        <li>
+            <a href="#0">
+                <img src="~/images/mjjia6.jpg" alt="project image" />
+                <div class="project-info">
+                    <h2>档案库房6</h2>
+                    <p>民生档案、重大活动档案...</p>
+                </div>
+            </a>
+        </li>
+
+        <li>
+            <a href="#0">
+                <img src="~/images/mjjia7.jpg" alt="project image" />
+                <div class="project-info">
+                    <h2>档案库房7</h2>
+                    <p>照片档案、音频视频档案...</p>
+                </div>
+            </a>
+        </li>
+
+        <li>
+            <a href="#0">
+                <img src="~/images/mjjia8.jpg" alt="project image" />
+                <div class="project-info">
+                    <h2>档案库房8</h2>
+                    <p>资料、书籍、史志...</p>
+                </div>
+            </a>
+        </li>
+            *@
+        </ul>
+
+        <ul class="cd-slider-navigation cd-img-replace">
+            <li><a href="#0" class="prev inactive">Prev</a></li>
+            <li><a href="#0" class="next">Next</a></li>
+        </ul> <!-- .cd-slider-navigation -->
+    </div> <!-- .cd-projects-wrapper -->
+
+    <div class="cd-project-content">
+        <iframe id="denseFrm" style="width:100%;height:100%;border:0;">
+        </iframe>
+        <a href="#0" class="close cd-img-replace">Close</a>
+    </div> <!-- .cd-project-content -->
+
+    <script type="text/javascript">
+        var addCustomLis = function () {
+            $.ajax({
+                type: 'POST',
+                url: "/WVirStock/GetStocks",
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.length == 0) {
+                        $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                        $("#h_loading").css("display", "none");
+                        HM.alertWin('目前还未设置库房（0个库房），请添加库房后再继续！');
+                        return;
+                    }
+                    var ul = $('#sliderList');
+                    var cls = '';
+                    for (var i = 0; i < data.length; i++) {
+                        if (i == 0) {
+                            cls = 'current';
+                        }
+                        else {
+                            cls = '';
+                        }
+                        var li = '<li class="'+ cls +'"> \r\n';
+                        li += '<a href="#0" id="a_' + data[i].unique_code + '"> \r\n';
+                        li += '<img src="@Url.Content("~/images/mjjia1.jpg")" alt="project image" /> \r\n';
+                        li += '<div class="project-info"> \r\n';
+                        li += '<h2>' + data[i].base_name + '</h2> \r\n';
+                        li += '<p>' + data[i].cmt + '</p> \r\n';
+                        li += '</div> \r\n';
+                        li += '</a> \r\n';
+                        li += '</li> \r\n';
+                        ul.append(li);
+                        //console.log(li);
+                    }
+
+                    initiatePage();
+                    $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+                    $("#h_loading").css("display", "none");
+                }
+            });
+        }
+
+        $(function () {
+            addCustomLis();
+        });
+
+
+        var intro = $('.cd-intro-block');
+        var projectsContainer = $('.cd-projects-wrapper');
+        var projectsSlider = projectsContainer.children('.cd-slider');
+        var singleProjectContent = $('.cd-project-content');
+        var sliderNav = $('.cd-slider-navigation');
+
+        function initiatePage() {
+            var resizing = false;
+
+            //if on desktop - set a width for the projectsSlider element
+            setSliderContainer();
+            $(window).on('resize', function () {
+                //on resize - update projectsSlider width and translate value
+                if (!resizing) {
+                    (!window.requestAnimationFrame) ? setSliderContainer() : window.requestAnimationFrame(setSliderContainer);
+                    resizing = true;
+                }
+            });
+
+            //show the projects slider if user clicks the show-projects button
+            intro.on('click', 'a[data-action="show-projects"]', function (event) {
+                event.preventDefault();
+                intro.addClass('projects-visible');
+                projectsContainer.addClass('projects-visible');
+                //animate single project - entrance animation
+                setTimeout(function () {
+                    showProjectPreview(projectsSlider.children('li').eq(0));
+                }, 200);
+            });
+
+            intro.on('click', function (event) {
+                //projects slider is visible - hide slider and show the intro panel
+                if (intro.hasClass('projects-visible') && !$(event.target).is('a[data-action="show-projects"]')) {
+                    intro.removeClass('projects-visible');
+                    projectsContainer.removeClass('projects-visible');
+                }
+            });
+
+            //select a single project - open project-content panel
+            projectsContainer.on('click', '.cd-slider a', function (event) {
+                event.preventDefault();
+                if ($(this).parent('li').next('li').is('.current')) {
+                    prevSides(projectsSlider);
+                } else if ($(this).parent('li').prev('li').prev('li').prev('li').is('.current')) {
+                    nextSides(projectsSlider);
+                } else {
+                    singleProjectContent.addClass('is-visible');
+                }
+
+                var aId = $(this).attr('id');//20200608增加
+                var stockId = aId.substring(2);
+                $('#denseFrm').attr('src', '/WVirStock/DenseFrameSelect/' + stockId);
+            });
+
+            //close single project content
+            singleProjectContent.on('click', '.close', function (event) {
+                event.preventDefault();
+                singleProjectContent.removeClass('is-visible');
+            });
+
+            //go to next/pre slide - clicking on the next/prev arrow
+            sliderNav.on('click', '.next', function () {
+                nextSides(projectsSlider);
+            });
+            sliderNav.on('click', '.prev', function () {
+                prevSides(projectsSlider);
+            });
+
+            //go to next/pre slide - keyboard navigation
+            $(document).keyup(function (event) {
+                if (event.which == '37' && intro.hasClass('projects-visible') && !(sliderNav.find('.prev').hasClass('inactive'))) {
+                    prevSides(projectsSlider);
+                } else if (event.which == '39' && intro.hasClass('projects-visible') && !(sliderNav.find('.next').hasClass('inactive'))) {
+                    nextSides(projectsSlider);
+                } else if (event.which == '27' && singleProjectContent.hasClass('is-visible')) {
+                    singleProjectContent.removeClass('is-visible');
+                }
+            });
+
+            projectsSlider.on('swipeleft', function () {
+                (!(sliderNav.find('.next').hasClass('inactive'))) && nextSides(projectsSlider);
+            });
+
+            projectsSlider.on('swiperight', function () {
+                (!(sliderNav.find('.prev').hasClass('inactive'))) && prevSides(projectsSlider);
+            });
+        }
+
+        function showProjectPreview(project) {
+            if (project.length > 0) {
+                setTimeout(function () {
+                    project.addClass('slides-in');
+                    showProjectPreview(project.next());
+                }, 50);
+            }
+        }
+
+        function checkMQ() {
+            //check if mobile or desktop device
+            return window.getComputedStyle(document.querySelector('.cd-projects-wrapper'), '::before').getPropertyValue('content').replace(/'/g, "").replace(/"/g, "");
+        }
+
+        function setSliderContainer() {
+            var mq = checkMQ();
+            if (mq == 'desktop') {
+                var slides = projectsSlider.children('li'),
+                    slideWidth = slides.eq(0).width(),
+                    //marginLeft = Number(projectsSlider.children('li').eq(1).css('margin-left').replace('px', '')),
+                    marginLeft = projectsSlider.children('li').length > 1 ? Number(projectsSlider.children('li').eq(1).css('margin-left').replace('px', '')) : 0,
+                    sliderWidth = (slideWidth + marginLeft) * (slides.length + 1) + 'px',
+                    slideCurrentIndex = projectsSlider.children('li.current').index();
+                projectsSlider.css('width', sliderWidth);
+                (slideCurrentIndex != 0) && setTranslateValue(projectsSlider, (slideCurrentIndex * (slideWidth + marginLeft) + 'px'));
+            } else {
+                projectsSlider.css('width', '');
+                setTranslateValue(projectsSlider, 0);
+            }
+            resizing = false;
+        }
+
+        function nextSides(slider) {
+            var actual = slider.children('.current'),
+                index = actual.index(),
+                following = actual.nextAll('li').length,
+                width = actual.width(),
+                marginLeft = Number(slider.children('li').eq(1).css('margin-left').replace('px', ''));
+
+            index = (following > 4) ? index + 3 : index + following - 2;
+            //calculate the translate value of the slider container
+            translate = index * (width + marginLeft) + 'px';
+
+            slider.addClass('next');
+            setTranslateValue(slider, translate);
+            slider.one('webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend', function () {
+                updateSlider('next', actual, slider, following);
+            });
+
+            if ($('.no-csstransitions').length > 0) updateSlider('next', actual, slider, following);
+        }
+
+        function prevSides(slider) {
+            var actual = slider.children('.previous'),
+                index = actual.index(),
+                width = actual.width(),
+                marginLeft = Number(slider.children('li').eq(1).css('margin-left').replace('px', ''));
+            console.log(index);
+
+            translate = index * (width + marginLeft) + 'px';
+
+            slider.addClass('prev');
+            setTranslateValue(slider, translate);
+            slider.one('webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend', function () {
+                updateSlider('prev', actual, slider);
+            });
+
+            if ($('.no-csstransitions').length > 0) updateSlider('prev', actual, slider);
+        }
+
+        function updateSlider(direction, actual, slider, numerFollowing) {
+            if (direction == 'next') {
+                slider.removeClass('next').find('.previous').removeClass('previous');
+                actual.removeClass('current'); console.log(numerFollowing);
+                if (numerFollowing > 2) {
+                    actual.addClass('previous').next('li').next('li').next('li').addClass('current');
+                } 
+                 //   else if (numerFollowing == 4) {
+                //    actual.next('li').next('li').addClass('current');
+                //    actual.prev('li').addClass('previous'); console.log(actual.prev('li'));
+                //} else if (numerFollowing == 3) {
+                //    actual.next('li').addClass('current');
+                //    actual.prev('li').prev('li').addClass('previous');
+                //}
+            } else {
+                slider.removeClass('prev').find('.current').removeClass('current');
+                actual.removeClass('previous').addClass('current');
+                if (actual.prevAll('li').length > 2) {
+                    actual.prev('li').prev('li').prev('li').addClass('previous');
+                } else {
+                    (!slider.children('li').eq(0).hasClass('current')) && slider.children('li').eq(0).addClass('previous');
+                }
+            }
+
+            updateNavigation();
+        }
+
+        function updateNavigation() {
+            //update visibility of next/prev buttons according to the visible slides
+            var current = projectsContainer.find('li.current');
+            (current.is(':first-child')) ? sliderNav.find('.prev').addClass('inactive') : sliderNav.find('.prev').removeClass('inactive');
+            (current.nextAll('li').length < 3) ? sliderNav.find('.next').addClass('inactive') : sliderNav.find('.next').removeClass('inactive');
+        }
+
+        function setTranslateValue(item, translate) {
+            item.css({
+                '-moz-transform': 'translateX(-' + translate + ')',
+                '-webkit-transform': 'translateX(-' + translate + ')',
+                '-ms-transform': 'translateX(-' + translate + ')',
+                '-o-transform': 'translateX(-' + translate + ')',
+                'transform': 'translateX(-' + translate + ')',
+            });
+        }
+    </script>
+}
+
+@section script {
+    @*<script src="~/js/jquery.mobile.custom.min.js"></script>*@
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+

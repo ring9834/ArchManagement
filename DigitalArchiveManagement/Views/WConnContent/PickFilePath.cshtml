@@ -1,0 +1,129 @@
+﻿@using System.IO
+@{
+    ViewData["Title"] = "服务器路径设置";
+    var moSearch = ViewData["Search"] as MoSearch;
+}
+@section head {
+    <link href="~/lib/jquery-radiocheck/jquery-labelauty.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <form role="form" style="margin-top:5px;">
+            <div class="form-group">
+                <label for="txt1">所选择路径：</label>
+                <input type="text" class="form-control" id="txt1" name="txt1" style="max-width:100%" placeholder="所选择的原文所在路径" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="txt1">可供选择的磁盘：</label>
+                <ul id="disksul" style="margin:0;list-style-type:none;padding-left:2px;"></ul>
+            </div>
+            <a class="btn btn-success" onclick="okPick();" style="margin-right:5px;">确 定</a>
+            <a class="btn btn-default" onclick="backClick();">返 回</a>
+        </form>
+
+        <div id="diskLoad"></div>
+
+        <div style="color:red">@ViewData["msg"]</div>
+    </div>
+    <script type="text/javascript">
+        $(function () {
+            loadDisks2();
+        });
+
+        var loadDirectories = function (path) {
+            HM.pageLoading();
+            $.ajax({
+                type: 'POST',
+                url: "/WConnContent/GetDirectories",
+                data: { path: path },
+                success: function (data) {
+                    if (data.rst != undefined) {//磁盘不可用或内无目录
+                        if (data.rst == 0) {
+                            $('#diskLoad').empty();
+                            HM.closePageLoading();
+                            HM.alertWin(data.title);
+                            return;
+                        }
+                    }
+                    if (deleting == 0) {//删除时不记忆
+                        sPathArray.push(path);//记忆进入的路径
+                    }
+                    $("#txt1").val(path);
+                    $('#diskLoad').empty().append(data);
+                    HM.closePageLoading();
+                }
+            });
+        }
+
+        var loadDirectories2 = function (path) { 
+            deleting = 0;
+            delFlag = 0;
+            loadDirectories(path);
+        }
+
+        var loadDisks2 = function () {
+            $.getJSON("/WConnContent/GetSelData2", function (data) {
+                if (data) {
+                    var sel1 = $("ul[id='disksul']");
+                    var gArr = [];
+                    $.each(data, function (i, item) {
+                        //var rd = Math.floor(Math.random() * 200 + 1);
+                        gArr.push('<li style="margin:8px 2px;display:inline-block;">');
+                        gArr.push('<input type="radio" name="diskRadio" class="labelauty" id="labelauty-' + i + '" data-labelauty="' + item.name + '" value="' + item.val + '" style="display:none;" onchange="diskClick(this);">');
+                        gArr.push('<label for="labelauty-' + i + '"><span class="labelauty-unchecked-image"></span><span class="labelauty-unchecked">' + item.name + '</span><span class="labelauty-checked-image"></span><span class="labelauty-checked">' + item.name + '</span></label>');
+                        gArr.push('</li>');
+                    });
+                    sel1.html(gArr.join(''));
+
+                    $("#h_loading_mask").css("display", "none");//关闭页面加载指示器
+                    $("#h_loading").css("display", "none");
+                }
+            });
+        }
+
+        var diskClick = function (t) {
+            sPathArray = [];//初始化
+            var d = $(t).val();
+            loadDirectories2(d);
+        }
+
+        var sPathArray = [];//存放可供返回的路径
+        var delFlag = 0;
+        var deleting = 0;
+
+        var backClick = function () {//返回上一步时执行
+            if (delFlag == 0 && sPathArray.length > 0) {
+                sPathArray.splice(sPathArray.length - 1);//删除最后一个记录的路径
+                delFlag = 1;//标识已删除最后一个
+                deleting = 1;//标识正在删除
+            }
+            if (sPathArray.length > 0) {
+                var i = sPathArray.length - 1;
+                var p = sPathArray[i];
+                loadDirectories(p);
+                if (sPathArray.length > 1) {//保留第一个记录的路径不返回
+                    sPathArray.splice(i, 1);//返回则删除
+                }
+            }
+        }
+
+        var okPick = function () {
+            var v = $("#txt1").val();
+            if ($.trim(v) != '') {
+                $('#pickedPath', window.parent.document).val(v);
+                window.parent.closeDealWin();
+            }
+            else {
+                HM.alertWin("还没有选择路径！");
+            }
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/jquery-radiocheck/jquery-labelauty.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

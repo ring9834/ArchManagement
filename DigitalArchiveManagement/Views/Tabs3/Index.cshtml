@@ -1,0 +1,97 @@
+﻿
+@{
+    ViewData["Title"] = "Tab Control Test3";
+}
+<br />
+<br />
+<a href="#" class="btn btn-success" onclick="initialTabControl();">初始化tab控件</a>
+<a href="#" class="btn btn-danger" onclick="addTab1();">增加tab1</a>
+<a href="#" class="btn btn-default" onclick="addTab2();">增加tab2</a>
+<a href="#" class="btn btn-info" onclick="addTab3();">增加tab3</a>
+<a href="#" class="btn btn-primary" onclick="addTab4();">增加tab4</a>
+<a href="#" class="btn btn-primary" onclick="addTab5();">增加tab4</a>
+<a href="#" class="btn btn-primary" onclick="addTab6();">增加tab4</a>
+<a href="#" class="btn btn-primary" onclick="addTab7();">增加tab4</a>
+<a href="#" class="btn btn-primary" onclick="addTab8();">增加tab4</a>
+<a href="#" class="btn btn-primary" onclick="addTab9();">增加tab4</a>
+<a href="#" class="btn btn-primary" onclick="addTab10();">增加tab4</a>
+<br />
+<div id="tabStripWrapper" class="tabstrip-wrapper">
+    <div id="tabstripTop1" class="tabstrip-top-container">
+        <div id="tabstripTopWrapper" class="tabstrip-top-wrapper">
+            <div id="tabstripLeftForward" class="tabstrip-left-forward"><i class="fa fa-angle-left"></i></div>
+            <div id="tabbarsWrapper" class="tabbars-wrapper">
+                <div id="tabbarsWrapper_scroll" class="tabbars-wrapper-scroll"></div>
+            </div>
+            <div id="tabstripRightForward" class="tabstrip-right-forward"><i class="fa fa-angle-right"></i></div>
+        </div>
+    </div>
+    <div id="tabstripContent1" class="tabstrip-content-container"></div>
+</div>
+
+<script type="text/javascript">
+    var cc;
+    var initialTabControl = function () {
+        cc = new hTabControl("tabbarsWrapper_scroll", 'tabstripContent1');
+        cc.IsFirstTabClosible = true;//false时第一个tab不加关闭按钮
+        $("#tabstripLeftForward").bind("click", function () { cc.leftForward(); });
+        $("#tabstripRightForward").bind("click", function () { cc.rightForward(); });
+        $("#tabstripLeftForward").bind("mousedown", function () { cc.leftForwardMouseDown(); });
+        $("#tabstripLeftForward").bind("mouseup", function () { cc.offMultiForward(); });
+        $("#tabstripLeftForward").bind("mouseout", function () { cc.offMultiForward(); });
+        $("#tabstripRightForward").bind("mousedown", function () { cc.rightForwardMouseDown(); });
+        $("#tabstripRightForward").bind("mouseup", function () { cc.offMultiForward(); });
+        $("#tabstripRightForward").bind("mouseout", function () { cc.offMultiForward(); });
+    };
+
+    var addTab1 = function () {
+        if (cc != null)
+            cc.AddTab('a', '我的MVC', "/button/index");
+        //cc.AddTab('d', '百度', "http://www.baidu.com", true);//为true的，加载时默认首页
+    }
+
+    var addTab2 = function () {
+        if (cc != null)
+            cc.AddTab('b', '我的TABs1', "/tabs/index");
+    }
+
+    var addTab3 = function () {
+        if (cc != null)
+            cc.AddTab('c', '我的TABs2', "/tabs2/index");
+    }
+
+    var addTab4 = function () {
+        if (cc != null)
+            cc.AddTab('d', '腾讯首页-QQ', "http://www.qq.com");
+    }
+
+    var addTab5 = function () {
+        if (cc != null)
+            cc.AddTab('e', '腾讯首页-QQ', "http://www.qq.com");
+    }
+
+    var addTab6 = function () {
+        if (cc != null)
+            cc.AddTab('f', '腾讯首页-QQ', "http://www.qq.com");
+    }
+
+    var addTab7 = function () {
+        if (cc != null)
+            cc.AddTab('g', '腾讯首页-QQ', "http://www.qq.com");
+    }
+
+    var addTab8 = function () {
+        if (cc != null)
+            cc.AddTab('h', '腾讯首页-QQ', "http://www.qq.com");
+    }
+
+    var addTab9 = function () {
+        if (cc != null)
+            cc.AddTab('j', '腾讯首页-QQ', "http://www.qq.com");
+    }
+
+    var addTab10 = function () {
+        if (cc != null)
+            cc.AddTab('k', '腾讯首页-QQ', "http://www.qq.com");
+    }
+</script>

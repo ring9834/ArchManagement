@@ -1,0 +1,241 @@
+﻿
+@{
+    ViewData["Title"] = "部门管理";
+}
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-table/css/jquery.treegrid.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="alert alert-warning" style="margin-top:8px;font-size:13px;">
+            <i class="fa fa-volume-up"></i><strong> 提醒!</strong> 1、机构设置可以无限级设置子机构；2、可以根据实际，动态设置机构信息；3、机构根节点无法修改、删除。
+        </div>
+        <table id="departmentTable"></table>
+    </div>
+    <script type="text/javascript">
+        var $table;
+        $(function () {
+            $table = $('#departmentTable');
+            $table.bootstrapTable({
+                url: '/WDepartMent/GetDepartments',
+                idField: 'unique_code',
+                parentIdField: 'parent_id', //指定父id列
+                treeShowField: 'name',//在哪一列展开树形
+                //dataType: 'json',
+                pagination: false,
+                columns: [
+                    {
+                        field: 'check', checkbox: true, formatter: function (value, row, index) {
+                            if (row.check == true) {
+                                return { checked: true };//设置选中
+                            }
+                        }
+                    },
+                    { field: 'name', title: '单位名' },
+                    { field: 'order_number', title: '排序' },
+                    { field: 'operate', title: '操作', align: 'center', width: '250px', events: operateEvents, formatter: 'operateFormatter' },
+                ],
+                onPreBody: function () {
+                },
+
+                //加载后台数据库时用onLoadSuccess；加载JSON数据文件时，用onResetView
+                onLoadSuccess: function (data) {
+                    $table.treegrid({
+                        //initialState: 'collapsed',
+                        treeColumn: 1,
+                        expandAll: true,  //是否全部展开
+                        expanderExpandedClass: 'glyphicon glyphicon-minus',
+                        expanderCollapsedClass: 'glyphicon glyphicon-plus',
+                        onChange: function () {
+                            $table.bootstrapTable('resetWidth');
+                        }
+                    });
+                    //$table.treegrid('getRootNodes').treegrid('expand');
+                    //getYwTypes();
+
+                    $("#h_loading_mask").css("display", "none");
+                    $("#h_loading").css("display", "none");
+                },
+                onResetView: function (data) {
+                    $table.treegrid({
+                        treeColumn: 1,
+                    });
+                },
+                onPostBody: function () {
+                    //改变复选框样式
+                    $table.find("input:checkbox").each(function (i) {
+                        var $check = $(this);
+                        if ($check.attr("id") && $check.next("label")) {
+                            return;
+                        }
+                        var name = $check.attr("name");
+                        var id = name + "-" + i;
+                        var $label = $('<label for="' + id + '"></label>');
+                        $check.attr("id", id)
+                            .parent()
+                            .addClass("bella-checkbox")
+                            .children("span").remove();
+                        $check.parent().append($label);
+                    });
+                }
+            });
+        });
+
+        // 格式化按钮
+        function operateFormatter(value, row, index) {
+            return [
+                '<button type="button" class="RoleOfadd btn btn-sm  btn-info" style="margin-right:15px;"><i class="fa fa-plus" ></i>&nbsp;新增</button>',
+                '<button type="button" class="RoleOfedit btn btn-sm   btn-info" style="margin-right:15px;"><i class="fa fa-pencil-square-o" ></i>&nbsp;修改</button>',
+                '<button type="button" class="RoleOfdelete btn btn-sm   btn-info" style="margin-right:15px;"><i class="fa fa-trash-o" ></i>&nbsp;删除</button>'
+            ].join('');
+        }
+
+        //初始化操作按钮的方法
+        window.operateEvents = {
+            'click .RoleOfadd': function (e, value, row, index) {
+                add(row, index);
+            },
+            'click .RoleOfdelete': function (e, value, row, index) {
+                del(row);
+            },
+            'click .RoleOfedit': function (e, value, row, index) {
+                update(row, index);
+            }
+        };
+
+        /**
+         * 选中父项时，同时选中子项
+         *  datas 所有的数据
+         *  row 当前数据
+         *  id id 字段名
+         *  pid 父id字段名
+         */
+        function selectChilds(datas, row, id, pid, checked) {
+            for (var i in datas) {
+                if (datas[i][pid] == row[id]) {
+                    datas[i].check = checked;
+                    selectChilds(datas, datas[i], id, pid, checked);
+                };
+            }
+        }
+
+        function selectParentChecked(datas, row, id, pid) {
+            for (var i in datas) {
+                if (datas[i][id] == row[pid]) {
+                    datas[i].check = true;
+                    selectParentChecked(datas, datas[i], id, pid);
+                };
+            }
+        }
+
+        function refreshTable() {
+            $('#departmentTable').bootstrapTable("refresh");
+        }
+
+        function add(row, index) {
+            var content = "<iframe id='adddeptFrame' src='/WDepartMent/AddDepartView' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 600, 300, '增添机构信息窗口','adddepFrm');
+            var frame = document.getElementById("adddeptFrame");
+            frame.onload = function () {//等待iframe中的页面加载完毕，再执行子页面中的函数
+                var p = {};//向子页面传值
+                p.pid = row.parent_id;
+                p.id = row.unique_code;
+                p.index = index;
+                var fwin = frame.contentWindow;
+                fwin.param = p;
+            };
+        }
+
+        function update(row, index) {
+            if (row.parent_id > 0) {
+                var content = "<iframe id='updatedepFrame' src='/WDepartMent/ModiDepartView/" + row.unique_code +"' style='border:0;width:100%;height:100%;'></iframe>";
+                HM.dealwinWithId(content, 600, 250, '修改机构信息窗口','updateDepFrm');
+                var frame = document.getElementById("updatedepFrame");
+                frame.onload = function () {//等待iframe中的页面加载完毕，再执行子页面中的函数
+                    var p = {};//向子页面传值
+                    p.pid = row.parent_id;
+                    p.id = row.unique_code;
+                    p.index = index;
+                    var fwin = frame.contentWindow;
+                    fwin.param = p;
+                };
+            }
+            else {
+                HM.alertWin("根节点不能被修改！");
+            }
+        }
+
+        function del(row) {
+            if (row.parent_id == 0) {
+                HM.alertWin('根节点不能被删除！');
+                return;
+            }
+
+            var flag = verifyIfHasChilds(row);
+            if (flag) {//
+                HM.alertWin("此节点还有子机构（节点），不能被删除！");
+            }
+            else {
+                HM.confirmWin(row.unique_code, "此机构信息将被删除！确定吗？",'确认删除','deldepart', delSelectedNode);
+            }
+        }
+
+        var closeDealWin = function (winid) {
+            pop.close('deal-win-' + winid);
+        }
+
+        var closeConfirmWin = function () {
+            pop.close("confirm-win_deldepart");
+        }
+
+        var hintWin = function (t) {
+            HM.hintWin(t);
+        }
+
+        var alertWint = function (t) {
+            HM.alertWin(t);
+        }
+
+        function delSelectedNode(id) {
+            $.ajax({
+                type: 'POST',
+                url: "/WDepartMent/DeleteDepartInfo",
+                data: { unique_code: id },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin("机构信息删除成功！");
+                        closeConfirmWin();
+                        refreshTable();
+                    }
+                }
+            });
+        }
+
+        function verifyIfHasChilds(row) {
+            var datas = $('#departmentTable').bootstrapTable('getData');
+            for (var i in datas) {
+                if (datas[i]["parent_id"] == row["unique_code"]) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-treegrid.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/bootstrap-table/js/jquery.treegrid.js"></script>
+    <script src="~/lib/bootstrap-table/js/jquery.treegrid.bootstrap3.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+

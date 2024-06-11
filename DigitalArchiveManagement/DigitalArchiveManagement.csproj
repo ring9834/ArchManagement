@@ -1,0 +1,1952 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <AssemblyName>ArchiveFileManagementNs</AssemblyName>
+    <RootNamespace>ArchiveFileManagementNs</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Utility\PanGuAnalyzerTests.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DotNetCore.NPOI" Version="1.2.2" />
+    <PackageReference Include="itext7" Version="7.1.11" />
+    <PackageReference Include="itext7.font-asian" Version="7.1.11" />
+    <PackageReference Include="Jieba.Net.Core" Version="1.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0" />
+    <PackageReference Include="PanGu.Core" Version="1.0.0" />
+    <PackageReference Include="PanGu.HighLight" Version="1.0.0" />
+    <PackageReference Include="PanGu.Lucene.Analyzer.Core" Version="1.0.0" />
+    <PackageReference Include="Spire.PDF" Version="6.5.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NetCoreDbUtility\NetCoreDbUtility.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Lucene.Net.QueryParser">
+      <HintPath>..\packages\lucene.net.queryparser\4.8.0-beta00005\lib\netstandard2.0\Lucene.Net.QueryParser.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Views\ButtonGroup\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\CollapsePanel\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\DragToAnotherTable\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Home\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Views\Home\Privacy.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Views\JqueryValidate\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\ModalWin\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Views\ModalWin\Index00.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\ResponsibleMenu\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Table\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Table\Index00.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Views\Table\Index88.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Tabs2\Index.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Tabs3\Index.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Tabs4\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Tabs5_ok_with_no_dynamic_hint\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\Tabs6_ok_with_dynamic_hint\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Views\TreeGrid\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WArchTree\AddArchType.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Views\WArchTree\DiskPartial.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WArchTree\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Views\WArchTree\PickFilePath.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WArchTree\SelectRole.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WArchTree\UpdateArchType.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WAuditingAccess\Index.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WAuditing\Auditings.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WAuditing\AuditsAll.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WAuditing\AuditsDone.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WAuditing\CheckingIn.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WAuditing\Epplication.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Views\WAuditing\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WAuditing\SpecificAuditDetail.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WBDataDict\AddBusDict.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WBDataDict\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WBDataDict\UpdateBusDict.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WBorrowAuditing\AuditsAll.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WBorrowAuditing\CheckingIn.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WConditionSearch\PrimSearch.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WConditionSearch\SuperSearch.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WConfigArchNum\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WConfigCodeHlp\AddBaseCode.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WConfigCodeHlp\AddSubCode.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WEncrypt\Index.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WEncrypt\PermitDecrypt2.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WEncrypt\PermitDecrypt.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WEncrypt\UpdatePwd.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WLookUpSvc\FileOutOprtn.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Views\WOperateRecs\PickTable.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WOperateRecs\SearchCondtions.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WPdfView\FileNotExist.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WUseRcdAuditing\AuditsAll.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WUseRcdAuditing\CheckingIn.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WVirStock\DenseFrame.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WVirStock\ViewSquareArch2.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WVirStock\ViewSquareArch.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WVirStock\ConfigDataIndex.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WVirStock\DenseFrame_Select.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WVirStock\PickTable.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WVirStock\TireConfig.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WVirStock\ConfigIndex.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WConfigCodeHlp\Index.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WConfigCodeHlp\ModiBaseCode.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WConfigCodeHlp\ModiSubCode.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WConfigSearch\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WConfigShowList\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WConfigSort\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WConfigUIShow\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WConnContent\DiskPartial.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WConnContent\Index.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WConnContent\PickFilePath.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WDataDict\AddPubDict.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WDataDict\UpdatePubDict.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WDepartment\AddDepart.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WDepartment\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WDepartment\ModifyDepart.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WFirstPage\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WFullContSearch\DiskPartial.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WFullContSearch\FileNotExist.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WFullContSearch\Index.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WFullContSearch\IndexCreationConf.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WFullContSearch\PickFilePath.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WFuncMng\AddFuncMng.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WFuncMng\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WFuncMng\ModiFuncMng.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WFuncMng\SelectRole.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WLogin\Index.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WLookUpSvc\AuditsAll.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WLookUpSvc\ElecContentSearchB.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WLookUpSvc\FetchPhotoFrmCam.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WLookUpSvc\FetchPhotoFrmImage.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WLookUpSvc\GiveThemBack.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WLookUpSvc\HintExpired.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WLookUpSvc\Index.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WLookUpSvc\PickTable.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WLookUpSvc\PrintSheet.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WLookUpSvc\PrintSheetB.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WLookUpSvc\ProlongDays.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WLookUpSvc\RegistRqsterBInfo.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WLookUpSvc\RegistRqsterInfo.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WLookUpSvc\ReturnBack.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WLookUpSvc\RqstSeasrch.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WLookUpSvc\StcPrv.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WLookUpSvc\ViewCartWin.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WManageStore\CatalogAdd.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Views\WManageStore\CatalogBunchUpdate.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Views\WManageStore\CatalogUpdate.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Views\WManageStore\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Views\WManageStore\PrimSearch.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Views\WManageStore\SuperSearch.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Views\WMenuMng\AddNavMenu.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WMenuMng\Index.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WMenuMng\ModiNavMenu.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WMenuMng\SelectRole.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WOperateRecs\Index.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WOperateRecs\OperationRecDetail.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WPdfView\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WPreArchive\Index.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WPreArchive\YearField.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WRecvCatalog\BundleImpRecDetail.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WRecvCatalog\CatalogMatch.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WRecvCatalog\ImpCatalogRec.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WRecvCatalog\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Views\WRole\AddRole.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WRole\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WRole\UpdateRole.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WStableStcPrv\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WStableStore\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WStableStore\PrimSearch.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WStableStore\SuperSearch.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WStatisticsAmount\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WStatisticsAmount\StatisticGear.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WStatisticsAmount\StatisticPreview.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WStatisticsFirstP\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WStatisticsStockPrd\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WStatisticsStockPrd\StatisticGear.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WStatisticsStockPrd\StatisticPreview.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WStatisticsType\Index.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WStatisticsType\StatisticGear.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WStatisticsType\StatisticPreview.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WStatistics\AddStcTemplate.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WStatistics\CountStatistics.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WStatistics\GroupFields.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WStatistics\SearchCondition.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WStatistics\SpecificTemplates.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WStatistics\StatisticFields.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WStatistics\StatisticPreview.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WStatistics\StcTemplate.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WUser\AddUser.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WUser\Index.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WUser\PickDepart.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WUser\UpdateUser.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WVirStock\AddStock.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WVirStock\AddDenseFrm.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WVirStock\ModiStock.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WVirStock\ModiDenseFrm.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WVirStock\ShowFrmData.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WVirStock\ViewStock.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WVirStock\ViewStock_Select.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="Views\WWatermark\Index.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+    <Content Update="wwwroot\css\site.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\js\site.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\js\toastwindow.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\boots-menu\css\bootsnav.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\boots-menu\script\bootsnav.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap-export\base64.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap-export\base64.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap-export\bootstrap-table-export.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap-export\bootstrap-table-export.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap-export\FileSaver.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap-export\html2canvas.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap-export\jspdf.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap-export\tableExport.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap-export\tableExport.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap-export\xlsx.core.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap-print\bootstrap-table-print.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap-print\bootstrap-table-print.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap-select\bootstrap-select.min.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap-select\bootstrap-select.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap-tooltip\bootstrap-tooltip-custom-class.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap-tooltip\bootstrap-tooltip-custom-class.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap-wizard\jquery.bootstrap.wizard.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap-wizard\jquery.bootstrap.wizard.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap\.bower.json">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap\dist\css\bootstrap-theme.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap\dist\css\bootstrap-theme.css.map">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap\dist\css\bootstrap-theme.min.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap\dist\css\bootstrap-theme.min.css.map">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap\dist\css\bootstrap.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap\dist\css\bootstrap.css.map">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap\dist\css\bootstrap.min.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap\dist\css\bootstrap.min.css.map">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap\dist\fonts\glyphicons-halflings-regular.eot">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap\dist\fonts\glyphicons-halflings-regular.svg">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap\dist\fonts\glyphicons-halflings-regular.ttf">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap\dist\fonts\glyphicons-halflings-regular.woff">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap\dist\fonts\glyphicons-halflings-regular.woff2">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap\dist\js\bootstrap.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap\dist\js\bootstrap.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap\dist\js\npm.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\bootstrap\LICENSE">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\collapse-nav\css\allpages-shared.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\collapse-nav\css\collapseSideNav.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\collapse-nav\css\collapseSideNav2.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\collapse-nav\css\jquery.mCustomScrollbar.min.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\collapse-nav\css\topNav.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\collapse-nav\js\collapseSideNav.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\collapse-nav\js\collapseSideNav2.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\collapse-nav\js\jquery.mCustomScrollbar.concat.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\echart\echarts.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-cropper\cropper.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-cropper\cropper.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-cropper\cropper.min.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-cropper\cropper.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-media\jquery.media.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-print\jQuery.print.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-print\jQuery.print.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-radiocheck\images\input-checked.png">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-radiocheck\images\input-unchecked.png">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-radiocheck\jquery-labelauty-small.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-radiocheck\jquery-labelauty.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-radiocheck\jquery-labelauty.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-slideverify\jq-slideVerify.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-toast\jquery.toast.min.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-toast\jquery.toast.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-ui\css\jquery-ui.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-ui\css\jquery-ui.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-ui\css\jquery.dragtable.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-ui\js\dragtable.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-ui\js\jquery-ui.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-ui\js\jquery-ui.min.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-validation-unobtrusive\.bower.json">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-validation-unobtrusive\LICENSE.txt">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-validation\.bower.json">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-validation\dist\additional-methods.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-validation\dist\additional-methods.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-validation\dist\jquery.validate.extend.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-validation\dist\jquery.validate.extend.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-validation\dist\jquery.validate.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-validation\dist\jquery.validate.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-validation\dist\messages_zh.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery-validation\LICENSE.md">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery\.bower.json">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery\dist\jquery.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery\dist\jquery.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery\dist\jquery.min.map">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\jquery\LICENSE.txt">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\Microsoft.Jquery.Unobtrustive.Ajax\jquery.unobtrusive-ajax.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\Microsoft.Jquery.Unobtrustive.Ajax\jquery.unobtrusive-ajax.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\modal-panel\jspanel.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\modal-panel\jspanel.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\modal-panel\jspanel.min.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\modal-panel\jspanel.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\modal-panel\jspanel.modal.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\modal-panel\jspanel.modal.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\modal-panel\pop.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\popper\popper.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\popper\popper.js.map">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\popper\popper.min.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\popper\popper.min.js.map">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\popper\tooltip.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\lib\popper\tooltip.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WConnContent\DiskPartial.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WConnContent\DiskPartial.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Views\Button\Index.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\Home\About.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\Home\Contact.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\Tabs2\Index.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\Tabs3\Index.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\Tabs\Index.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\ValidateForm\Index.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WBorrowAuditing\AuditsAll.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WBorrowAuditing\CheckingIn.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WBorrowAuditing\Epplication.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WConditionSearch\Index.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WConditionSearch\PrimSearch.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WConditionSearch\SuperSearch.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WConfigCodeHlp\AddBaseCode.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WConfigCodeHlp\AddSubCode.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WConfigCodeHlp\Index.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WConfigCodeHlp\ModiBaseCode.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WConfigCodeHlp\ModiSubCode.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WConnContent\DiskPartial.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WConnContent\Index.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WConnContent\PickFilePath.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WDataDict\AddPubDict.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WDataDict\Index.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WDataDict\UpdatePubDict.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WFullContSearch\DiskPartial.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WFullContSearch\FileNotExist.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WFullContSearch\Index.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WFullContSearch\IndexCreationConf.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WFullContSearch\PickFilePath.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WLogin\Index.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WLookUpSvc\AuditsAll.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WLookUpSvc\ElecContentSearch.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WLookUpSvc\ElecContentSearchB.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WLookUpSvc\FetchPhotoFrmCam.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WLookUpSvc\FetchPhotoFrmImage.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WLookUpSvc\FileOutOprtn.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WLookUpSvc\FileOutOprtnB.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WLookUpSvc\GiveThemBack.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WLookUpSvc\HintExpired.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WLookUpSvc\Index.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WLookUpSvc\PickTable.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WLookUpSvc\PrimSearch.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WLookUpSvc\PrintSheet.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WLookUpSvc\PrintSheetB.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WLookUpSvc\ProlongDays.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WLookUpSvc\RegistRqsterBInfo.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WLookUpSvc\RegistRqsterInfo.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WLookUpSvc\ReturnBack.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WLookUpSvc\RqstSeasrch.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WLookUpSvc\StcPrv.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WLookUpSvc\SuperSearch.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WLookUpSvc\ViewCartWin.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WMenuMng\AddNavMenu.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WMenuMng\Index.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WMenuMng\ModiNavMenu.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WMenuMng\SelectRole.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WOperateRecs\Index.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WOperateRecs\OperationRecDetail.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WPreArchive\Index.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WPreArchive\YearField.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WStatisticsType\Index.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WStatisticsType\StatisticGear.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WStatisticsType\StatisticPreview.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WStatistics\AddStcTemplate.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WStatistics\CountStatistics.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WStatistics\GroupFields.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WStatistics\SearchCondition.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WStatistics\SpecificTemplates.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WStatistics\StatisticFields.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WStatistics\StatisticPreview.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WStatistics\StcTemplate.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\WVirStock\ShowFrmData.cshtml" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\diskdata\diskconf1.json" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\firstPageJs.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\jquery.mobile.custom.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\modalwindow.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\Multi-Column-Select.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\site.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-datetimepicker\bootstrap-datepicker.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-datetimepicker\bootstrap-datepicker.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-datetimepicker\bootstrap-datepicker.min.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-datetimepicker\bootstrap-datepicker.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-datetimepicker\bootstrap-datepicker.zh-CN.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-datetimepicker\bootstrap-datetimepicker.min.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-datetimepicker\bootstrap-datetimepicker.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-datetimepicker\bootstrap-datetimepicker.zh-CN.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-fileinput\css\fileinput.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-fileinput\css\fileinput.min.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-fileinput\img\loading-sm.gif" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-fileinput\img\loading.gif" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-fileinput\js\fileinput-utf8.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-fileinput\js\fileinput-utf8.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-fileinput\js\fileinput-zh.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-fileinput\js\fileinput.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-fileinput\js\fileinput.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\icheck.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\icheck.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\all.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\aero.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\aero.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\aero@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\blue.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\blue.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\blue@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\flat.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\flat.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\flat@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\green.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\green.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\green@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\grey.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\grey.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\grey@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\orange.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\orange.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\orange@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\pink.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\pink.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\pink@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\purple.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\purple.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\purple@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\red.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\red.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\red@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\yellow.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\yellow.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\yellow@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\flat\_all.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\futurico\futurico.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\futurico\futurico.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\futurico\futurico@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\line\aero.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\line\blue.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\line\green.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\line\grey.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\line\line.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\line\line.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\line\line@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\line\orange.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\line\pink.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\line\purple.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\line\red.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\line\yellow.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\line\_all.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\aero.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\aero.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\aero@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\blue.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\blue.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\blue@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\green.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\green.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\green@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\grey.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\grey.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\grey@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\minimal.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\minimal.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\minimal@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\orange.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\orange.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\orange@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\pink.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\pink.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\pink@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\purple.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\purple.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\purple@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\red.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\red.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\red@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\yellow.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\yellow.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\yellow@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\minimal\_all.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\polaris\polaris.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\polaris\polaris.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\polaris\polaris@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\aero.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\aero.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\aero@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\blue.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\blue.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\blue@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\green.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\green.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\green@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\grey.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\grey.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\grey@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\orange.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\orange.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\orange@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\pink.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\pink.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\pink@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\purple.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\purple.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\purple@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\red.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\red.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\red@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\square.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\square.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\square@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\yellow.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\yellow.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\yellow@2x.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-icheck\skins\square\_all.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\css\bootstrap-table-reorder-rows.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\css\bootstrap-table-reorder-rows.min.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\css\bootstrap-table.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\css\bootstrap-table.min.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\css\jquery.treegrid.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\extension\bootstrap-table-export.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\extension\FileSaver.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\extension\jspdf.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\extension\jspdf.plugin.autotable.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\extension\tableExport.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\extension\xlsx.core.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\img\collapse.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\img\expand.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\img\file.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\img\folder.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\js\bootstrap-table-reorder-columns.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\js\bootstrap-table-reorder-columns.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\js\bootstrap-table-reorder-rows.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\js\bootstrap-table-reorder-rows.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\js\bootstrap-table-treegrid.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\js\bootstrap-table-treegrid.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\js\bootstrap-table-zh-CN.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\js\bootstrap-table-zh-CN.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\js\bootstrap-table.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\js\bootstrap-table.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\js\jquery.tablednd.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\js\jquery.tablednd.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\js\jquery.treegrid.bootstrap3.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\js\jquery.treegrid.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\bootstrap-table\js\jquery.treegrid.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\font-awesome\css\font-awesome.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\font-awesome\css\font-awesome.min.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\font-awesome\fonts\fontawesome-webfont.eot" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\font-awesome\fonts\fontawesome-webfont.svg" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\font-awesome\fonts\fontawesome-webfont.ttf" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\font-awesome\fonts\fontawesome-webfont.woff" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\font-awesome\fonts\fontawesome-webfont.woff2" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\font-awesome\fonts\FontAwesome.otf" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery_webcam\jquery.webcam.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery_webcam\jquery.webcam.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery_webcam\jscam.swf" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery_webcam\jscam_canvas_only.swf" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery_webcam\src\BitString.as" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery_webcam\src\JPGEncoder.as" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery_webcam\src\jscam.as" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\jquery_webcam\src\jscam.xml" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\awesomeStyle\awesome.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\awesomeStyle\awesome.less" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\awesomeStyle\fa.less" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\awesomeStyle\img\loading.gif" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\metroStyle\img\line_conn.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\metroStyle\img\loading.gif" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\metroStyle\img\metro.gif" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\metroStyle\img\metro.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\metroStyle\metroStyle.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\zTreeStyle\img\diy\1_close.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\zTreeStyle\img\diy\1_open.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\zTreeStyle\img\diy\2.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\zTreeStyle\img\diy\3.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\zTreeStyle\img\diy\4.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\zTreeStyle\img\diy\5.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\zTreeStyle\img\diy\6.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\zTreeStyle\img\diy\7.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\zTreeStyle\img\diy\8.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\zTreeStyle\img\diy\9.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\zTreeStyle\img\left_menuForOutLook.gif" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\zTreeStyle\img\left_menuForOutLook.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\zTreeStyle\img\line_conn.gif" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\zTreeStyle\img\loading.gif" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\zTreeStyle\img\zTreeStandard.gif" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\zTreeStyle\img\zTreeStandard.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\css\zTreeStyle\zTreeStyle.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\script\jquery.ztree.all.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\script\jquery.ztree.all.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\script\jquery.ztree.core.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\script\jquery.ztree.core.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\script\jquery.ztree.excheck.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\script\jquery.ztree.exedit.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\script\jquery.ztree.exhide.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\outlook-treeview\script\jquery.ztree.exhide.min.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\tab-control\CSS\hTabStyle.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\tab-control\CSS\hTabStyle2.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\tab-control\CSS\hTabStyle3.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\tab-control\CSS\hTabStyle4.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\tab-control\CSS\hTabStyle5.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\tab-control\CSS\hTabStyle6.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\tab-control\hTabControl.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\tab-control\hTabControl2.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\tab-control\hTabControl3.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\tab-control\hTabControl4.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\tab-control\hTabControl5.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\tab-control\hTabControl6.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\tab-control\Html-Elements-Resize.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WConnContent\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WConnContent\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WConnContent\PickFilePath.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WConnContent\PickFilePath.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WConditionSearch\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WConditionSearch\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WConditionSearch\PrimSearch.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WConditionSearch\PrimSearch.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WConditionSearch\SuperSearch.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WConditionSearch\SuperSearch.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WMenuMng\AddNavMenu.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WMenuMng\AddNavMenu.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WMenuMng\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WMenuMng\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WMenuMng\ModiNavMenu.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WMenuMng\ModiNavMenu.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WMenuMng\SelectRole.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WMenuMng\SelectRole.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WDataDict\AddPubDict.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WDataDict\AddPubDict.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WDataDict\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WDataDict\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WDataDict\UpdatePubDict.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WDataDict\UpdatePubDict.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\ValidateForm\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\ValidateForm\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WPreArchive\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WPreArchive\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WPreArchive\YearField.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WPreArchive\YearField.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WLookUpSvc\AuditsAll.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WLookUpSvc\AuditsAll.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WLookUpSvc\ElecContentSearch.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WLookUpSvc\ElecContentSearch.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WLookUpSvc\ElecContentSearchB.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WLookUpSvc\ElecContentSearchB.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WLookUpSvc\FetchPhotoFrmCam.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WLookUpSvc\FetchPhotoFrmCam.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WLookUpSvc\FetchPhotoFrmImage.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WLookUpSvc\FetchPhotoFrmImage.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WLookUpSvc\FileOutOprtn.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WLookUpSvc\FileOutOprtn.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WLookUpSvc\FileOutOprtnB.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WLookUpSvc\FileOutOprtnB.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WLookUpSvc\GiveThemBack.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WLookUpSvc\GiveThemBack.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WLookUpSvc\HintExpired.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WLookUpSvc\HintExpired.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WLookUpSvc\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WLookUpSvc\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WLookUpSvc\PickTable.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WLookUpSvc\PickTable.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WLookUpSvc\PrimSearch.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WLookUpSvc\PrimSearch.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WLookUpSvc\PrintSheet.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WLookUpSvc\PrintSheet.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WLookUpSvc\PrintSheetB.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WLookUpSvc\PrintSheetB.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WLookUpSvc\ProlongDays.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WLookUpSvc\ProlongDays.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WLookUpSvc\RegistRqsterBInfo.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WLookUpSvc\RegistRqsterBInfo.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WLookUpSvc\RegistRqsterInfo.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WLookUpSvc\RegistRqsterInfo.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WLookUpSvc\ReturnBack.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WLookUpSvc\ReturnBack.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WLookUpSvc\RqstSeasrch.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WLookUpSvc\RqstSeasrch.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WLookUpSvc\StcPrv.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WLookUpSvc\StcPrv.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WLookUpSvc\SuperSearch.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WLookUpSvc\SuperSearch.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WLookUpSvc\ViewCartWin.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WLookUpSvc\ViewCartWin.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WStatistics\AddStcTemplate.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WStatistics\AddStcTemplate.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WStatistics\CountStatistics.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WStatistics\CountStatistics.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WStatistics\GroupFields.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WStatistics\GroupFields.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WStatistics\SearchCondition.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WStatistics\SearchCondition.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WStatistics\SpecificTemplates.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WStatistics\SpecificTemplates.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WStatistics\StatisticFields.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WStatistics\StatisticFields.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WStatistics\StatisticPreview.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WStatistics\StatisticPreview.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WStatistics\StcTemplate.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WStatistics\StcTemplate.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WStatisticsType\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WStatisticsType\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WStatisticsType\StatisticGear.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WStatisticsType\StatisticGear.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WStatisticsType\StatisticPreview.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WStatisticsType\StatisticPreview.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WOperateRecs\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WOperateRecs\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WOperateRecs\OperationRecDetail.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WOperateRecs\OperationRecDetail.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\Tabs2\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\Tabs2\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\Tabs3\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\Tabs3\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WFullContSearch\DiskPartial.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WFullContSearch\DiskPartial.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WFullContSearch\FileNotExist.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WFullContSearch\FileNotExist.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WFullContSearch\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WFullContSearch\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WFullContSearch\IndexCreationConf.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WFullContSearch\IndexCreationConf.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WFullContSearch\PickFilePath.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WFullContSearch\PickFilePath.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WLogin\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WLogin\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WVirStock\ShowFrmData.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WVirStock\ShowFrmData.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\Button\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\Button\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WBorrowAuditing\AuditsAll.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WBorrowAuditing\AuditsAll.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WBorrowAuditing\CheckingIn.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WBorrowAuditing\CheckingIn.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WBorrowAuditing\Epplication.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WBorrowAuditing\Epplication.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WConfigCodeHlp\AddBaseCode.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WConfigCodeHlp\AddBaseCode.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WConfigCodeHlp\AddSubCode.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WConfigCodeHlp\AddSubCode.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WConfigCodeHlp\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WConfigCodeHlp\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WConfigCodeHlp\ModiBaseCode.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WConfigCodeHlp\ModiBaseCode.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\WConfigCodeHlp\ModiSubCode.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\WConfigCodeHlp\ModiSubCode.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\Tabs\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\Tabs\Index.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\Home\About.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\Home\About.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="Views\Home\Contact.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\Home\Contact.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\lib\jquery-image-viewer\viewer.js" />
+    <None Include="wwwroot\lib\jquery-image-viewer\viewer.min.js" />
+    <None Include="wwwroot\lib\jquery-tooltip\tipso.js" />
+    <None Include="wwwroot\lib\jquery-tooltip\tipso.min.js" />
+  </ItemGroup>
+
+</Project>

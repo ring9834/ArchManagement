@@ -1,0 +1,262 @@
+﻿
+@{
+    ViewData["Title"] = "档案利用登记";
+}
+
+
+@section head {
+
+}
+
+@section body {
+    <style>
+        .userTable {
+            width: 100%;
+        }
+
+            .userTable td {
+                padding: 5px 0 12px 0;
+            }
+
+            .userTable select,
+            .userTable input {
+                --width: 420px;
+                margin-right: 5px;
+            }
+    </style>
+    <div class="container-fluid">
+        <div class="panel panel-info" style="margin-top:10px;">
+            <div class="panel-heading">
+                <h3 class="panel-title">查档利用登记</h3>
+            </div>
+            <div class="panel-body">
+                <table class="userTable">
+                    <tr>
+                        <td class="col-md-1">
+                            <label for="userName" class="control-label">姓名</label>
+                        </td>
+                        <td class="col-md-5">
+                            <input type="text" id="userName" class="form-control" placeholder="*必填项*" />
+                        </td>
+                        <td rowspan="7" class="col-md-6">
+                            <div class="panel panel-default" style="margin-left:10px;">
+                                <div class="panel-body">
+                                    <img id="webcam" style="margin:10px;width:320px; height:240px;" /><br />
+                                    <div class="btn-group" style="margin-left:35px;">
+                                        <button type="button" class="btn btn-default" onclick="captureFromCam();">拍照取头像</button>
+                                        <button type="button" class="btn btn-default" onclick="captureFromImg();">照片选取</button>
+                                        <button type="button" class="btn btn-default">身份证读取</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="certifType" class="control-label">证件类型</label>
+                        </td>
+                        <td>
+                            <select class="form-control" id="certifType"></select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="certifNo" class="control-label">证件号码</label>
+                        </td>
+                        <td>
+                            <input type="text" id="certifNo" class="form-control" placeholder="*必填项*" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="workplace" class="control-label">就职（学）单位</label>
+                        </td>
+                        <td>
+                            <input type="text" id="workplace" class="form-control" placeholder="选填项" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="address" class="control-label">联系地址</label>
+                        </td>
+                        <td>
+                            <input type="text" id="address" class="form-control" placeholder="选填项" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="telephone" class="control-label">联系电话</label>
+                        </td>
+                        <td>
+                            <input type="text" id="telephone" class="form-control" placeholder="*必填项*" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="lookUpAim" class="control-label">查档目的</label>
+                        </td>
+                        <td>
+                            <select class="form-control" id="lookUpAim"></select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="lookUpContent" class="control-label">查档内容</label>
+                        </td>
+                        <td colspan="2">
+                            <textarea type="text" id="lookUpContent" class="form-control" cols="4" placeholder="*必填项*"></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>
+                            <button class="btn btn-warning" onclick="saveUserInfo();"><i class="fa fa-save"></i> 保存</button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            InitiateSelects();
+        });
+
+        var captureFromCam = function () {
+            var content = "<iframe id='camFrame' src='/WLookUpSvc/CamCaptureView' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwin(content, 740, 380, '摄像头拍照取查档者头像');
+        }
+
+        var captureFromImg = function () {
+            var content = "<iframe id='imgFrame' src='/WLookUpSvc/ImgCaptureView' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwin(content, 1000, 620, '裁剪本地图片取查档者头像');
+        }
+
+        var closeCamFrame = function () {
+            pop.close('deal-win');
+        }
+
+        function InitiateSelects() {
+            $.ajax({
+                type: 'post',
+                url: '/WLookUpSvc/GetCertiTypes',
+                dataType: "json",
+                @*data: {id:'@ViewData["table"]'},*@
+                success: function (data) {
+                    var select = $('#certifType');
+                    select.append("<option value='-1'>--请选择--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                        select.append("<option value='" + data[i].code_value + "'>" + data[i].code_name + "</option>");
+                    }
+                }
+            });
+
+            $.ajax({
+                type: 'post',
+                url: '/WLookUpSvc/GetReqstAimTypes',
+                dataType: "json",
+                @*data: {id:'@ViewData["table"]'},*@
+                success: function (data) {
+                    var select = $('#lookUpAim');
+                    select.append("<option value='-1'>--请选择--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                        select.append("<option value='" + data[i].code_value + "'>" + data[i].code_name + "</option>");
+                    }
+                    $("#h_loading_mask").css("display", "none");
+                    $("#h_loading").css("display", "none");
+                }
+            });
+        }
+
+        var saveUserInfo = function () {
+            var r = validateBeforeSummit();
+            if (r == 0) {//验证有误则返回
+                return;
+            }
+
+            var userName = $("#userName").val();
+            var certifType = $("#certifType").find("option:selected").text();//select
+            var certifNo = $("#certifNo").val();
+            var workplace = $("#workplace").val();
+            var address = $("#address").val();
+            var telephone = $("#telephone").val();
+            var lookUpAim = $("#lookUpAim").find("option:selected").text();//select
+            var lookUpContent = $("#lookUpContent").val();
+            var userid = '@ViewData["userid"]';
+
+            $.ajax({
+                type: 'POST',
+                url: "/WLookUpSvc/AddRequesterInfo",
+                data: { userName: userName, certifType: certifType, certifNo: certifNo, workplace: workplace, address: address, telephone: telephone, lookUpAim: lookUpAim, lookUpContent: lookUpContent,userid:userid},
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        window.parent.popHintWin("登记成功！");
+                        window.parent.closeUserRegFrame();
+                        window.parent.updateTable();
+                    }
+                }
+            });
+        }
+
+        var validateBeforeSummit = function () {
+            if ($("#userName").val() == '') {
+                HM.alertWin("姓名不能为空！");
+                return 0;
+            }
+            if ($("#certifType").val() == '-1') {
+                HM.alertWin("需要选择证件类型后继续！");
+                return 0;
+            }
+            if ($("#certifNo").val() == '') {
+                HM.alertWin("证件号码不能为空！");
+                return 0;
+            }
+
+            var certifType = $("#certifType").find("option:selected").text();//select
+            if (certifType.indexOf('身份证') > -1) {
+                var flag = isCardNo($("#certifNo").val());
+                if (!flag) {
+                    HM.alertWin("身份证号码不正确！");
+                    return 0;
+                }
+            }
+
+            if ($("#telephone").val() == '') {
+                HM.alertWin("联系电话不能为空！");
+                return 0;
+            }
+            if ($("#lookUpAim").val() == '-1') {
+                HM.alertWin("需要选择查档目的后继续！"); 
+                return 0;
+            }
+            if ($("#lookUpContent").val() == '' || $.trim($("#lookUpContent").val()) == '') {//added on 20201119
+                HM.alertWin("查档内容不能为空！"); 
+                return 0;
+            }
+        }
+
+        // 验证手机号
+        function isPhoneNo(phone) { 
+         var pattern = /^1[34578]\d{9}$/; 
+         return pattern.test(phone); 
+        }
+ 
+        // 验证身份证 
+        function isCardNo(card) { 
+         var pattern = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/; 
+         return pattern.test(card); 
+        }  
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/jquery_webcam/jquery.webcam.min.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

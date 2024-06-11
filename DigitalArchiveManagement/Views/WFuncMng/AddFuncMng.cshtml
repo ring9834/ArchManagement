@@ -1,0 +1,129 @@
+﻿
+@{
+    ViewData["Title"] = "增添页面功能的权限功能点";
+}
+@section head {
+    <link href="~/lib/jquery-radiocheck/jquery-labelauty.css" rel="stylesheet" />
+}
+
+@section body {
+    <style>
+        input.labelauty + label {
+            font: 12px "Microsoft Yahei";
+        }
+    </style>
+    <div class="container-fluid">
+        <div class="row" style="padding: 5px">
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6">
+                <div class="input-group">
+                    <span class="input-group-addon">节点类型</span>
+                    <ul style="margin:0;list-style-type:none;">
+                        <li style="margin-top:8px;display:inline-block;"><input type="radio" name="funcNodeRadio" data-labelauty="同级节点" value="0"></li>
+                        <li style="margin-top:8px;display:inline-block;"><input type="radio" name="funcNodeRadio" data-labelauty="下级节点" value="1"></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-lg-6">
+                <div class="input-group">
+                    <span class="input-group-addon">功能点名称</span>
+                    <input class="form-control" type="text" id="funcName" placeholder="如，原文查看，信息修改、删除等（*必填）">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-lg-6">
+                <div class="input-group">
+                    <span class="input-group-addon">功能点标识</span>
+                    <input class="form-control" type="text" id="funcSymble" placeholder="用于与前台实际的功能点挂钩，以控制权限（*必填）">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6" style="margin-bottom:2px;text-align:center;">
+                <input type="button" class="btn btn-success" id="okbutton" onclick="addFuncInfo();" value="确定" />
+                <input type="button" class="btn btn-danger" onclick="resetInfo();" value="重置" />
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var param;//通过iframe父窗体的$("#mainfrm")[0].contentWindow.param = 传参到子页面来
+
+        $(function () {
+            $(':input').labelauty();//初始化按钮样式的radio
+            $("#h_loading_mask").css("display", "none");
+            $("#h_loading").css("display", "none");
+        });
+
+        var validateBeforeSummit = function () {
+
+            var isCheck = $('input[type=radio][name=funcNodeRadio]:checked').val();
+            if (isCheck == undefined || isCheck == null) {
+                HM.alertWin("请选择“节点类型”，为同级节点或下级节点！");
+                return 0;
+            }
+            if (param.pid == 0 && isCheck == '0') {
+                HM.alertWin("根节点下只能添加儿子节点，不能添加同级节点！");
+                return 0;
+            }
+            if ($.trim($("#funcName").val()) == '') {
+                HM.alertWin("功能点名称不能为空！");
+                return 0;
+            }
+            if ($.trim($("#funcSymble").val()) == '') {
+                HM.alertWin("功能点标识不能为空！");
+                return 0;
+            }
+        }
+
+        var addFuncInfo = function () { 
+            var r = validateBeforeSummit();
+            if (r == 0) {//验证有误则返回
+                return;
+            }
+            var name = $("#funcName").val();
+            var symble = $("#funcSymble").val();
+            var node_type = $('input[type=radio][name=funcNodeRadio]:checked').val();
+            var parentid = 0;
+            if (node_type == '0') {
+                parentid = param.pid;
+            }else if (node_type == '1') {
+                parentid = param.id;
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: "/WFuncMng/AddFuncPoint",
+                data: { name: name, symble: symble, parentid: parentid},
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst == '1') {
+                        parent.closeDealWin('addfuncFrm');
+                        parent.refreshTable();
+                        parent.hintWin("功能点信息添加成功！");
+                        return;
+                    }
+                    else if (data.rst == '-2') {//记录已存在，无法插入重复记录  
+                        parent.closeDealWin('addfuncFrm');
+                        parent.hintAddedAlready();
+                    }
+                }
+            });
+        }
+
+        var resetInfo = function () {
+            $("#funcName").val('');
+            $("#funcSymble").val('');
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/jquery-radiocheck/jquery-labelauty.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

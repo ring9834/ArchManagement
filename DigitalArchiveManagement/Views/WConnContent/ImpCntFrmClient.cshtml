@@ -1,0 +1,126 @@
+﻿
+@{
+    ViewData["Title"] = "目录接收";
+}
+
+@section head {
+    <link href="~/lib/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="alert alert-warning" style="margin-top:8px;font-size:13px;">
+            <i class="fa fa-volume-up"></i><strong> 提醒!</strong> 1、支持多文件，支持PDF（建议）、JPG、PNG、TIFF格式；2、如果原文非PDF格式，则JPG、PNG、TIFF格式的文件名须以档号命名；3、如果原文所占空间较大（超过500M），可能会上传失败；4、如果非本档案库对应的原文，请不要上传（上传时会有提示）。
+        </div>
+        <div class="panel panel-info" style="margin-top:5px;">
+            <div class="panel-heading">
+                <h3 class="panel-title">档案电子原文上传</h3>
+            </div>
+            <div class="panel-body">
+                <input type="file" name="cont_file" id="cont_file" class="file-loading" accept=".pdf,.tiff,.jpg,.jpeg,.png" data-min-file-count="1" multiple />
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var CommonParam;//从首页传过来的参数，所有tab页均用
+
+        $(function () {
+            verifyYwPresentable();
+            initiatePage();
+        });
+
+        var initiatePage = function () {
+            var control = $("#cont_file");
+            var uploadrul = "/WConnContent/RecCtnFrmClient/"+'@ViewData["table"]' + "/" + '@ViewData["userid"]';
+            control.fileinput({
+                language: 'zh', //设置语言
+                uploadUrl: uploadrul, //上传的地址
+                allowedFileExtensions: ['pdf', 'jpg','tiff','png'],//接收的文件后缀
+                showUpload: true, //显示批量上传按钮
+                showCaption: false,//是否显示标题
+                browseClass: "btn btn-info", //按钮样式
+                dropZoneEnabled: true,//是否显示拖拽区域
+                uploadAsync: false,//为false时，filebatchuploadsuccess才起作用 而fileuploaded不起作用；true时，正好相反； added on 20201222
+                //minImageWidth: 50, //图片的最小宽度
+                //minImageHeight: 50,//图片的最小高度
+                //maxImageWidth: 100,//图片的最大宽度
+                //maxImageHeight: 100,//图片的最大高度
+                maxFileSize: 0,//单位为kb，如果为0表示不限制文件大小 524288000 500M
+                //minFileCount: 0,
+                maxFileCount: 20,
+                enctype: 'multipart/form-data',
+                validateInitialCount: true,
+                showPreview: true, //是否显示预览
+                previewFileIcon: "<i class='fa fa-file-pdf-o' style='color:darkred;'></i>",
+                layoutTemplates: {
+                    //actionDelete: '', //去除上传预览的缩略图中的删除图标
+                    //actionUpload: '',//去除上传预览缩略图中的上传图片；
+                    actionZoom: ''   //去除上传预览缩略图中的查看详情预览的缩略图标。
+                },
+
+                msgFilesTooMany: "选择上传的文件数量({n}) 超过允许的最大数值{m}！",
+                uploadExtraData: function (previewId, index) {//传送额外参数
+                    //return {'rpath': filePath};
+                },
+            }).on('filebatchuploadsuccess', function (event, data, previewId, index) {//uploadAsync：false执行下面{ }的代码 同步
+                if (data.response) {
+                    var rsp = data.response;
+                    if (rsp.rst == 0) {
+                        HM.alertWinCallBack(rsp.info,closeParentWin);
+                        return;
+                    }
+                    if (rsp.rst == 1) {
+                        HM.hintWin(rsp.info);
+                    }
+                }
+            });
+
+            $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+            $("#h_loading").css("display", "none");
+        }
+
+        var connectCnts = function (p) {
+            $.ajax({
+                type: 'POST',
+                url: "/WConnContent/ConntContentsFrmClient",
+                data: { paths: p },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin('原文上传并挂接成功！');
+                    }
+                }
+            });
+        }
+
+        var verifyYwPresentable = function () {
+            $.ajax({
+                type: 'POST',
+                url: "/WConnContent/IfYwRootExist",
+                data: { table:  '@ViewData["table"]'},
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst == 0) {
+                        HM.alertWinCallBack(data.info,closeParentWin);
+                        return;
+                    }
+                }
+            });
+        }
+
+        var closeParentWin = function () {
+             parent.closeDealWin('clientRecCtnFrm');
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-fileinput/js/fileinput.min.js"></script>
+    <script src="~/lib/bootstrap-fileinput/js/fileinput-zh.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

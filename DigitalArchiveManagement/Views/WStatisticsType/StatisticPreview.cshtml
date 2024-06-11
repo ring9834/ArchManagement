@@ -1,0 +1,190 @@
+﻿
+@{
+    ViewData["Title"] = "馆藏数量统计效果预览";
+}
+
+@section head {
+    <script src="~/lib/echart/echarts.min.js"></script>
+    <link href="~/css/arch-button.css" rel="stylesheet" />
+}
+
+@section body {
+    <style>
+        .stadiv {
+            height: 150px;
+            float: left;
+            background-color: white;
+            margin: 8px;
+            padding: 8px 0 8px 0;
+            box-shadow: 0 0 5px lightgray;
+            -moz-box-shadow: 0 0 5px lightgray;
+            -webkit-box-shadow: 0 0 5px lightgray;
+        }
+
+        .stasubdiv {
+            position: relative;
+            top: 50%; /*偏移*/
+            height: 30px;
+            margin-top: -15px;
+            font-size: 25px;
+        }
+    </style>
+    <div style="height:100%;width:100%;">
+        <div style="padding:5px;">
+            <button class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="prvExsting();"><i class="fa fa-refresh"></i> 预览现有数据</button>
+            <button class="btn btn-archbutton" style="border-color:#99D1FF;" onclick="prvAfterUpdate();"><i class="fa fa-repeat"></i> 更新数据后预览</button>
+        </div>
+        <div style="padding:5px 5px 0 5px;">
+            <div class="panel panel-info" style="margin-bottom:0;">
+                <div class="panel-heading">
+                    <h3 class="panel-title">预览结果</h3>
+                </div>
+                <div id="scontainer" class="panel-body">
+                    <div id="mainChart" style="height:400px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        $(function () {
+            $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+            $("#h_loading").css("display", "none");
+        });
+
+        function showChart() {
+            // 基于准备好的dom，初始化echarts实例
+            var myChart = echarts.init(document.getElementById('mainChart'));
+
+            // 指定图表的配置项和数据
+            var option = {
+                title: {
+                    text: 'ECharts示例'
+                },
+                tooltip: {},
+                legend: {
+                    data: ["文书类", "学籍类"]
+                },
+                xAxis: {
+                    data: ["1979", "1980", "1981", "1982", "1983", "1984", "1985", "1986", "1987", "1988", "1989", "1990", "1991", "1992", "1993", "1994", "1995", "1996", "1997", "1998", "2000", "2001", "2002", "2004", "2005", "2019"]
+                },
+                yAxis: {},
+                textStyle: {
+                    color: 'red'
+                },
+                series: [
+                    { name: "文书类", type: "bar", color: "#f00000", data: [2, 60, 20, 4, 2, 28, 8, 4, 4, 74, 128, 116, 62, 44, 64, 40, 26, 54, 72, 40, 14, 2, 8, 2, 10, 3] },
+                    { name: "学籍类", type: "bar", color: "#310000", data: [2, 60, 20, 4, 2, 28, 8, 4, 4, 74, 128, 116, 62, 44, 64, 40, 26, 54, 72, 40, 14, 2, 8, 2, 10, 3] }
+                ]
+            };
+
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
+        }
+
+        function prvExsting() {
+            //showChart(); return;
+            HM.pageLoading();
+            var myChart = echarts.init(document.getElementById('mainChart'));
+            $.ajax({
+                type: 'post',
+                url: '/WStatisticsType/GetAmountStatiscInfo',
+                dataType: "json",
+                success: function (data) {
+                    var serieStr = '[';
+                    for (var i = 0; i < data.legends.length; i++) {//拼凑成series，字符串形式
+                        if (i == 0) {
+                            serieStr += '{name:"' + data.legends[i] + '",type:"bar",color:"' + color16() + '",data:[' + data.series[i] + ']}';
+                        }
+                        else {
+                            serieStr += ',{name:"' + data.legends[i] + '",type:"bar",color:"' + color16() + '",data:[' + data.series[i] + ']}';
+                        }
+                    }
+                    serieStr += ']';
+
+                    var option = {
+                        title: {
+                            text: '类型统计预览'
+                        },
+                        tooltip: {},
+                        legend: {
+                            data: data.legends
+                        },
+                        xAxis: {
+                            data: data.years
+                        },
+                        yAxis: {},
+                        textStyle: {
+                            color: 'red'
+                        },
+                        series: eval('(' + serieStr + ')') // JSON字符串转JSON对象
+                    };
+                    myChart.setOption(option);//画统计图
+                    HM.closePageLoading();
+                }
+            });
+        }
+
+        function prvAfterUpdate() {
+            HM.pageLoading();
+            var myChart = echarts.init(document.getElementById('mainChart'));
+            $.ajax({
+                type: 'post',
+                url: '/WStatisticsType/GetAmountStatiscInfo2',
+                dataType: "json",
+                success: function (data) {
+                    var serieStr = '[';
+                    for (var i = 0; i < data.legends.length; i++) {//拼凑成series，字符串形式
+                        if (i == 0) {
+                            serieStr += '{name:"' + data.legends[i] + '",type:"bar",color:"' + color16() + '",data:[' + data.series[i] + ']}';
+                        }
+                        else {
+                            serieStr += ',{name:"' + data.legends[i] + '",type:"bar",color:"' + color16() + '",data:[' + data.series[i] + ']}';
+                        }
+                    }
+                    serieStr += ']';
+
+                    var option = {
+                        title: {
+                            text: '类型统计预览'
+                        },
+                        tooltip: {},
+                        legend: {
+                            data: data.legends
+                        },
+                        xAxis: {
+                            data: data.years
+                        },
+                        yAxis: {},
+                        textStyle: {
+                            color: 'red'
+                        },
+                        series: eval('(' + serieStr + ')') // JSON字符串转JSON对象
+                    };
+                    myChart.setOption(option);//画统计图
+                    HM.closePageLoading();
+                }
+            });
+        }
+
+        //十六进制颜色随机
+        function color16() {
+            var r = Math.floor(Math.random() * 256);
+            var g = Math.floor(Math.random() * 256);
+            var b = Math.floor(Math.random() * 256);
+            var color = '#' + r.toString(16) + g.toString(16) + b.toString(16);
+            return color;
+        }
+
+    </script>
+}
+
+@section script {
+
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

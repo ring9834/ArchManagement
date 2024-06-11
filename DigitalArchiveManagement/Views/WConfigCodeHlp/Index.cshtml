@@ -1,0 +1,281 @@
+﻿
+@{
+    ViewData["Title"] = "辅助编码管理";
+}
+
+@section head {
+    <link href="~/lib/bootstrap-table/css/bootstrap-table.css" rel="stylesheet" />
+    <link href="~/css/arch-button.css" rel="stylesheet" />
+    <link href="~/css/table-checkbox.css" rel="stylesheet" />
+}
+
+@section body {
+    <div class="container-fluid">
+        <div class="alert alert-warning" style="margin:8px 0 0 0;font-size:13px;">
+            <i class="fa fa-volume-up"></i><strong> 提醒!</strong> 1、辅助编码由系统管理员设置，其他人员不可触碰；2、辅助编码，主要完成动态创建数字字典的功能，方便本管理系统使用。
+        </div>
+        <div id="codeToolbar">
+            <button type="button" class="btn btn-archbutton" onclick="addBaseCode();" style="border-color:#99D1FF;"><i class="fa fa-plus"></i>&nbsp;增加辅助代码基类</button>
+        </div>
+        <table id="baseCodeTable"></table>
+    </div>
+    <script type="text/javascript">
+        var $table;
+        $(function () {
+            loadBaseTable();
+        });
+
+        var loadBaseTable = function () {
+            $('#baseCodeTable').bootstrapTable('destroy');
+            $table = $('#baseCodeTable').bootstrapTable({
+                url: '/WConfigCodeHlp/GetCodebases',                      //请求后台的URL（*）
+                method: 'POST',                      //请求方式（*）
+                contentType: "application/x-www-form-urlencoded",
+                silent: true, //静态刷新
+                toolbar: '#codeToolbar',              //工具按钮用哪个容器
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                search: false,                      //是否显示表格搜索
+                //strictSearch: true,
+                showColumns: false,                  //是否显示所有的列（选择显示的列）
+                showRefresh: true,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                //clickToSelect: true,                //是否启用点击选中行
+                //height: 500,                      //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+                uniqueId: "unique_code",                     //每一行的唯一标识，一般为主键列
+                showToggle: false,                   //是否显示详细视图和列表视图的切换按钮
+                showExport: false,
+                cardView: false,                    //是否显示详细视图
+                detailView: true,                  //是否显示父子表
+                showLoading: false,
+                //singleSelect: true,                //true只能单选，false为多选
+                exportDataType: "selected",        //导出checkbox选中的行数
+                showFullscreen: true,
+                columns: [
+                    { field: 'base_name', title: '基类名' },
+                    { field: 'code_key', title: '基类值' },
+                    { field: 'comments', title: '说明' },
+                    { field: 'operate', title: '基类操作', align: 'center', width: '320px', events: operateEvents, formatter: 'operateFormatter' },
+                ],
+                formatLoadingMessage: function () {
+                    return "请稍等，正在加载中···";
+                },
+                onLoadSuccess: function (data) {
+                    //alert(JSON.stringify(data));
+                    $("#h_loading_mask").css("display", "none");//关闭页面加载指示器
+                    $("#h_loading").css("display", "none");
+                },
+                onPreBody: function () {
+                },
+                //注册加载子表的事件。注意三个参数！
+                onExpandRow: function (index, row, $detail) {
+                    loadSubTable(index, row, $detail);
+                }
+            });
+        }
+
+        var loadSubTable = function (index, row, $detail) {
+            var parentid = row.unique_code;
+            var cur_table = $detail.html('<table></table>').find('table');
+            //$(cur_table).bootstrapTable('destroy');
+            $(cur_table).bootstrapTable({
+                url: '/WConfigCodeHlp/GetCodes',                      //请求后台的URL（*）
+                method: 'POST',                      //请求方式（*）
+                contentType: "application/x-www-form-urlencoded",
+                queryParams: { baseCodeId: parentid },
+                //ajaxOptions: { baseCodeId: parentid },
+                silent: true, //静态刷新
+                striped: true,                      //是否显示行间隔色
+                cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+                search: false,                      //是否显示表格搜索
+                showColumns: false,                  //是否显示所有的列（选择显示的列）
+                showRefresh: false,                  //是否显示刷新按钮
+                minimumCountColumns: 2,             //最少允许的列数
+                uniqueId: "unique_code",                     //每一行的唯一标识，一般为主键列
+                showToggle: false,                   //是否显示详细视图和列表视图的切换按钮
+                showExport: false,
+                cardView: false,                    //是否显示详细视图
+                detailView: false,                  //是否显示父子表
+                showLoading: false,
+                showFullscreen: false,
+                columns: [
+                    { field: 'code_name', title: '子类名' },
+                    { field: 'code_value', title: '子类值' },
+                    { field: 'order_id', title: '排序' },
+                    { field: 'suboperate', title: '子类操作', align: 'center', width: '200px', events: operateEvents, formatter: 'subOperateFormatter' },
+                ],
+                formatLoadingMessage: function () {
+                    return "请稍等，正在加载中···";
+                },
+                onLoadSuccess: function (data) {
+                    //alert(JSON.stringify(data));
+                    $("#h_loading_mask").css("display", "none");//关闭页面加载指示器
+                    $("#h_loading").css("display", "none");
+                },
+                onPreBody: function () {
+                },
+                //注册加载子表的事件。注意三个参数！无限级嵌套
+                //onExpandRow: function (index, row, $detail) {
+                //    loadSubTable(index, row, $detail);
+                //}
+            });
+        }
+
+        // 格式化父表按钮
+        function operateFormatter(value, row, index) {
+            return [
+                '<button type="button" class="RoleOfedit btn btn-sm   btn-info" style="margin-right:15px;"><i class="fa fa-pencil-square-o" ></i>&nbsp;修改</button>',
+                '<button type="button" class="RoleOfdelete btn btn-sm   btn-info" style="margin-right:15px;"><i class="fa fa-trash-o" ></i>&nbsp;删除</button>',
+                '<button type="button" class="RoleOfadd btn btn-sm  btn-warning" style="margin-right:15px;"><i class="fa fa-plus" ></i>&nbsp;增加子类</button>'
+            ].join('');
+        }
+
+        // 格式化子表按钮
+        function subOperateFormatter(value, row, index) {
+            return [
+                '<button type="button" class="RoleOfSubEditCode btn btn-sm   btn-success" style="margin-right:15px;"><i class="fa fa-pencil-square-o" ></i>&nbsp;修改</button>',
+                '<button type="button" class="RoleOfSubDelCode btn btn-sm   btn-danger" style="margin-right:15px;"><i class="fa fa-trash-o" ></i>&nbsp;删除</button>'
+            ].join('');
+        }
+
+        //初始化操作按钮的方法
+        window.operateEvents = {
+            'click .RoleOfadd': function (e, value, row, index) {
+                addSubCode(row);
+            },
+            'click .RoleOfdelete': function (e, value, row, index) {
+                delBaseCode(row);
+            },
+            'click .RoleOfedit': function (e, value, row, index) {
+                updateBaseCode(row, index);
+            },
+            'click .RoleOfSubDelCode': function (e, value, row, index) {
+                delSubCode(row);
+            },
+            'click .RoleOfSubEditCode': function (e, value, row, index) {
+                updateSubCode(row, index);
+            }
+
+        };
+
+        function addBaseCode() {
+            var content = "<iframe id='baseCodeFrame' src='/WConfigCodeHlp/AddBaseCodeV' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 600, 300, '增添辅助代码基类信息窗口','addbaseFrm');
+        }
+
+        function addSubCode(row, index) {
+            var content = "<iframe id='subCodeFrame' src='/WConfigCodeHlp/AddSubCodeV/" + row.unique_code + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 600, 300, '增添辅助代码子类信息窗口','addsubFrm');
+        }
+
+        function updateBaseCode(row, index) {
+            var content = "<iframe id='baseCodeFrame' src='/WConfigCodeHlp/ModiBaseCodeV/" + row.unique_code + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 600, 300, '修改辅助代码基类信息窗口','modibaseFrm');
+        }
+
+        function updateSubCode(row, index) {
+            var content = "<iframe id='subCodeFrame' src='/WConfigCodeHlp/ModiSubCodeV/" + row.unique_code + "' style='border:0;width:100%;height:100%;'></iframe>";
+            HM.dealwinWithId(content, 600, 300, '修改辅助代码子类信息窗口','modisubFrm');
+        }
+
+        function delBaseCode(row) {
+            verifyIfHasChilds(row,
+                function () {
+                    HM.alertWin("此辅助代码基类下还有子类，不能被删除！");
+                },
+                function () {
+                    HM.confirmWin(row.unique_code, "此辅助代码基类信息将被删除！确定吗？", '确认删除', 'basecode', delSelectedBaseCode);
+                });
+        }
+
+        var refreshTable = function () {
+            $('#baseCodeTable').bootstrapTable("refresh");
+        }
+
+        var closeDealWin = function (winid) {
+            pop.close('deal-win-' + winid);
+        }
+
+        var hintAlready = function () { 
+            HM.alertWin('辅助代码基类信息（基类名或基类值）已存在，无法重复添加！');
+        }
+
+        var hintAlreadySub = function () { 
+            HM.alertWin('辅助代码子类信息（子类名或子类值）已存在，无法重复添加！');
+        }
+
+        var hintAlreadyMod = function () { 
+            HM.alertWin('辅助代码基类信息（基类名或基类值）已存在，无法修改！');
+        }
+
+        var hintAlreadySubMod = function () { 
+            HM.alertWin('辅助代码子类信息（子类名或子类值）已存在，无法修改！');
+        }
+
+        var hintWin = function (t) {
+            HM.hintWin(t);
+        }
+
+        function delSelectedBaseCode(id) {
+            $.ajax({
+                type: 'POST',
+                url: "/WConfigCodeHlp/DeleteBaseCode",
+                data: { baseCodeId: id },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin("删除基类信息删除成功！");
+                        pop.close('confirm-win_basecode');
+                        refreshTable();
+                    }
+                }
+            });
+        }
+
+        var delSubCode = function (row) {
+            HM.confirmWin(row.unique_code, "此辅助代码子类信息将被删除！确定吗？", '确认删除', 'subcode', delSelectedSubCode);
+        }
+
+        function delSelectedSubCode(id) {
+            $.ajax({
+                type: 'POST',
+                url: "/WConfigCodeHlp/DeleteSubCode",
+                data: { subCodeId: id },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin("删除子类信息删除成功！");
+                        pop.close('confirm-win_subcode');
+                        refreshTable();
+                    }
+                }
+            });
+        }
+
+        function verifyIfHasChilds(row, funNo, funcYes) {
+            $.ajax({
+                type: 'POST',
+                url: "/WConfigCodeHlp/GetCodes",
+                data: { baseCodeId: row.unique_code },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data.length > 0) {
+                        funNo();
+                    }
+                    else {
+                        funcYes();
+                    }
+                }
+            });
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+

@@ -1,0 +1,198 @@
+﻿
+@{
+    ViewData["Title"] = "数量统计";
+}
+
+
+@section head {
+    <link href="~/css/bootstrapWizard.css" rel="stylesheet" />
+    <link href="~/css/VerticalTabs.css" rel="stylesheet" />
+}
+
+@section body {
+    <div id="rootwizard">
+        <ul>
+            <li><a href="#tab1" data-toggle="tab"><span class="label">1</span> 配置搜索条件</a></li>
+            <li><a href="#tab2" data-toggle="tab"><span class="label">2</span> 选择被统计字段</a></li>
+            <li><a href="#tab3" data-toggle="tab"><span class="label">3</span> 设置分组字段</a></li>
+            <li><a href="#tab4" data-toggle="tab"><span class="label">4</span> 统计结果</a></li>
+            <li><a href="#tab5" data-toggle="tab"><span class="label">5</span> 保存统计模板</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane pane-height" id="tab1">
+                <div class="vertical-tab" role="tabpanel">
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabz" role="tablist">
+                        <li role="presentation" class="active" onclick="liclick(0);" id="lione">
+                            <a href="#Section1" aria-controls="home" role="tab" data-toggle="tab">
+                                <i class="fa fa-flag-checkered"></i> 统计模板列表
+                            </a>
+                        </li>
+                        <li role="presentation" onclick="liclick(1);" id="litwo">
+                            <a href="#Section2" aria-controls="profile" role="tab" data-toggle="tab">
+                                <i class="fa fa-flag-o"></i> 开始新的统计
+                            </a>
+                        </li>
+                    </ul>
+                    <!-- Tab panes -->
+                    <div class="tab-content tabs">
+                        <div role="tabpanel" class="tab-pane fade in active pane-height" id="Section1">
+                            <iframe id="specificTemplateFrm" src="/WStatistics/SpecificTemplatesView" style="border:0;height:100%;width:100%;"></iframe>
+                        </div>
+                        <div role="tabpanel" class="tab-pane fade pane-height" id="Section2">
+                            <iframe id="searchConditonFrm" style="border:0;height:100%;width:100%;"></iframe>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" id="vertiTabHidden" />
+            </div>
+            <div class="tab-pane pane-height" id="tab2">
+                <iframe id="statisticFieldsFrm" style="border:0;height:100%;width:100%;"></iframe>
+            </div>
+            <div class="tab-pane pane-height" id="tab3">
+                <iframe id="groupFieldsFrm" style="border:0;height:100%;width:100%;"></iframe>
+            </div>
+            <div class="tab-pane pane-height" id="tab4">
+                <iframe id="previewFrm" style="border:0;height:100%;width:100%;"></iframe>
+            </div>
+            <div class="tab-pane pane-height" id="tab5">
+                <iframe id="templateFrm" style="border:0;height:100%;width:100%;"></iframe>
+            </div>
+            @*<ul class="pager wizard">
+                    <li class="previous first" style="display:none;"><a href="#">First</a></li>
+                    <li class="previous"><a href="#">Previous</a></li>
+                    <li class="next last" style="display:none;"><a href="#">Last</a></li>
+                    <li class="next"><a href="#">Next</a></li>
+                </ul>*@
+            <div class="wizard-button">
+                @*<button type="button" class="btn btn-info previous"><i class="fa fa-step-backward"></i> 上一步</button>
+                    <button type="button" class="btn btn-info next"><i class="fa fa-step-forward"></i> 下一步</button>*@
+                <button type="button" class="btn btn-info" onclick="preClick();"><i class="fa fa-step-backward"></i> 上一步</button>
+                <button type="button" class="btn btn-info" onclick="nextClick();"><i class="fa fa-step-forward"></i> 下一步</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        //记录统计配置每一步搜集的数据
+        var tempStatisticCondition = {
+            searchCondition: [],//JSON对象
+            statisticFields: [],
+            groupFields: [],
+            isNumStatistic: false,//是否数量类型的统计，默认：不是
+            isSum: false//统计后的数量字段，显示为总和，还是显示为去重后的数目。默认显示去重后的数目
+        }
+        var stcType = '';//接收从网站首页穿过来的统计类型
+
+        $(function () {
+            $('#rootwizard').bootstrapWizard({
+                tabClass: 'bwizard-steps'
+            });
+            stcType = '@ViewData["stctype"]';//显示页面时，从后端传过来的统计类型
+
+            $("#h_loading_mask").css("display", "none");//关闭页面加载指示器
+            $("#h_loading").css("display", "none");
+        });
+
+        var liclick = function (v) { 
+            $('#vertiTabHidden').val(v);
+            if (v == '1') {
+                $("#searchConditonFrm").attr('src','/WStatistics/SearchConditionView/@ViewData["table"]');
+            }
+        }
+
+        var preClick = function () {
+            var index = $('#rootwizard').bootstrapWizard('currentIndex');
+            index = index - 1;
+            if (index == -1) {
+                index = 0;
+            }
+            $('#rootwizard').bootstrapWizard('previous');
+        }
+
+        var nextClick = function () {
+            var index = $('#rootwizard').bootstrapWizard('currentIndex');
+            var count = $('#rootwizard').bootstrapWizard('navigationLength') + 1;
+            index = index + 1;
+
+            if (index == 1) {
+                var v = $('#vertiTabHidden').val();
+                if (v == '1') {//不是模板tab
+                    var frm = $("#searchConditonFrm")[0].contentWindow;
+                    var rows = frm.$('#tb_right').bootstrapTable('getData');
+                    if (rows.length == 0) {
+                        HM.alertWin('“搜索条件”未配置完成，请配置后继续！');
+                        return;
+                    }
+                }
+                tempStatisticCondition.searchCondition = rows;//记住searchCondition
+                //确认“搜索条件”已经搜集后，再加载“统计字段”页面
+                $("#statisticFieldsFrm").attr('src', '/WStatistics/StatisticFieldsView/@ViewData["table"]');
+            }
+
+            if (index == 2) {
+                var frm = $("#statisticFieldsFrm")[0].contentWindow;
+                var rows = frm.$('#tb_right').bootstrapTable('getData');
+                if (rows.length == 0) {
+                    HM.alertWin('被统计字段还未配置，请配置后继续！');
+                    return;
+                }
+                tempStatisticCondition.statisticFields = rows;//记住statisticFields
+                //确认“统计字段”已经搜集后，再加载“分组字段”页面
+                $("#groupFieldsFrm").attr('src', '/WStatistics/GroupFieldsView/@ViewData["table"]');
+            }
+
+            if (index == 3) {
+                var frm = $("#groupFieldsFrm")[0].contentWindow;
+                var rows = frm.$('#tb_right').bootstrapTable('getData');
+                if (rows.length == 0) {
+                    HM.alertWin('分组字段还未配置，请配置后继续！');
+                    return;
+                }
+                tempStatisticCondition.groupFields = rows;//记住groupFields
+                //确认“分组字段”已经搜集后，再加载“统计结果预览”页面
+                $("#previewFrm").attr('src','/WStatistics/StatisticPreviewView/@ViewData["table"]');
+            }
+
+            if (index == 4) {
+                $("#templateFrm").attr('src','/WStatistics/StcTemplateView');//转到统计模板页面
+            }
+
+            if (index == count) {
+                index = count - 1;
+            }
+
+            $('#rootwizard').bootstrapWizard('next');
+        }
+
+        var statisticAlert = function(t){
+            HM.alertWin(t);
+            return;
+        }
+
+        var statisticHint = function (t) {
+            HM.hintWin(t);
+            return;
+        }
+
+        var confirmHint = function (id, t, bt, winid, func) {
+            HM.confirmWin(id, t, bt, winid, func);
+        }
+
+        var closeConfirmWin = function (id) {
+            pop.close('confirm-win_' + id);
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.min.js"></script>
+    <script src="~/lib/bootstrap-wizard/jquery.bootstrap.wizard.min.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
+
+

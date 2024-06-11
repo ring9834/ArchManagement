@@ -1,0 +1,40 @@
+﻿@{
+
+    ViewData["Title"] = "延期天数";
+}
+@section head {
+    <link href="~/css/archRequestPrint.css" rel="stylesheet" />
+}
+@section body {
+    <div class="container-fluid">
+        <div style="margin:25px 1px 5px 1px;padding:5px;background-color:#e1eefc;" class="form-inline">
+            <div class="input-group">
+                <span class="input-group-addon">延期天数：</span>
+                <input id="days" type="text" class="form-control" style="width:50px;" value="5" />&nbsp;
+                <button class="btn btn-info" id="okBtn" onclick="prolong();">确定</button>
+            </div>            
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+
+            $('#days').keyup(function () {//只能输入正整数
+                $(this)[0].value = $(this)[0].value.replace(/^(0+)|[^\d]+/g, '')
+            })
+            $("#h_loading_mask").css("display", "none");//加载成功后关闭加载提示
+            $("#h_loading").css("display", "none");
+        });
+
+        var prolong = function () {
+            parent.prolongDays = $('#days').val();
+            parent.prolongArch('@ViewData["itemId"]');//执行延期
+        }
+    </script>
+}
+
+@section script {
+    <script src="~/lib/jquery-print/jQuery.print.min.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}

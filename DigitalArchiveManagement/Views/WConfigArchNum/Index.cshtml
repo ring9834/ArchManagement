@@ -1,0 +1,258 @@
+﻿
+@{
+    ViewData["Title"] = "档号规则配置";
+}
+
+@section head {
+
+}
+
+@section body {
+    <style>
+        .archNumTable {
+            width: 100%;
+        }
+
+            .archNumTable td {
+                padding: 5px 0 12px 0;
+            }
+
+            .archNumTable select,
+            .archNumTable input {
+                width: 320px;
+                margin-right: 5px;
+            }
+    </style>
+    <div class="container-fluid">
+        <div class="alert alert-warning" style="margin-top:10px;font-size:13px;">
+            <i class="fa fa-volume-up"></i><strong>说明：</strong>
+            1、档号规则可为一至八段式；2、组成档号的各字段前，均可自定义添加前缀。如在全宗号“0001”前面加上“A”字符，那么生成的档号就类似于“A0001-***-***-***”的式样。
+        </div>
+        <table class="archNumTable">
+            <tr>
+                <td class="col-md-1">
+                    <label for="regularSelect" class="control-label">档号规则</label>
+                </td>
+                <td class="col-md-11">
+                    <select class="form-control" id="regularSelect"></select>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-1">
+                    <label for="connCharInput" class="control-label">连接符号</label>
+                </td>
+                <td class="col-md-11">
+                    <input type="text" id="connCharInput" class="form-control" placeholder="连接组成档号的各字段的符号，如“-”" />
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-1">
+                    <label for="archNumField" class="control-label">档号字段</label>
+                </td>
+                <td class="col-md-11">
+                    <select class="form-control" id="archNumField"></select>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-1">
+                    <label for="archNumGroup" class="control-label">档号组成</label>
+                </td>
+                <td class="col-md-11">
+                    <div class="form-inline" id="archNumGroupDiv">
+
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-1">
+                    <label for="archNumPrefix" class="control-label">字段前缀</label>
+                </td>
+                <td class="col-md-11">
+                    <div class="form-inline" id="archNumPrefixDiv">
+
+                    </div>
+
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-1"></td>
+                <td class="col-md-11" id="archNumPrefixTd">
+                    <button class="btn btn-warning" onclick="saveConfig();"><i class="fa fa-save"></i> 保存规则</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        var fieldsData;
+
+        $(function () {
+            archNumRegulars();
+            getArchNumFieldOptions();
+
+            $('select[id=regularSelect]').change(function () {
+                //alert($(this).val());
+                createCtrlsDynamiclly($(this).val());
+            });
+        });
+
+        var archNumRegulars = function () {
+            $('#regularSelect')
+                .append("<option value='-1'>--请选择--</option>")
+                .append("<option value='1'>一段式</option>")
+                .append("<option value='2'>二段式</option>")
+                .append("<option value='3'>三段式</option>")
+                .append("<option value='4'>四段式</option>")
+                .append("<option value='5'>五段式</option>")
+                .append("<option value='6'>六段式</option>")
+                .append("<option value='7'>七段式</option>")
+                .append("<option value='8'>八段式</option>");
+        }
+
+        var getArchNumFieldOptions = function () {
+            $.ajax({
+                type: 'post',
+                url: '/WConfigArchNum/GetFieldsByTableName',
+                dataType: "json",
+                data: {id:'@ViewData["table"]'},
+                success: function (data) {
+                    fieldsData = data;
+                    var select = $('#archNumField');
+                    select.append("<option value='-1'>--请选择--</option>");
+                    for (var i = 0; i < data.length; i++) {
+                        select.append("<option value='" + data[i].col_name + "'>" + data[i].show_name + "</option>");
+                    }
+
+                    initiateCtls();//初始化控件数据
+                }
+            });
+        }
+
+        var createCtrlsDynamiclly = function (n) {
+            var td = $('#archNumGroupDiv');
+            td.empty();//清除所有子元素
+
+            var pfd = $('#archNumPrefixDiv');
+            pfd.empty();
+
+            for (var i = 0; i < n; i++) {
+                var html = generateSelectHtml(i);
+                td.append(html);
+                var html2 = generateInputHtml(i);
+                pfd.append(html2);
+            }
+        }
+
+        var generateSelectHtml = function (i) {
+            var html = '<select class="form-control" id="grp_slct_' + i + '">';
+            html += "<option value='-1'>-请选择-</option>";
+            for (var i = 0; i < fieldsData.length; i++) {
+                html += "<option value='" + fieldsData[i].col_name + "'>" + fieldsData[i].show_name + "</option>";
+            }
+            html += '</select>';
+            return html;
+        }
+
+        var generateInputHtml = function (i) {
+            var html = '<input type="text" id="grp_ipt_' + i + '" class="form-control" style="width:104px;" />';
+            return html;
+        }
+
+        var initiateCtls = function () {
+            $.ajax({
+                type: 'post',
+                url: '/WConfigArchNum/GetArchNumConfigInfo',
+                dataType: "json",
+                data: {table:'@ViewData["table"]'},
+                success: function (data) {
+                    if (data.rst > 0) {
+                        var dt = data.configinfo;
+
+                        createCtrlsDynamiclly(dt.archItems.length);//根据档号规则动态创建 档号组成 和字段组成 控件
+
+                        $("#regularSelect").val(dt.amount);
+                        $("#connCharInput").val(dt.connectChar);
+                        $("#archNumField").val(dt.archFieldName);
+                        for (var j = 0; j < dt.archItems.length; j++) {
+                            var item = dt.archItems[j];
+                            $('#grp_slct_' + j).val(item.colName);
+                            $('#grp_ipt_' + j).val(item.fieldPrefix);
+                        }
+                    }
+
+                    $("#h_loading_mask").css("display", "none");//关闭页面加载指示器
+                    $("#h_loading").css("display", "none");
+                }
+            });
+        }
+
+        var saveConfig = function () {
+            if ($('#regularSelect').val() == '-1') {
+                HM.alertWin('请在“档号规则”中选择！');
+                return;
+            }
+            if ($.trim($('#connCharInput').val()) == '') {
+                HM.alertWin('请在填写“连接符号”！');
+                return;
+            }
+            if ($('#archNumField').val() == '-1') {
+                HM.alertWin('请在“档号字段”中选择！');
+                return;
+            }
+            var c = parseInt($('#regularSelect').val());
+            for (var i = 0; i < c; i++) {
+                if ($('#grp_slct_' + i).val() == '-1') {
+                    HM.alertWin('“档号组成”中有字段未选择！');
+                    return;
+                }
+            }
+            HM.confirmWin('','确定保存这些档号配置吗？','确定保存','saveConfig',saveArchNumConfig);
+
+        }
+
+        var saveArchNumConfig = function () { 
+            var anm = {};
+            var ani = [];
+            anm.Amount = $('#regularSelect').val();
+            anm.ConnectChar = $('#connCharInput').val();
+            anm.ArchFieldName = $('#archNumField').val();
+            var c = parseInt(anm.Amount);
+            for (var i = 0; i < c; i++) {
+                var ArchNumItem = {};
+                ArchNumItem.ID = i;
+                ArchNumItem.ShowName = $('#grp_slct_' + i).find("option:selected").text();//选中的文本
+                ArchNumItem.ColName = $('#grp_slct_' + i).val();
+                ArchNumItem.FieldPrefix = $('#grp_ipt_' + i).val();
+                ani.push(ArchNumItem);
+            }
+            anm.ArchItems = ani;
+
+            $.ajax({
+                type: 'post',
+                url: '/WConfigArchNum/SaveArchNumConfitInfo',
+                dataType: "json",
+                data: { table: '@ViewData["table"]', anm: anm},
+                success: function (data) {
+                    if (data.rst > 0) {
+                        HM.hintWin(data.info);
+                        pop.close('confirm-win_saveConfig');
+                        return;
+                    } else {
+                        HM.alertWin(data.info);
+                        pop.close('confirm-win_saveConfig');
+                        return;
+                    }
+                }
+            });
+        }
+
+    </script>
+}
+
+@section script {
+    <script src="~/lib/bootstrap-table/js/bootstrap-table.js"></script>
+    <script src="~/lib/bootstrap-table/js/bootstrap-table-zh-CN.js"></script>
+    <script src="~/lib/modal-panel/pop.min.js"></script>
+    <script src="~/js/modalwindow.js"></script>
+}
+
