@@ -1,0 +1,7 @@
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\NetMVCProject-gdspecific - 副本\NetCoreDbUtility\bin\Debug\netcoreapp2.2\NetCoreDbUtility.deps.json
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\NetMVCProject-gdspecific - 副本\NetCoreDbUtility\bin\Debug\netcoreapp2.2\NetCoreDbUtility.dll
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\NetMVCProject-gdspecific - 副本\NetCoreDbUtility\bin\Debug\netcoreapp2.2\NetCoreDbUtility.pdb
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\NetMVCProject-gdspecific - 副本\NetCoreDbUtility\obj\Debug\netcoreapp2.2\NetCoreDbUtility.AssemblyInfoInputs.cache
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\NetMVCProject-gdspecific - 副本\NetCoreDbUtility\obj\Debug\netcoreapp2.2\NetCoreDbUtility.AssemblyInfo.cs
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\NetMVCProject-gdspecific - 副本\NetCoreDbUtility\obj\Debug\netcoreapp2.2\NetCoreDbUtility.dll
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\NetMVCProject-gdspecific - 副本\NetCoreDbUtility\obj\Debug\netcoreapp2.2\NetCoreDbUtility.pdb

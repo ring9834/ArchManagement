@@ -1,0 +1,40 @@
+F:\Myprojects\2、AspCoreProject\Gdspecific\NetMVCProject-gdspecific（Core30）0\NetCoreDbUtility\bin\Release\netcoreapp3.0\NetCoreDbUtility.deps.json
+F:\Myprojects\2、AspCoreProject\Gdspecific\NetMVCProject-gdspecific（Core30）0\NetCoreDbUtility\bin\Release\netcoreapp3.0\NetCoreDbUtility.dll
+F:\Myprojects\2、AspCoreProject\Gdspecific\NetMVCProject-gdspecific（Core30）0\NetCoreDbUtility\bin\Release\netcoreapp3.0\NetCoreDbUtility.pdb
+F:\Myprojects\2、AspCoreProject\Gdspecific\NetMVCProject-gdspecific（Core30）0\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.csprojAssemblyReference.cache
+F:\Myprojects\2、AspCoreProject\Gdspecific\NetMVCProject-gdspecific（Core30）0\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.AssemblyInfoInputs.cache
+F:\Myprojects\2、AspCoreProject\Gdspecific\NetMVCProject-gdspecific（Core30）0\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.AssemblyInfo.cs
+F:\Myprojects\2、AspCoreProject\Gdspecific\NetMVCProject-gdspecific（Core30）0\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.dll
+F:\Myprojects\2、AspCoreProject\Gdspecific\NetMVCProject-gdspecific（Core30）0\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.pdb
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（20201204 TSZB Core30）\NetCoreDbUtility\bin\Release\netcoreapp3.0\NetCoreDbUtility.deps.json
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（20201204 TSZB Core30）\NetCoreDbUtility\bin\Release\netcoreapp3.0\NetCoreDbUtility.dll
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（20201204 TSZB Core30）\NetCoreDbUtility\bin\Release\netcoreapp3.0\NetCoreDbUtility.pdb
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（20201204 TSZB Core30）\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.csprojAssemblyReference.cache
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（20201204 TSZB Core30）\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.AssemblyInfoInputs.cache
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（20201204 TSZB Core30）\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.AssemblyInfo.cs
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（20201204 TSZB Core30）\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.dll
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（20201204 TSZB Core30）\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.pdb
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（TSBX Core30）\NetCoreDbUtility\bin\Release\netcoreapp3.0\NetCoreDbUtility.deps.json
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（TSBX Core30）\NetCoreDbUtility\bin\Release\netcoreapp3.0\NetCoreDbUtility.dll
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（TSBX Core30）\NetCoreDbUtility\bin\Release\netcoreapp3.0\NetCoreDbUtility.pdb
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（TSBX Core30）\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.csprojAssemblyReference.cache
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（TSBX Core30）\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.AssemblyInfoInputs.cache
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（TSBX Core30）\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.AssemblyInfo.cs
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（TSBX Core30）\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.dll
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（TSBX Core30）\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.pdb
+F:\Myprojects\2、AspCoreProject\Gdspecific\NetMVCProject-gdspecific（Core30）\NetCoreDbUtility\bin\Release\netcoreapp3.0\NetCoreDbUtility.deps.json
+F:\Myprojects\2、AspCoreProject\Gdspecific\NetMVCProject-gdspecific（Core30）\NetCoreDbUtility\bin\Release\netcoreapp3.0\NetCoreDbUtility.dll
+F:\Myprojects\2、AspCoreProject\Gdspecific\NetMVCProject-gdspecific（Core30）\NetCoreDbUtility\bin\Release\netcoreapp3.0\NetCoreDbUtility.pdb
+F:\Myprojects\2、AspCoreProject\Gdspecific\NetMVCProject-gdspecific（Core30）\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.AssemblyInfoInputs.cache
+F:\Myprojects\2、AspCoreProject\Gdspecific\NetMVCProject-gdspecific（Core30）\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.AssemblyInfo.cs
+F:\Myprojects\2、AspCoreProject\Gdspecific\NetMVCProject-gdspecific（Core30）\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.dll
+F:\Myprojects\2、AspCoreProject\Gdspecific\NetMVCProject-gdspecific（Core30）\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.pdb
+F:\Myprojects\2、AspCoreProject\Gdspecific\NetMVCProject-gdspecific（Core30）\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.csprojAssemblyReference.cache
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（Core30）\NetCoreDbUtility\bin\Release\netcoreapp3.0\NetCoreDbUtility.deps.json
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（Core30）\NetCoreDbUtility\bin\Release\netcoreapp3.0\NetCoreDbUtility.dll
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（Core30）\NetCoreDbUtility\bin\Release\netcoreapp3.0\NetCoreDbUtility.pdb
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（Core30）\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.AssemblyInfoInputs.cache
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（Core30）\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.AssemblyInfo.cs
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（Core30）\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.dll
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（Core30）\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.pdb
+D:\SoftInstalled\Melfs\Project\档案管理系统（web）\1GdSpecific\NetMVCProject-gdspecific（Core30）\NetCoreDbUtility\obj\Release\netcoreapp3.0\NetCoreDbUtility.csprojAssemblyReference.cache
